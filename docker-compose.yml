@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: mockio-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${AUTH_DB_NAME}        # 기본으로 생성될 DB 하나
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d

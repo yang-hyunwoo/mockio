@@ -1,0 +1,29 @@
+plugins {
+	id 'java'
+}
+
+group = 'com.mockio'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compileOnly 'org.projectlombok:lombok:1.18.32'
+	annotationProcessor 'org.projectlombok:lombok:1.18.32'
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+}

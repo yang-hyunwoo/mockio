@@ -1,0 +1,16 @@
+rootProject.name = "mockio"
+
+include "gateway"
+project(":gateway").projectDir = file("backend/gateway")
+
+include "auth-service"
+project(":auth-service").projectDir = file("backend/auth-service")
+
+include "user-service"
+project(":user-service").projectDir = file("backend/user-service")
+
+include "common-core"
+project(":common-core").projectDir = file("backend/common-core")
+
+include "common-spring"
+project(":common-spring").projectDir = file("backend/common-spring")

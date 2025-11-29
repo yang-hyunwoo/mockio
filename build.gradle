@@ -1,0 +1,11 @@
+subprojects {
+    apply plugin: 'java'
+
+    group = 'com.mockio'
+    version = '0.0.1-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+

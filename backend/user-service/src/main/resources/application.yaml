@@ -2,11 +2,13 @@ server:
   port: 8081
 
 spring:
+  profiles:
+    active: local
   application:
-    name: auth-service
+    name: user-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/${AUTH_DB_NAME}
+    url: jdbc:postgresql://localhost:5432/${USER_DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASS}
   jpa:

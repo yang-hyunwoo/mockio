@@ -9,7 +9,7 @@ public class GatewayHealthController {
 
     @GetMapping("/health")
     public String health() {
-        return "gateway ok";
+        return "gateway ok2";
     }
 
 }

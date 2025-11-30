@@ -1,0 +1,45 @@
+package com.mockio.common_spring.util.response;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mockio.common_core.error.ErrorCode;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+
+@Slf4j
+public class CustomResponseUtil {
+
+    private static final ObjectMapper om = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+    // 성공 응답 - 객체 data를 내려줌
+    public static void success(HttpServletResponse response, Object dto, String msg) {
+        try {
+            Response<Object> responseDto = Response.successRead(msg, dto);
+            String responseBody = om.writeValueAsString(responseDto);
+            response.setContentType("application/json; charset=utf-8");
+            response.setStatus(HttpStatus.OK.value());
+            response.getWriter().println(responseBody);
+        } catch (Exception e) {
+            log.error("서버 성공 응답 직렬화 실패", e);
+        }
+    }
+
+    // 실패 응답 - 에러 메시지와 상태코드를 내려줌
+    public static void fail(HttpServletResponse response, String msg, HttpStatus httpStatus, ErrorCode errorEnum) {
+        try {
+            Response<String> responseDto = Response.error(httpStatus.value(),errorEnum, msg);
+            String responseBody = om.writeValueAsString(responseDto);
+
+            response.setContentType("application/json; charset=utf-8");
+            response.setStatus(httpStatus.value());
+            response.getWriter().println(responseBody);
+        } catch (Exception e) {
+            log.error("서버 실패 응답 직렬화 실패", e);
+        }
+    }
+
+}

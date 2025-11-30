@@ -1,4 +1,4 @@
-package com.mockio.common_spring.config;
+package com.mockio.user_service.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;

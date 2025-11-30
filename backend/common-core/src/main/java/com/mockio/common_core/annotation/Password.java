@@ -1,5 +1,6 @@
 package com.mockio.common_core.annotation;
 
+import com.mockio.common_core.annotation.annotationValidator.PasswordValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

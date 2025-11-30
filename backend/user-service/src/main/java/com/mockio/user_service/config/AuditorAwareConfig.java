@@ -1,4 +1,4 @@
-package com.mockio.common_spring.config;
+package com.mockio.user_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,7 @@ public class AuditorAwareConfig {
 
     @Bean
     public AuditorAware<Long> auditorAware() {
-        return new SecurityAuditorAware();
+//        return new SecurityAuditorAware();
+        return  null;
     }
 }

@@ -7,19 +7,19 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class CustomApiFieldException extends RuntimeException{
 
-    private final HttpStatus status;
+    private final int httpStatus;
 
     private final String field;
 
     private final ErrorCode errorEnum;
 
-    public CustomApiFieldException(HttpStatus status,
+    public CustomApiFieldException(int status,
                                    String message,
                                    ErrorCode errorEnum,
                                    String field
     ) {
         super(message);
-        this.status = status;
+        this.httpStatus = status;
         this.field = field;
         this.errorEnum = errorEnum;
     }

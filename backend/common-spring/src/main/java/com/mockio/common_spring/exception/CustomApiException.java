@@ -7,10 +7,10 @@ import org.springframework.http.HttpStatus;
 @Getter
 public class CustomApiException extends RuntimeException{
 
-    private final HttpStatus status;
+    private final int status;
     private final ErrorCode errorEnum;
 
-    public CustomApiException(HttpStatus status,
+    public CustomApiException(int status,
                               ErrorCode errorEnum,
                               String message
     ) {

@@ -1,4 +1,4 @@
-package com.mockio.common_spring.config;
+package com.mockio.common_jpa.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

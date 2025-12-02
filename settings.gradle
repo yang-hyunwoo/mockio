@@ -14,3 +14,9 @@ project(":common-core").projectDir = file("backend/common-core")
 
 include "common-spring"
 project(":common-spring").projectDir = file("backend/common-spring")
+
+include "common-jpa"
+project(":common-jpa").projectDir = file("backend/common-jpa")
+
+include "common-security"
+project(":common-security").projectDir = file("backend/common-security")

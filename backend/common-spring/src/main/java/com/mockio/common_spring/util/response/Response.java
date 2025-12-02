@@ -50,34 +50,34 @@ public class Response<T> {
 
     /**
      * 일반적인 에러
-     * @param status
+     * @param httpStatus
      * @param message
      * @param messageOrData
      * @return
      * @param <T>
      */
-    public static <T> ResponseEntity<Response<T>> error(HttpStatus status, String message, ErrorCode errorEnum, T messageOrData) {
-        return ResponseEntity.status(status).body(new Response<>("ERROR", status.value(), message, errorEnum.toString(), errorEnum.getMessage(), messageOrData, LocalDateTime.now()));
+    public static <T> ResponseEntity<Response<T>> error(int httpStatus, String message, ErrorCode errorEnum, T messageOrData) {
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorEnum.getCode(), errorEnum.getMessage(), messageOrData, LocalDateTime.now()));
     }
 
     /**
      * 변수 유효성 검사 에러
-     * @param status
+     * @param httpStatus
      * @param message
      * @param field
      * @return
      */
-    public static ResponseEntity<Response<ValidationErrorResponse>> validationError(HttpStatus status, String message,ErrorCode errorEnum , String field) {
-        return ResponseEntity.status(status).body(new Response<>(ERROR_CODE, status.value(), message, errorEnum.toString(), errorEnum.getMessage(), new ValidationErrorResponse(field, message), LocalDateTime.now()));
+    public static ResponseEntity<Response<ValidationErrorResponse>> validationError(int httpStatus, String message,ErrorCode errorEnum , String field) {
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorEnum.getCode(), errorEnum.getMessage(), new ValidationErrorResponse(field, message), LocalDateTime.now()));
     }
 
-    public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(HttpStatus status, String message, ErrorCode errorEnum, List<ValidationErrorResponse> errors) {
-        return ResponseEntity.status(status).body(
+    public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(int httpStatus, String message, ErrorCode errorEnum, List<ValidationErrorResponse> errors) {
+        return ResponseEntity.status(httpStatus).body(
                 new Response<>(
                         ERROR_CODE,
-                        status.value(),
+                        httpStatus,
                         message,
-                        errorEnum.toString(),
+                        errorEnum.getCode(),
                         errorEnum.getMessage(),
                         errors,
                         LocalDateTime.now()
@@ -109,8 +109,8 @@ public class Response<T> {
         return ResponseEntity.noContent().build();
     }
 
-    protected static Response<String> error(int httpCode, ErrorCode errorEnum ,String message) {
-        return new Response<>(ERROR_CODE, httpCode, message, errorEnum.toString(), errorEnum.getMessage(), null, LocalDateTime.now());
+    protected static Response<String> error(int httpStatus, ErrorCode errorEnum ,String message) {
+        return new Response<>(ERROR_CODE, httpStatus, message, errorEnum.getCode(), errorEnum.getMessage(), null, LocalDateTime.now());
     }
 
     protected static <T> Response<T> successRead(String message, T data) {

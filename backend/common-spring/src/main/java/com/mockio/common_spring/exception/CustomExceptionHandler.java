@@ -6,6 +6,7 @@ import com.mockio.common_spring.util.response.Response;
 import com.mockio.common_spring.util.response.ValidationErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,12 +52,12 @@ public class CustomExceptionHandler {
         log.error("CustomApiFieldException: {}", e.getMessage());
         return Response.validationError(e.getHttpStatus(), e.getMessage(),e.getErrorEnum(),e.getField());
     }
-        //TODO tx 관련이라 common-api나 만들까?..
-//    @ExceptionHandler(DataIntegrityViolationException.class)
-//    public ResponseEntity<Response<ValidationErrorResponse>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-//       log.error("DataIntegrityViolationException: {}" , e.getMessage());
-//        return Response.error(BAD_REQUEST.value(), messageUtil.getMessage("error.not.data.type.ok"), ERR_018, null);
-//    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Response<ValidationErrorResponse>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+       log.error("DataIntegrityViolationException: {}" , e.getMessage());
+        return Response.error(BAD_REQUEST.value(), messageUtil.getMessage("error.not.data.type.ok"), ERR_018, null);
+    }
 
     /**
      * 변수 리스트 유효성 에러 리턴

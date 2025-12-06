@@ -104,6 +104,15 @@ html, body {
     font-size: 13px;
 }
 
+.mok-info {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #A8E6CF;
+    color: #2E7D32;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
 /* 입력창 */
 .mok-field {
     margin-bottom: 10px;
@@ -224,4 +233,61 @@ html, body,
 .kc-feedback-text,
 #kc-feedback-wrapper {
     display: none !important;
+}
+
+/* Keycloak 기본 경고창 숨김 */
+.pf-c-alert,
+.alert-warning,
+.pf-m-warning {
+    display: none !important;
+}
+
+/* 전체 영역 */
+.mok-remember {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* 라벨 */
+.mok-remember-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* 기본 체크박스 숨기기 */
+.mok-remember-checkbox {
+    display: none;
+}
+
+/* 커스텀 동그라미 체크박스 */
+.mok-remember-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #b3b3b3;
+    border-radius: 50%;
+    position: relative;
+    display: inline-block;
+    transition: all 0.25s ease;
+}
+
+/* 체크 상태 스타일 */
+.mok-remember-checkbox:checked + .mok-remember-custom {
+    border-color: #3a7ca5; /* Mockio 메인 컬러 추천 */
+    background-color: #3a7ca5;
+}
+
+/* 체크 아이콘 */
+.mok-remember-checkbox:checked + .mok-remember-custom::after {
+    content: '✔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -57%);
+    font-size: 13px;
+    color: white;
 }

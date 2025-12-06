@@ -1,6 +1,6 @@
 <#import "template.ftl" as layout>
 
-<@layout.registrationLayout displayInfo=false; section>
+<@layout.registrationLayout displayInfo=false displayMessage=false; section>
 
 <#-- header 섹션은 비워둠 (위에서 CSS로 숨김) -->
     <#if section = "header">
@@ -39,9 +39,26 @@
                                    placeholder="비밀번호" />
                         </div>
 
-                        <#-- 🔻 에러를 버튼 바로 위에 표시 -->
+                        <#-- Remember Me 체크박스 -->
+                        <#if realm.rememberMe?? && realm.rememberMe>
+                            <div class="mok-remember">
+                                <label class="mok-remember-label">
+                                    <input id="rememberMe"
+                                           name="rememberMe"
+                                           type="checkbox"
+                                           class="mok-remember-checkbox"
+                                           <#if login.rememberMe?? && login.rememberMe>checked</#if> />
+
+                                    <span class="mok-remember-custom"></span>
+                                    로그인 상태 유지
+                                </label>
+                            </div>
+                        </#if>
+
+                        <#-- 전역 메시지: 성공 / 에러 구분해서 표시 -->
                         <#if message?has_content>
-                            <div class="mok-error">
+                            <#assign msgType = (message.type!'')?lower_case />
+                            <div class="<#if msgType == 'error'>mok-error<#else>mok-info</#if>">
                                 ${kcSanitize(message.summary)?no_esc}
                             </div>
                         </#if>

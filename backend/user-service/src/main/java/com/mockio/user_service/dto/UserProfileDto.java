@@ -1,6 +1,5 @@
 package com.mockio.user_service.dto;
 
-import com.mockio.user_service.domain.UserProfile;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record UserProfileDto(
@@ -19,15 +18,5 @@ public record UserProfileDto(
         @Schema(description = "유저_휴대폰번호", example = "01012345678")
         String phoneNumber
 ) {
-    public static UserProfileDto from(UserProfile userProfile) {
-        return new UserProfileDto(
-                userProfile.getId(),
-                userProfile.getKeycloakId(),
-                userProfile.getProfileImageId(),
-                userProfile.getName(),
-                userProfile.getEmail(),
-                userProfile.getNickname(),
-                userProfile.getPhoneNumber()
-        );
-    }
+
 }

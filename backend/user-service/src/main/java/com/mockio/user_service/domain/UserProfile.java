@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.management.Notification;
 import java.util.Objects;
 
 @Entity
@@ -41,12 +40,12 @@ public class UserProfile extends BaseEntity {
 
     @Builder
     protected UserProfile(Long id,
-                           String keycloakId,
-                           Long profileImageId,
-                           String name,
-                           String email,
-                           String nickname,
-                           String phoneNumber) {
+                          String keycloakId,
+                          Long profileImageId,
+                          String name,
+                          String email,
+                          String nickname,
+                          String phoneNumber) {
         this.id = id;
         this.keycloakId = keycloakId;
         this.profileImageId = profileImageId;
@@ -56,15 +55,7 @@ public class UserProfile extends BaseEntity {
         this.phoneNumber = phoneNumber;
     }
 
-    public static UserProfile fromKeycloakClaims(UserProfileDto userProfileDto) {
-        return UserProfile.builder()
-                .keycloakId(userProfileDto.keycloakId())
-                .name(userProfileDto.name())
-                .email(userProfileDto.email())
-                .nickname(userProfileDto.nickname())
-                .phoneNumber(userProfileDto.phoneNumber())
-                .build();
-    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -90,3 +81,4 @@ public class UserProfile extends BaseEntity {
                 '}';
     }
 }
+

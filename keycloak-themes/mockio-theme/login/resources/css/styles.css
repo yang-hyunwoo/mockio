@@ -178,8 +178,30 @@ html, body {
     .mok-logo {
         height: 200px;
     }
+    /* 페이지 전체 */
+    .mok-page {
+        padding: 35px 16px;       /* 위/아래 패딩 제거 → 세로 초과 줄이기 */
+    }
+
+
 }
 
+/* 인풋 에러 상태 */
+.mok-input-error {
+    border-color: #f03f3f !important;
+    background-color: #fffafa;
+}
+
+.mok-field-error-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #e03131;
+}
+
+/* 전체 mok-field에 여유 */
+.mok-field {
+    margin-bottom: 14px;
+}
 
 /*  Keycloak 기본 배경 이미지 통째로 제거 */
 #kc-page-background {

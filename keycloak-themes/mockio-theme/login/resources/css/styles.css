@@ -1,70 +1,205 @@
-/* 전체 배경 다크톤 */
-body.login-pf {
-    background: #020617 !important; /* 거의 검은 남색 */
+/* 1) body – 이상한 height/overflow 제거 (여기가 원인) */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f5f6f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    overflow-x: hidden;   /* 🔹 가로 스크롤 강제 제거 */
 }
 
-/* 가운데 카드 */
-.login-pf-page .card-pf {
-    border-radius: 18px;
-    padding: 32px 32px 28px 32px;
-    background: #0f172a;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+/* 2) Keycloak 헤더 / realm 이름만 정확히 숨기기 */
+#kc-header,
+#kc-header-wrapper,
+#kc-page-title,
+.kc-header,
+.kc-header-wrapper,
+.login-pf-header,
+.login-pf-page .login-pf-header,
+.kc-login-header,
+.masthead {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* 헤더 영역 (로고 + 텍스트) */
-#kc-header {
-    background: transparent;
+/* 3) 기본 배경만 우리 배경으로 맞추기 */
+.login-pf,
+.login-pf-page {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #f5f6f7 !important;
+    background-image: none !important;
 }
 
-/* 로고 표시 + 기본 텍스트 숨김 */
-#kc-header-wrapper {
-    background-image: url('../img/mockio-all.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 140px auto;
-    text-indent: -9999px;  /* 기본 글자 숨기기 */
-    height: 120px;
-    margin-bottom: 20px;
+/* 4) card 래퍼는 투명 처리 (남아 있어도 티 안 나게) */
+.card-pf {
+    box-shadow: none !important;
+    background: transparent !important;
+    border: none !important;
 }
 
-/* 인풋 박스 */
-.login-pf-page .form-control {
-    border-radius: 9999px;
-    background-color: #020617;
-    border: 1px solid #1f2937;
-    color: #e5e7eb;
+/* 페이지 전체 */
+.mok-page {
+    height: 100%;          /* 🔹 min-height 대신 height */
+    width: 100%;
+    padding: 90px 16px;       /* 위/아래 패딩 제거 → 세로 초과 줄이기 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;  /* 세로 중앙 정렬 */
+    box-sizing: border-box;
 }
 
-.login-pf-page .form-control:focus {
-    box-shadow: 0 0 0 1px #3b82f6;
-    border-color: #3b82f6;
+/* 로고 */
+
+.mok-logo {
+    height: 200px;
 }
 
-/* placeholder 색 */
-.login-pf-page ::placeholder {
-    color: #6b7280;
+/* 카드 */
+.mok-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+
+/* (탭 안 쓰면 이 블록은 나중에 삭제해도 OK) */
+.mok-tabs {
+    display: flex;
+    border-bottom: 1px solid #e3e5e8;
+    background: #f8f9fb;
+}
+.mok-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 14px;
+    color: #7b858f;
+}
+.mok-tab.active {
+    background: #fff;
+    color: #222;
+    font-weight: 600;
+    border-bottom: 2px solid #03c75a;
+}
+
+.mok-body {
+    padding: 24px 22px;
+}
+
+/* 에러 */
+.mok-error {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+/* 입력창 */
+.mok-field {
+    margin-bottom: 10px;
+}
+.mok-field input {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid #dadada;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+.mok-field input::placeholder {
+    color: #b0b8c1;
+}
+.mok-field input:focus {
+    border-color: #03c75a;
+    outline: none;
+}
+
+/* 옵션 */
+.mok-suboptions {
+    margin: 8px 2px 16px;
+    font-size: 13px;
+    color: #616a74;
+}
+.mok-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* 로그인 버튼 */
-#kc-login {
-    border-radius: 9999px;
-    background-color: #3b82f6;
+.mok-btn {
+    width: 100%;
+    height: 52px;
+    background: #34718F;
+    color: #fff;
     border: none;
+    border-radius: 8px;
+    font-size: 15px;
     font-weight: 600;
+    cursor: pointer;
 }
 
-#kc-login:hover {
-    background-color: #2563eb;
+/* 하단 링크 */
+.mok-links {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #7b858f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.mok-links a {
+    text-decoration: none;
+    color: #7b858f;
+}
+.mok-links a:hover {
+    text-decoration: underline;
 }
 
-/* 하단 링크 (비밀번호 찾기 등) */
-.login-pf-page a {
-    color: #93c5fd;
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+    .mok-card {
+        border-radius: 12px;
+    }
+    .mok-body {
+        padding: 20px 16px;
+    }
+    .mok-logo {
+        height: 200px;
+    }
 }
 
-/* 에러 메시지 */
-.alert-error {
-    background: rgba(239, 68, 68, 0.08);
-    border-color: #ef4444;
-    color: #fecaca;
+
+/*  Keycloak 기본 배경 이미지 통째로 제거 */
+#kc-page-background {
+    display: none !important;
+}
+
+/* 혹시 몰라서 한 번 더 회색으로 덮어쓰기 */
+html, body,
+.login-pf,
+.login-pf-page,
+#kc-content,
+#kc-content-wrapper {
+    background-color: #f5f6f7 !important;
+    background-image: none !important;
+}
+
+/* Keycloak 기본 전체 너비 에러 배너 숨기기 */
+.alert-error,
+.alert.alert-error,
+.kc-feedback-text,
+#kc-feedback-wrapper {
+    display: none !important;
 }

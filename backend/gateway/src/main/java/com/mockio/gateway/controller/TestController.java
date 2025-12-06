@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/public/")
-public class GatewayHealthController {
+@RequestMapping("/api/test/")
+public class TestController {
 
-    @GetMapping("/health")
+    @GetMapping("/test")
     public String health() {
         return "gateway ok2";
     }

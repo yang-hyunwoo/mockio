@@ -42,20 +42,20 @@ public class UserProfileService {
         log.info("phoneNumber : {}" , phoneNumber);
         log.info("keycloakId : {}" , keycloakId);
 
-//        userRepository.findByKeycloakId(keycloakId)
-//                .orElseGet(() -> {
-//                    UserProfile userProfile = UserProfileMapper.fromKeycloakClaims(
-//                            new UserProfileDto(null,
-//                                    keycloakId,
-//                                    null,
-//                                    fullName,
-//                                    email,
-//                                    userId,
-//                                    phoneNumber
-//                            )
-//                    );
-//                    return userRepository.save(userProfile);
-//                });
+        userRepository.findByKeycloakId(keycloakId)
+                .orElseGet(() -> {
+                    UserProfile userProfile = UserProfileMapper.fromKeycloakClaims(
+                            new UserProfileDto(null,
+                                    keycloakId,
+                                    null,
+                                    fullName,
+                                    email,
+                                    userId,
+                                    phoneNumber
+                            )
+                    );
+                    return userRepository.save(userProfile);
+                });
     }
 
 

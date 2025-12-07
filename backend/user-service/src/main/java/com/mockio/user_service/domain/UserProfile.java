@@ -26,10 +26,10 @@ public class UserProfile extends BaseEntity {
 
     private Long profileImageId;
 
-    @Column(length = 10)
+    @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(length = 100)
+    @Column(nullable = false, length = 100)
     private String email;
 
     @Column(nullable = false, length = 50)

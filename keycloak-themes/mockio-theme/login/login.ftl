@@ -66,6 +66,35 @@
                         <button type="submit" class="mok-btn">로그인</button>
                     </form>
 
+                    <#if social?? && social.providers?has_content>
+                        <div class="mok-social-wrap">
+                            <div class="mok-social-buttons">
+                                <#list social.providers as provider>
+                                    <a class="mok-social-btn mok-social-${provider.alias}"
+                                       href="${provider.loginUrl}">
+                                        <#-- 아이콘 -->
+                                        <#if provider.alias == "google">
+                                            <img src="${url.resourcesPath}/img/icon-google.svg"
+                                                 alt="Google" class="mok-social-icon" />
+                                            <span>Google로 시작하기</span>
+                                        <#elseif provider.alias == "kakao">
+                                            <img src="${url.resourcesPath}/img/icon-kakao.png"
+                                                 alt="Kakao" class="mok-social-icon" />
+                                            <span>Kakao로 시작하기</span>
+                                        <#elseif provider.alias == "naver">
+                                            <img src="${url.resourcesPath}/img/icon-naver.png"
+                                                 alt="Naver" class="mok-social-icon" />
+                                            <span>Naver로 시작하기</span>
+                                        <#else>
+                                            <span>${provider.displayName}로 시작하기</span>
+                                        </#if>
+                                    </a>
+                                </#list>
+                            </div>
+                        </div>
+                    </#if>
+
+
                 </div>
             </div>
 

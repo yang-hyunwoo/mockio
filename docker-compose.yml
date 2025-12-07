@@ -3,23 +3,14 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16
-    container_name: mockio-postgres
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${AUTH_DB_NAME}        # 기본으로 생성될 DB 하나
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./db/init:/docker-entrypoint-initdb.d
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0
-    command: ["start-dev"]
-    environment:
-      - KEYCLOAK_ADMIN=mockio
-      - KEYCLOAK_ADMIN_PASSWORD=mocki0123!@#
-    ports:
-      - "8084:8080"
     networks:
       - backend
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

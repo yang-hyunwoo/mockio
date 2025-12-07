@@ -3,7 +3,7 @@ package com.mockio.user_service.Mapper;
 /**
  * UserProfileMapper
  *
- * DTO / DOmain 변환  Mapper.
+ * DTO / Domain 변환  Mapper.
  *
  */
 

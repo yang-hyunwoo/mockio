@@ -1,0 +1,42 @@
+services:
+  postgres:
+    container_name: mockio-postgres-local
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
+      - ./db/data:/var/lib/postgresql/data
+    restart: always
+
+    # 🔹 Postgres가 진짜 접속 가능한 상태인지 헬스체크
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s       # 5초마다 체크
+      timeout: 5s
+      retries: 10        # 최대 10번 시도
+      start_period: 10s  # 처음 10초는 워밍업 시간
+
+  keycloak:
+    container_name: keycloak-local
+    command: ["start-dev"]
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${KEYCLOAK_DB_NAME}
+      KC_DB_USERNAME: ${DB_USER}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8084:8080"
+    volumes:
+      - C:/project/mockio/keycloak-themes/mockio-theme:/opt/keycloak/themes/mockio-theme
+    restart: always
+
+    # 🔹 Postgres가 healthy 되기 전까지는 Keycloak 시작 안 함
+    depends_on:
+      postgres:
+        condition: service_healthy

@@ -1,1 +1,2 @@
 CREATE DATABASE userdb;
+CREATE DATABASE keycloakdb;

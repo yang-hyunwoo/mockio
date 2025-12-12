@@ -56,8 +56,8 @@ public class Response<T> {
      * @return
      * @param <T>
      */
-    public static <T> ResponseEntity<Response<T>> error(int httpStatus, String message, ErrorCode errorEnum, T messageOrData) {
-        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorEnum.getCode(), errorEnum.getMessage(), messageOrData, LocalDateTime.now()));
+    public static <T> ResponseEntity<Response<T>> error(int httpStatus, String message, ErrorCode errorCode, T messageOrData) {
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), messageOrData, LocalDateTime.now()));
     }
 
     /**
@@ -67,18 +67,18 @@ public class Response<T> {
      * @param field
      * @return
      */
-    public static ResponseEntity<Response<ValidationErrorResponse>> validationError(int httpStatus, String message,ErrorCode errorEnum , String field) {
-        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorEnum.getCode(), errorEnum.getMessage(), new ValidationErrorResponse(field, message), LocalDateTime.now()));
+    public static ResponseEntity<Response<ValidationErrorResponse>> validationError(int httpStatus, String message,ErrorCode errorCode , String field) {
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), new ValidationErrorResponse(field, message), LocalDateTime.now()));
     }
 
-    public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(int httpStatus, String message, ErrorCode errorEnum, List<ValidationErrorResponse> errors) {
+    public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(int httpStatus, String message, ErrorCode errorCode, List<ValidationErrorResponse> errors) {
         return ResponseEntity.status(httpStatus).body(
                 new Response<>(
                         ERROR_CODE,
                         httpStatus,
                         message,
-                        errorEnum.getCode(),
-                        errorEnum.getMessage(),
+                        errorCode.getCode(),
+                        errorCode.getMessage(),
                         errors,
                         LocalDateTime.now()
                 )
@@ -109,8 +109,8 @@ public class Response<T> {
         return ResponseEntity.noContent().build();
     }
 
-    protected static Response<String> error(int httpStatus, ErrorCode errorEnum ,String message) {
-        return new Response<>(ERROR_CODE, httpStatus, message, errorEnum.getCode(), errorEnum.getMessage(), null, LocalDateTime.now());
+    protected static Response<String> error(int httpStatus, ErrorCode errorCode ,String message) {
+        return new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), null, LocalDateTime.now());
     }
 
     protected static <T> Response<T> successRead(String message, T data) {

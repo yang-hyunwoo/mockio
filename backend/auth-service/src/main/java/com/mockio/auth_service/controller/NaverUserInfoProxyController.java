@@ -24,7 +24,7 @@ public class NaverUserInfoProxyController {
 
     @GetMapping("/naver/userinfo")
     public Mono<Map<String, Object>> userInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
-        // Keycloak → 우리 서버로 들어온 Authorization: Bearer {accessToken}
+        // Keycloak → 서버로 들어온 Authorization: Bearer {accessToken}
         // → 이걸 그대로 네이버 userinfo 에 전달
         return webClient.get()
                 .uri("/v1/nid/me")

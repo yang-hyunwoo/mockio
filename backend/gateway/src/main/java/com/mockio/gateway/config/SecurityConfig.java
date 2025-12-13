@@ -1,5 +1,7 @@
 package com.mockio.gateway.config;
 
+import com.mockio.gateway.handler.GatewayAccessDeniedHandler;
+import com.mockio.gateway.handler.GatewayAuthenticationEntryPoint;
 import com.mockio.gateway.handler.GatewaySecurityHandlers;
 import com.mockio.gateway.properties.JwtConfigProperties;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,8 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     private final JwtConfigProperties jwtConfigProperties;
+    private final GatewayAuthenticationEntryPoint gatewayAuthenticationEntryPoint;
+    private final GatewayAccessDeniedHandler gatewayAccessDeniedHandler;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, GatewaySecurityHandlers gatewaySecurityHandlers) {
@@ -27,8 +31,8 @@ public class SecurityConfig {
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(gatewaySecurityHandlers.authenticationEntryPoint()) //인증 실패
-                        .accessDeniedHandler(gatewaySecurityHandlers.accessDeniedHandler()))          //인가 실패
+                        .authenticationEntryPoint(gatewayAuthenticationEntryPoint) //인증 실패
+                        .accessDeniedHandler(gatewayAccessDeniedHandler))          //인가 실패
                 .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt)
                 .build();
     }

@@ -3,10 +3,12 @@ package com.mockio.common_spring.exception;
 import com.mockio.common_spring.constant.CommonErrorEnum;
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
+import com.mockio.common_spring.util.response.ResponseBuilder;
 import com.mockio.common_spring.util.response.ValidationErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -100,6 +102,17 @@ public class CustomExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<String>> handleServerError(Exception ex) {
         log.error("500 에러 발생", ex);
-        return Response.error(INTERNAL_SERVER_ERROR.value(), messageUtil.getMessage("error.server.ok"), CommonErrorEnum.ERR_500, null);
+        return Response.error(INTERNAL_SERVER_ERROR.value(), messageUtil.getMessage("error.server.ok"), ERR_500, null);
+    }
+
+    //
+    @ExceptionHandler(RefreshTokenMissingException.class)
+    public ResponseEntity<Response<String>> refreshMissing(RefreshTokenMissingException e) {
+        return Response.error(UNAUTHORIZED.value(),messageUtil.getMessage("error.refresh.missing"), ERR_REFRESH_TOKEN_MISSING,null);
+    }
+
+    @ExceptionHandler(RefreshTokenInvalidException.class)
+    public ResponseEntity<Response<String>> refreshInvalid(RefreshTokenInvalidException e) {
+        return Response.error(UNAUTHORIZED.value(),messageUtil.getMessage("error.refresh.invalid"), ERR_REFRESH_TOKEN_INVALID,null);
     }
 }

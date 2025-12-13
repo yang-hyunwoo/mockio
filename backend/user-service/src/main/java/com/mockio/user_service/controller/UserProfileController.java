@@ -6,7 +6,6 @@ package com.mockio.user_service.controller;
  * 유저 정보 조회 등 유저 관련 API를 제공합니다.
  */
 
-
 import com.mockio.user_service.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

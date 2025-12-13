@@ -3,7 +3,6 @@ package com.mockio.user_service.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mockio.common_spring.constant.CommonErrorEnum;
 import com.mockio.common_spring.util.response.Response;
 import com.mockio.common_spring.util.response.ResponseBuilder;
 import jakarta.servlet.http.HttpServletRequest;

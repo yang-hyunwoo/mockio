@@ -3,6 +3,7 @@ package com.mockio.auth_service.config;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,17 +17,55 @@ import java.util.function.Supplier;
 @EnableWebSecurity
 public class SecurityConfig {
 
-//    private static final String KEYCLOAK_IP = "172.19.0.3";
-private static final String KEYCLOAK_IP = "127.0.0.1";
+    private static final String KEYCLOAK_IP = "127.0.0.1";
 
+    /**
+     * 1) Keycloak 전용 프록시 엔드포인트: IP allowlist
+     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain keycloakProxyChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher("/api/auth/v1/naver/userinfo")
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().access(this::keycloakIpOnly)
+                )
+                .build();
+    }
+
+    /**
+     * 2) 클라이언트가 직접 호출하는 인증 허브 엔드포인트:
+     * - refresh / logout 등은 쿠키 기반 검증을 컨트롤러/서비스에서 수행하므로 permitAll
+     */
+    @Bean
+    @Order(2)
+    public SecurityFilterChain authHubClientChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(
+                        "/api/auth/v1/refresh",
+                        "/api/auth/v1/logout",
+                        "/api/auth/v1/logout/all"
+                )
+                .csrf(csrf -> csrf.disable()) // 쿠키를 쓰더라도 refresh/logout는 보통 CSRF 미사용(대신 SameSite/Origin 정책으로 방어)
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll()
+                )
+                .build();
+    }
+
+    /**
+     * 3) 나머지 전부 차단
+     */
+    @Bean
+    @Order(3)
+    public SecurityFilterChain denyAllChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/naver/userinfo").access(this::keycloakIpOnly)
                         .anyRequest().denyAll()
-                ).build();
+                )
+                .build();
     }
 
     private AuthorizationDecision keycloakIpOnly(
@@ -35,8 +74,6 @@ private static final String KEYCLOAK_IP = "127.0.0.1";
     ) {
         HttpServletRequest request = context.getRequest();
         String remoteAddr = request.getRemoteAddr();
-
-        boolean allowed = KEYCLOAK_IP.equals(remoteAddr);
-        return new AuthorizationDecision(allowed);
+        return new AuthorizationDecision(KEYCLOAK_IP.equals(remoteAddr));
     }
 }

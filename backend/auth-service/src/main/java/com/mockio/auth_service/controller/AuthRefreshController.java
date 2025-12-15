@@ -13,18 +13,20 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_TOKEN_EXPIRED;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/auth/v1")
 public class AuthRefreshController {
 
     private final RefreshService refreshService;
     private final CookieFactory cookieFactory;
 
-    @PostMapping("/auth/refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<Response<RefreshResponse>> refresh(HttpServletRequest request) {
         String refreshToken = extractCookie(request, cookieFactory.refreshCookieName());
         if (refreshToken == null || refreshToken.isBlank()) {

@@ -15,7 +15,7 @@ public class CookieFactory {
 
     public CookieFactory(
             @Value("${security.cookie.refresh-name:refresh_token}") String refreshName,
-            @Value("${security.cookie.refresh-path:/auth/refresh}") String refreshPath,
+            @Value("${security.cookie.refresh-path:/api/auth/v1}") String refreshPath,
             @Value("${security.cookie.secure:true}") boolean secure,
             @Value("${security.cookie.same-site:Lax}") String sameSite,
             @Value("${security.cookie.domain:}") String domain

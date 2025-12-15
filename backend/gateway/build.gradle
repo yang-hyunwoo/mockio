@@ -48,11 +48,18 @@ dependencies {
 
 	// Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	testImplementation "org.springframework.security:spring-security-test"
 
 	implementation 'org.yaml:snakeyaml:2.3'
 
-	implementation project(':common-core')
-	implementation project(':common-spring')
+	implementation(project(":common-spring")) {
+		exclude group: "org.springframework.boot", module: "spring-boot-starter-web"
+		exclude group: "org.springframework", module: "spring-webmvc"
+	}
+	implementation(project(":common-core")) {
+		exclude group: "org.springframework.boot", module: "spring-boot-starter-web"
+		exclude group: "org.springframework", module: "spring-webmvc"
+	}
 }
 
 ext {

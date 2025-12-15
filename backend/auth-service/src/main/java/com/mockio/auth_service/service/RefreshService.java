@@ -15,14 +15,15 @@ public class RefreshService {
 
 
     public KeycloakTokenResponse refreshBy(String refreshToken) {
-        try {
-            return keycloakTokenClient.refresh(refreshToken);
-        } catch (HttpClientErrorException e) {
-            String body = e.getResponseBodyAsString();
-            if (body != null && body.contains("invalid_grant")) {
-                throw new RefreshTokenInvalidException("REFRESH_INVALID_GRANT", e);
-            }
-            throw e;
-        }
+        return keycloakTokenClient.refresh(refreshToken);
+//        try {
+//            return keycloakTokenClient.refresh(refreshToken);
+//        } catch (HttpClientErrorException e) {
+//            String body = e.getResponseBodyAsString();
+//            if (body != null && body.contains("invalid_grant")) {
+//                throw new RefreshTokenInvalidException("REFRESH_INVALID_GRANT", e);
+//            }
+//            throw e;
+//        }
     }
 }

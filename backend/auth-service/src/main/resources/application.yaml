@@ -2,6 +2,9 @@ server:
   port: 8081
 
 spring:
+  messages:
+    basename: messages/apiResponseMessage
+    encoding: UTF-8
   profiles:
     active: local
   application:

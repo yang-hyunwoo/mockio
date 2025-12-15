@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api/auth/v1")
 public class NaverUserInfoProxyController {
 
     private final WebClient webClient;

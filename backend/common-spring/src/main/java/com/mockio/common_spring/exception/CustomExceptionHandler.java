@@ -105,12 +105,18 @@ public class CustomExceptionHandler {
         return Response.error(INTERNAL_SERVER_ERROR.value(), messageUtil.getMessage("error.server.ok"), ERR_500, null);
     }
 
-    //
+
+    /**
+     * refresh_token 쿠키가 없는 경우: 401
+     */
     @ExceptionHandler(RefreshTokenMissingException.class)
     public ResponseEntity<Response<String>> refreshMissing(RefreshTokenMissingException e) {
         return Response.error(UNAUTHORIZED.value(),messageUtil.getMessage("error.refresh.missing"), ERR_REFRESH_TOKEN_MISSING,null);
     }
 
+    /**
+     * refresh_token이 무효/만료/invalid_grant 등인 경우: 401
+     */
     @ExceptionHandler(RefreshTokenInvalidException.class)
     public ResponseEntity<Response<String>> refreshInvalid(RefreshTokenInvalidException e) {
         return Response.error(UNAUTHORIZED.value(),messageUtil.getMessage("error.refresh.invalid"), ERR_REFRESH_TOKEN_INVALID,null);

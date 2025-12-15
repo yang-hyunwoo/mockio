@@ -23,11 +23,12 @@ public class SecurityConfig {
     private final GatewayAccessDeniedHandler gatewayAccessDeniedHandler;
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, GatewaySecurityHandlers gatewaySecurityHandlers) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(ex -> ex
-                        .pathMatchers("/api/public/**").permitAll()
+                        .pathMatchers("/api/users/v1/public/**",
+                                "/api/auth/public/v1/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(ex -> ex

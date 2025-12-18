@@ -63,6 +63,8 @@ dependencies {
 	//jwt
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
+	//flyway
+	implementation 'org.flywaydb:flyway-core'
 }
 
 tasks.named('test') {

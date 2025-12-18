@@ -23,4 +23,6 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
      * @return 활성 상태의 유저 프로필 조회
      */
     Optional<UserProfile> findByKeycloakId(String keycloakId);
+
+    boolean existsByNickname(String nickname);
 }

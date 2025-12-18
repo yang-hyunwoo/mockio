@@ -7,31 +7,32 @@ package com.mockio.user_service.Mapper;
  *
  */
 
+import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.user_service.domain.UserProfile;
-import com.mockio.user_service.dto.UserProfileDto;
+import com.mockio.user_service.dto.response.UserProfileResponse;
 
 public class UserProfileMapper {
 
-    public static UserProfileDto from(UserProfile userProfile) {
-        return new UserProfileDto(
+    public static UserProfileResponse from(UserProfile userProfile) {
+        return new UserProfileResponse(
                 userProfile.getId(),
-                userProfile.getKeycloakId(),
-                userProfile.getProfileImageId(),
+                userProfile.getNickname(),
                 userProfile.getName(),
                 userProfile.getEmail(),
-                userProfile.getNickname(),
-                userProfile.getPhoneNumber()
+                userProfile.getProfileImageId(),
+                userProfile.getBio(),
+                EnumResponse.of(
+                        userProfile.getVisibility().name(),
+                        userProfile.getVisibility().getLabel()
+                ),
+                EnumResponse.of(
+                        userProfile.getStatus().name(),
+                        userProfile.getStatus().getLabel()
+                ),
+                userProfile.getLastLoginAt()
         );
     }
 
-    public static UserProfile fromKeycloakClaims(UserProfileDto userProfileDto) {
-        return UserProfile.builder()
-                .keycloakId(userProfileDto.keycloakId())
-                .name(userProfileDto.name())
-                .email(userProfileDto.email())
-                .nickname(userProfileDto.nickname())
-                .phoneNumber(userProfileDto.phoneNumber())
-                .build();
-    }
+
 
 }

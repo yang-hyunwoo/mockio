@@ -12,6 +12,7 @@ import com.mockio.user_service.dto.UserProfileDto;
 import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -30,7 +31,7 @@ public class UserProfileService {
      * 최초 사용자 로그인 시 userProfile 등록
      * @param jwt
      */
-    public void loadOrCreateFromToken(Jwt jwt) {
+    public UserProfile loadOrCreateFromToken(Jwt jwt) {
         String keycloakId = jwt.getSubject();
         String email = jwt.getClaimAsString("email");
         String userId = jwt.getClaimAsString("preferred_username");
@@ -42,22 +43,28 @@ public class UserProfileService {
         log.info("phoneNumber : {}" , phoneNumber);
         log.info("keycloakId : {}" , keycloakId);
 
-        userRepository.findByKeycloakId(keycloakId)
+        return userRepository.findByKeycloakId(keycloakId)
+                .map(existing -> {
+                    existing.updateLastLoginAt();
+                    return existing;
+                })
                 .orElseGet(() -> {
-                    UserProfile userProfile = UserProfileMapper.fromKeycloakClaims(
-                            new UserProfileDto(null,
-                                    keycloakId,
-                                    null,
-                                    fullName,
-                                    email,
-                                    userId,
-                                    phoneNumber
-                            )
+                    String nickname = generateRandomNickname();
+                    UserProfile createUserProfile = UserProfile.createUserProfile(keycloakId,
+                            email,
+                            fullName,
+                            nickname
                     );
-                    return userRepository.save(userProfile);
+                    createUserProfile.updateLastLoginAt();
+                    return userRepository.save(createUserProfile);
                 });
     }
 
-
-
+    private String generateRandomNickname() {
+        String nickname;
+        do {
+            nickname = "user_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        } while (userRepository.existsByNickname(nickname));
+        return nickname;
+    }
 }

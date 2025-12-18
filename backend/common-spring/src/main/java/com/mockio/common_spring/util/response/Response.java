@@ -2,6 +2,7 @@ package com.mockio.common_spring.util.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mockio.common_core.error.ErrorCode;
+import com.mockio.common_spring.util.MessageUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

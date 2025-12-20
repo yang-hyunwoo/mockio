@@ -1,5 +1,9 @@
 package com.mockio.user_service.constant;
 
+/** 유저 상태 enum
+ *  UserStatus
+ */
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

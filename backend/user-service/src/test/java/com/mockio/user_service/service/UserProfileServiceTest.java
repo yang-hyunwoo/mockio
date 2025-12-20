@@ -1,8 +1,12 @@
 package com.mockio.user_service.service;
 
+import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.user_service.constant.ProfileVisibility;
 import com.mockio.user_service.domain.UserProfile;
+import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.repository.UserProfileRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,12 +19,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserProfileServiceTest {
@@ -130,5 +134,50 @@ class UserProfileServiceTest {
         assertThat(result).isNotNull();
         then(userRepository).should(times(3)).existsByNickname(anyString());
         then(userRepository).should().save(any(UserProfile.class));
+    }
+
+    @Test
+    @DisplayName("updateMyProfile: record request로 updateProfile 호출이 정확히 된다")
+    void updateMyProfile_withRealRequest() {
+        // given
+        UserProfile currentUser = mock(UserProfile.class);
+        given(currentUser.getKeycloakId()).willReturn("kc-123");
+
+        UserProfile foundProfile = mock(UserProfile.class);
+
+        UserProfileUpdateRequest req =
+                new UserProfileUpdateRequest("newNick", 1L ,"안녕하세요", ProfileVisibility.PUBLIC);
+
+        given(userRepository.findByKeycloakId("kc-123"))
+                .willReturn(Optional.of(foundProfile));
+
+        // when
+        userProfileService.updateMyProfile(currentUser, req);
+
+        // then
+        then(foundProfile).should().updateProfile("newNick", 1L ,"안녕하세요", ProfileVisibility.PUBLIC);
+        then(userRepository).should(never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateMyProfile: 프로필이 없으면 CustomApiException 던진다")
+    void updateMyProfile_whenProfileNotFound_customApiException() {
+        // given
+        UserProfile currentUser = mock(UserProfile.class);
+        given(currentUser.getKeycloakId()).willReturn("kc-404");
+
+        UserProfileUpdateRequest req =
+                new UserProfileUpdateRequest("newNick", 1L, "안녕하세요", ProfileVisibility.PUBLIC);
+
+        given(userRepository.findByKeycloakId("kc-404"))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userProfileService.updateMyProfile(currentUser, req))
+                .isInstanceOf(CustomApiException.class);
+
+        then(userRepository).should().findByKeycloakId("kc-404");
+        then(userRepository).should(never()).save(any());
+        // 엔티티가 없으니 updateProfile도 호출될 대상이 없음
     }
 }

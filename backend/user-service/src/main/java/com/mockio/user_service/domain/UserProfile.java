@@ -1,5 +1,10 @@
 package com.mockio.user_service.domain;
 
+/**
+ * 유저 프로필 엔티티
+ * UserProfile
+ */
+
 import com.mockio.common_jpa.domain.BaseTimeEntity;
 import com.mockio.user_service.constant.ProfileVisibility;
 import com.mockio.user_service.constant.UserStatus;
@@ -12,8 +17,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import java.util.Random;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -109,8 +112,12 @@ public class UserProfile extends BaseTimeEntity {
     }
 
     /** 프로필 수정 */
-    public void updateProfile(String nickname, String bio, ProfileVisibility visibility) {
+    public void updateProfile(String nickname,
+                              Long profileImageId ,
+                              String bio,
+                              ProfileVisibility visibility) {
         this.nickname = nickname;
+        this.profileImageId = profileImageId;
         this.bio = bio;
         this.visibility = visibility;
     }

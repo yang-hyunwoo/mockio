@@ -19,13 +19,12 @@ public class QUserProfile extends EntityPathBase<UserProfile> {
 
     public static final QUserProfile userProfile = new QUserProfile("userProfile");
 
-    public final com.mockio.common_jpa.domain.QBaseEntity _super = new com.mockio.common_jpa.domain.QBaseEntity(this);
+    public final com.mockio.common_jpa.domain.QBaseTimeEntity _super = new com.mockio.common_jpa.domain.QBaseTimeEntity(this);
+
+    public final StringPath bio = createString("bio");
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
-
-    //inherited
-    public final NumberPath<Long> createdBy = _super.createdBy;
 
     public final StringPath email = createString("email");
 
@@ -33,19 +32,20 @@ public class QUserProfile extends EntityPathBase<UserProfile> {
 
     public final StringPath keycloakId = createString("keycloakId");
 
+    public final DateTimePath<java.time.OffsetDateTime> lastLoginAt = createDateTime("lastLoginAt", java.time.OffsetDateTime.class);
+
     public final StringPath name = createString("name");
 
     public final StringPath nickname = createString("nickname");
 
-    public final StringPath phoneNumber = createString("phoneNumber");
-
     public final NumberPath<Long> profileImageId = createNumber("profileImageId", Long.class);
+
+    public final EnumPath<com.mockio.user_service.constant.UserStatus> status = createEnum("status", com.mockio.user_service.constant.UserStatus.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> updatedAt = _super.updatedAt;
 
-    //inherited
-    public final NumberPath<Long> updatedBy = _super.updatedBy;
+    public final EnumPath<com.mockio.user_service.constant.ProfileVisibility> visibility = createEnum("visibility", com.mockio.user_service.constant.ProfileVisibility.class);
 
     public QUserProfile(String variable) {
         super(UserProfile.class, forVariable(variable));

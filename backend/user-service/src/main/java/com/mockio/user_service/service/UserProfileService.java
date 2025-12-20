@@ -9,6 +9,7 @@ package com.mockio.user_service.service;
 import com.mockio.user_service.Mapper.UserProfileMapper;
 import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.UserProfileDto;
+import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,33 +32,24 @@ public class UserProfileService {
      * 최초 사용자 로그인 시 userProfile 등록
      * @param jwt
      */
-    public UserProfile loadOrCreateFromToken(Jwt jwt) {
+    public UserProfileResponse loadOrCreateFromToken(Jwt jwt) {
         String keycloakId = jwt.getSubject();
         String email = jwt.getClaimAsString("email");
-        String userId = jwt.getClaimAsString("preferred_username");
         String fullName = jwt.getClaimAsString("name");
-        String phoneNumber = jwt.getClaimAsString("phone_number"); // ← Mapper를 추가해야 가져옴
-        log.info("email : {}" , email);
-        log.info("username : {}" , userId);
-        log.info("fullName : {}" , fullName);
-        log.info("phoneNumber : {}" , phoneNumber);
-        log.info("keycloakId : {}" , keycloakId);
 
-        return userRepository.findByKeycloakId(keycloakId)
+        UserProfile userProfile = userRepository.findByKeycloakId(keycloakId)
                 .map(existing -> {
                     existing.updateLastLoginAt();
                     return existing;
                 })
                 .orElseGet(() -> {
                     String nickname = generateRandomNickname();
-                    UserProfile createUserProfile = UserProfile.createUserProfile(keycloakId,
-                            email,
-                            fullName,
-                            nickname
-                    );
-                    createUserProfile.updateLastLoginAt();
-                    return userRepository.save(createUserProfile);
+                    UserProfile created = UserProfile.createUserProfile(keycloakId, email, fullName, nickname);
+                    created.updateLastLoginAt();
+                    return userRepository.save(created);
                 });
+
+        return UserProfileMapper.from(userProfile);
     }
 
     private String generateRandomNickname() {

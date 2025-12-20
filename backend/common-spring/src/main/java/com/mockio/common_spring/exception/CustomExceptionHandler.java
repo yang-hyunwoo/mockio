@@ -1,19 +1,18 @@
 package com.mockio.common_spring.exception;
 
-import com.mockio.common_spring.constant.CommonErrorEnum;
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
-import com.mockio.common_spring.util.response.ResponseBuilder;
 import com.mockio.common_spring.util.response.ValidationErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
 import java.util.List;
 
 import static com.mockio.common_spring.constant.CommonErrorEnum.*;
@@ -120,5 +119,11 @@ public class CustomExceptionHandler {
     @ExceptionHandler(RefreshTokenInvalidException.class)
     public ResponseEntity<Response<String>> refreshInvalid(RefreshTokenInvalidException e) {
         return Response.error(UNAUTHORIZED.value(),messageUtil.getMessage("error.refresh.invalid"), ERR_REFRESH_TOKEN_INVALID,null);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Response<String>> handleNoResourceFound(NoResourceFoundException ex) {
+        log.error("404 리소스 없음", ex);
+        return Response.error(NOT_FOUND.value(), messageUtil.getMessage("error.not.fount.ok"), ERR_404,null);
     }
 }

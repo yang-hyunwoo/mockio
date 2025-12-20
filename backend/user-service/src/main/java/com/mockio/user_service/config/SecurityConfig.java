@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/user/public/**").permitAll()
+                        .requestMatchers("/api/users/v1/public/**").permitAll()
                         // 나머지는 다 인증 필요
                         .anyRequest().authenticated()
                 )

@@ -10,6 +10,7 @@ import com.mockio.common_security.annotation.CurrentUser;
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
 import com.mockio.user_service.domain.UserProfile;
+import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
@@ -34,20 +35,27 @@ public class UserProfileController {
      */
     @PostMapping("/me/sync")
     public ResponseEntity<Response<UserProfileResponse>> syncMyProfile(@AuthenticationPrincipal Jwt jwt) {
-
-
         return Response.ok(messageUtil.getMessage("response.read"),
                 userProfileService.loadOrCreateFromToken(jwt));
     }
 
+    /**
+     * 유저 프로필 변경
+     *
+     * @param user
+     * @param userProfileUpdateRequest
+     * @return
+     */
     @PatchMapping("/me/update-profile")
-    public ResponseEntity<Response<Void>> updateMyProfile() {
-    return null;
+    public ResponseEntity<Response<Void>> updateMyProfile(@CurrentUser UserProfile user,
+                                                          UserProfileUpdateRequest userProfileUpdateRequest) {
+        userProfileService.updateMyProfile(user, userProfileUpdateRequest);
+        return Response.update(messageUtil.getMessage("response.update"));
     }
 
     @GetMapping("/public/me/public-page")
-    public ResponseEntity<?> publicPage(@CurrentUser(required = false) UserProfile me) {
-        if (me == null) {
+    public ResponseEntity<?> publicPage(@CurrentUser(required = false) UserProfile user) {
+        if (user == null) {
             // 로그인 안한 사용자
         } else {
             // 로그인 사용자

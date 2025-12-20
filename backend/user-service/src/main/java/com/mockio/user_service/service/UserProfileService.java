@@ -3,13 +3,17 @@ package com.mockio.user_service.service;
 /**
  * UserService.
  *
- *  회원 관련 비즈니스 로직을 담당합니다.
+ *  유저 관련 비즈니스 로직을 담당합니다.
  */
 
+import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.user_service.Mapper.UserProfileMapper;
+import com.mockio.user_service.domain.UserInterviewPreference;
 import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.UserProfileDto;
+import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
+import com.mockio.user_service.repository.UserInterviewPreferenceRepository;
 import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +21,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.oauth2.jwt.Jwt;
+
+import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_012;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
 @Service
@@ -26,6 +33,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public class UserProfileService {
 
     private final UserProfileRepository userRepository;
+
+    private final UserInterviewPreferenceRepository userInterviewPreferenceRepository;
 
 
     /**
@@ -45,6 +54,7 @@ public class UserProfileService {
                 .orElseGet(() -> {
                     String nickname = generateRandomNickname();
                     UserProfile created = UserProfile.createUserProfile(keycloakId, email, fullName, nickname);
+                    userInterviewPreferenceRepository.save(UserInterviewPreference.createUserInterviewPreference(created));
                     created.updateLastLoginAt();
                     return userRepository.save(created);
                 });
@@ -52,11 +62,40 @@ public class UserProfileService {
         return UserProfileMapper.from(userProfile);
     }
 
+    /**
+     * 유저 프로필 변경
+     * @param userProfile
+     * @param userProfileUpdateRequest
+     */
+    public void updateMyProfile(UserProfile userProfile, UserProfileUpdateRequest userProfileUpdateRequest) {
+        findByKeycloakId(userProfile.getKeycloakId()).updateProfile(
+                userProfileUpdateRequest.nickname(),
+                userProfileUpdateRequest.profileImageId(),
+                userProfileUpdateRequest.bio(),
+                userProfileUpdateRequest.visibility()
+        );
+    }
+
+    /**
+     * 랜덤 닉네임 생성
+     * @return
+     */
     private String generateRandomNickname() {
         String nickname;
         do {
             nickname = "user_" + RandomStringUtils.randomAlphanumeric(8).toLowerCase();
         } while (userRepository.existsByNickname(nickname));
         return nickname;
+    }
+
+
+    /**
+     * 유저 정보 유무 조회
+     * @param keycloakId
+     * @return
+     */
+    private UserProfile findByKeycloakId(String keycloakId) {
+        return userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
     }
 }

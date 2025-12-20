@@ -3,7 +3,7 @@ package com.mockio.user_service.repository;
 /**
  * UserRepository
  *
- * 회원 엔티티에 대한 CRUD 및 사용자 정의 조회 기능을 제공하는 Repository.
+ * 유저 엔티티에 대한 CRUD 및 사용자 정의 조회 기능을 제공하는 Repository.
  * Spring Data JPA를 기반으로 구현됩니다.
  */
 

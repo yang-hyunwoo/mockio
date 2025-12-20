@@ -102,6 +102,10 @@ public class Response<T> {
         return ResponseEntity.status(HttpStatus.OK).body(successUpdate(message, data));
     }
 
+    public static <T> ResponseEntity<Response<T>> update(String message) {
+        return ResponseEntity.status(HttpStatus.OK).body(successUpdate(message));
+    }
+
     public static <T> ResponseEntity<Response<T>> delete(String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(successDelete(message, data));
     }
@@ -124,6 +128,9 @@ public class Response<T> {
 
     protected static <T> Response<T> successUpdate(String message, T data) {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,LocalDateTime.now());
+    }
+    protected static <T> Response<T> successUpdate(String message) {
+        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,null,LocalDateTime.now());
     }
 
     protected static <T> Response<T> successDelete(String message, T data) {

@@ -6,13 +6,18 @@ package com.mockio.user_service.service;
  *  유저 관련 비즈니스 로직을 담당합니다.
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.user_service.Mapper.UserProfileMapper;
+import com.mockio.user_service.constant.UserStatus;
+import com.mockio.user_service.domain.OutboxUserEvent;
 import com.mockio.user_service.domain.UserInterviewPreference;
 import com.mockio.user_service.domain.UserProfile;
+import com.mockio.user_service.dto.UserDeletedEvent;
 import com.mockio.user_service.dto.UserProfileDto;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
+import com.mockio.user_service.repository.OutboxUserEventRepository;
 import com.mockio.user_service.repository.UserInterviewPreferenceRepository;
 import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +41,9 @@ public class UserProfileService {
 
     private final UserInterviewPreferenceRepository userInterviewPreferenceRepository;
 
+    private final OutboxUserEventRepository outboxRepository;
 
+    private final ObjectMapper objectMapper;
     /**
      * 최초 사용자 로그인 시 userProfile 등록
      * @param jwt
@@ -74,6 +81,22 @@ public class UserProfileService {
                 userProfileUpdateRequest.bio(),
                 userProfileUpdateRequest.visibility()
         );
+    }
+
+    /**
+     * 유저 탈퇴
+     */
+    public void updateProfileStatus(UserProfile userProfile) {
+        findByKeycloakId(userProfile.getKeycloakId()).changeStatus(UserStatus.DELETED);
+        UserDeletedEvent event = UserDeletedEvent.of(userProfile.getId(), userProfile.getKeycloakId());
+        String payloadJson;
+        try {
+            payloadJson = objectMapper.writeValueAsString(event);
+        } catch (Exception e) {
+            throw new IllegalStateException("failed to serialize UserDeletedEvent", e);
+        }
+
+        outboxRepository.save(OutboxUserEvent.pending(event.eventId(), userProfile.getId(), event.eventType(), payloadJson));
     }
 
     /**

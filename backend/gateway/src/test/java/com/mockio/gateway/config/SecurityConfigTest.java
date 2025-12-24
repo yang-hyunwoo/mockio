@@ -38,7 +38,7 @@ class SecurityConfigTest {
     @DisplayName("Users public endpoint allows access without token (200 OK)")
     void users_public_endpoint_allows_access_without_token()  {
         webTestClient.get()
-                .uri("/api/users/public/ping")
+                .uri("/api/users/v1/public/ping")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_PLAIN)
@@ -49,7 +49,7 @@ class SecurityConfigTest {
     @DisplayName("Auth public endpoint allows access without token (200 OK)")
     void auth_public_endpoint_allows_access_without_token()  {
         webTestClient.get()
-                .uri("/api/auth/public/ping")
+                .uri("/api/auth/v1/public/ping")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_PLAIN)
@@ -60,7 +60,7 @@ class SecurityConfigTest {
     @DisplayName("Protected endpoint returns 401 and JSON error response when token is missing")
     void protected_endpoint_returns_401_and_json_response_when_token_missing() {
         webTestClient.get()
-                .uri("/api/users/private/ping")
+                .uri("/api/users/v1/private/ping")
                 .exchange()
                 .expectStatus().isUnauthorized()
                 .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ class SecurityConfigTest {
     void protected_endpoint_allows_access_with_valid_jwt()  {
         webTestClient.mutateWith(mockJwt())
                 .get()
-                .uri("/api/users/private/ping")
+                .uri("/api/users/v1/private/ping")
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_PLAIN)
@@ -90,15 +90,15 @@ class SecurityConfigTest {
         @Bean
         RouterFunction<ServerResponse> testRouter() {
             return RouterFunctions
-                    .route(GET("/api/users/public/ping"),
+                    .route(GET("/api/users/v1/public/ping"),
                             req -> ServerResponse.ok()
                                     .contentType(MediaType.TEXT_PLAIN)
                                     .bodyValue("users-public-pong"))
-                    .andRoute(GET("/api/auth/public/ping"),
+                    .andRoute(GET("/api/auth/v1/public/ping"),
                             req -> ServerResponse.ok()
                                     .contentType(MediaType.TEXT_PLAIN)
                                     .bodyValue("auth-public-pong"))
-                    .andRoute(GET("/api/users/private/ping"),
+                    .andRoute(GET("/api/users/v1/private/ping"),
                             req -> ServerResponse.ok()
                                     .contentType(MediaType.TEXT_PLAIN)
                                     .bodyValue("users-private-pong"));

@@ -48,8 +48,14 @@ public class UserProfileController {
      */
     @PatchMapping("/me/update-profile")
     public ResponseEntity<Response<Void>> updateMyProfile(@CurrentUser UserProfile user,
-                                                          UserProfileUpdateRequest userProfileUpdateRequest) {
+                                                          @RequestBody UserProfileUpdateRequest userProfileUpdateRequest) {
         userProfileService.updateMyProfile(user, userProfileUpdateRequest);
+        return Response.update(messageUtil.getMessage("response.update"));
+    }
+
+    @PatchMapping("/me/update-profile-status")
+    public ResponseEntity<Response<Void>> updateProfileStatus(@CurrentUser UserProfile user) {
+        userProfileService.updateProfileStatus(user);
         return Response.update(messageUtil.getMessage("response.update"));
     }
 

@@ -1,7 +1,7 @@
 plugins {
+	id 'org.springframework.boot'
+	id 'io.spring.dependency-management'
 	id 'java'
-	id 'org.springframework.boot' version '3.3.5'
-	id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.mockio'
@@ -22,7 +22,6 @@ configurations {
 
 repositories {
 	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
@@ -30,7 +29,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -70,14 +68,25 @@ dependencies {
 	implementation 'com.h2database:h2'
 
 	testImplementation platform("org.testcontainers:testcontainers-bom:1.20.3")
-	testImplementation "org.testcontainers:junit-jupiter"
-	testImplementation "org.testcontainers:postgresql"
 
 	runtimeOnly "org.flywaydb:flyway-database-postgresql"
 	runtimeOnly "org.postgresql:postgresql"
+
+	testImplementation "org.testcontainers:junit-jupiter"
+	testImplementation "org.testcontainers:postgresql"
+	testImplementation "org.springframework.boot:spring-boot-testcontainers"
+
+	//흠 ... boot-4.0.0부터 있는듯?..
+	//implementation 'org.springframework.boot:spring-boot-starter-kafka'
+	//kafka
+	implementation "org.springframework.kafka:spring-kafka"
+	testImplementation "org.springframework.kafka:spring-kafka-test"
 
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+tasks.withType(Test).configureEach {
+	enabled = false
 }

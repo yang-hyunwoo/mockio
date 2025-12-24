@@ -5,6 +5,7 @@ import com.mockio.user_service.constant.ProfileVisibility;
 import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
+import com.mockio.user_service.repository.UserInterviewPreferenceRepository;
 import com.mockio.user_service.repository.UserProfileRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,9 @@ class UserProfileServiceTest {
 
     @Mock
     private UserProfileRepository userRepository;
+
+    @Mock
+    private UserInterviewPreferenceRepository userInterviewPreferenceRepository;
 
     @InjectMocks
     private UserProfileService userProfileService;

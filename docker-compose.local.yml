@@ -1,5 +1,6 @@
 services:
   postgres:
+    image: postgres:16
     container_name: mockio-postgres-local
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -11,16 +12,16 @@ services:
       - ./db/init:/docker-entrypoint-initdb.d
       - ./db/data:/var/lib/postgresql/data
     restart: always
-
-    # 🔹 Postgres가 진짜 접속 가능한 상태인지 헬스체크
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
-      interval: 5s       # 5초마다 체크
+      # CMD-SHELL 안에서 env가 확장되도록 $$ 사용 권장
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
       timeout: 5s
-      retries: 10        # 최대 10번 시도
-      start_period: 10s  # 처음 10초는 워밍업 시간
+      retries: 10
+      start_period: 10s
 
   keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
     container_name: keycloak-local
     command: ["start-dev"]
     environment:
@@ -35,8 +36,33 @@ services:
     volumes:
       - C:/project/mockio/keycloak-themes/mockio-theme:/opt/keycloak/themes/mockio-theme
     restart: always
-
-    # 🔹 Postgres가 healthy 되기 전까지는 Keycloak 시작 안 함
     depends_on:
       postgres:
         condition: service_healthy
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-local
+    ports:
+      - "9092:9092"
+    environment:
+      # KRaft 핵심 설정
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      # Listener 설정 (클라이언트/컨트롤러)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # 단일 브로커 개발용
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # KRaft 클러스터 ID (고정 문자열; 새로 만들어도 됨)
+      CLUSTER_ID: "4L6g3nShT-eMCtK--X86sw"
+    restart: always

@@ -15,5 +15,6 @@ public enum FeedbackStyle {
     FRIENDLY("친근")
     ;
 
+
     private final String label;
 }

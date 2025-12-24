@@ -1,46 +1,26 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.5'
-	id 'io.spring.dependency-management' version '1.1.7'
+	id 'java-library'
 }
-
-group = 'com.mockio'
-version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-repositories {
-	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
+	toolchain { languageVersion = JavaLanguageVersion.of(21) }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	api 'org.springframework.boot:spring-boot-starter-security'
+	api 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	api 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	api 'org.springframework.security:spring-security-oauth2-jose'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	// jpa를 여기서 끌고 오면 security가 데이터 계층까지 전파됩니다.
+	// 정말 필요할 때만 남기고, 가능하면 제거 권장
+	// api 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-	implementation 'org.springframework.security:spring-security-oauth2-jose'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation project(':common-core')
-	implementation project(':common-jpa')
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
+	api project(':common-core')
+	api project(':common-jpa')
 }

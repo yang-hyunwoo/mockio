@@ -1,11 +1,29 @@
-subprojects {
-    apply plugin: 'java'
-
-    group = 'com.mockio'
-    version = '0.0.1-SNAPSHOT'
-
-    repositories {
-        mavenCentral()
-    }
+plugins {
+    id 'org.springframework.boot' version '3.3.5' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories { mavenCentral() }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    ext {
+        springBootVersion = "3.3.5"
+        springCloudVersion = "2023.0.5"
+    }
+
+    dependencyManagement {
+        imports {
+            // Boot BOM 먼저
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.3.5"
+            // Cloud BOM 추가
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+}

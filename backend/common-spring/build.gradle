@@ -1,44 +1,33 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.5'
-	id 'io.spring.dependency-management' version '1.1.7'
+	id 'java-library'
 }
-
-group = 'com.mockio'
-version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-repositories {
-	mavenCentral()
-	maven { url = 'https://repo.spring.io/snapshot' }
+	toolchain { languageVersion = JavaLanguageVersion.of(21) }
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	// lombok (@Slf4j, @Getter 등)
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation "org.springframework:spring-tx"
-	//swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-	implementation project(':common-core')
-}
 
-tasks.named('test') {
-	useJUnitPlatform()
+	// validation
+	api 'org.springframework.boot:spring-boot-starter-validation'
+	api 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+	// DataIntegrityViolationException 등
+	api 'org.springframework:spring-tx'
+
+	// ✅ MVC/Servlet 타입들(NoHandlerFoundException, HttpServletResponse 등) 사용하려면 이게 필요
+	api 'org.springframework.boot:spring-boot-starter-web'
+
+	// swagger (공통 전파 싫으면 각 서비스로 내리세요)
+	api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+	api project(':common-core')
 }

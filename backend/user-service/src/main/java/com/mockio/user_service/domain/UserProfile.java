@@ -22,6 +22,7 @@ import java.util.Objects;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "user_profiles")
 public class UserProfile extends BaseTimeEntity {
 
     @Id

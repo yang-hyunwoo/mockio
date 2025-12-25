@@ -1,17 +1,17 @@
 CREATE TABLE user_interview_preferences (
-    id BIGINT PRIMARY KEY,
-    user_id BIGINT PRIMARY KEY,
+    user_profile_id BIGINT PRIMARY KEY,
     track VARCHAR(30) NOT NULL,
     difficulty VARCHAR(30) NOT NULL,
     feedback_style VARCHAR(30) NOT NULL,
     interview_mode VARCHAR(30) NOT NULL DEFAULT 'TEXT',
     answer_time_seconds INT NOT NULL DEFAULT 90,
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_user_interview_preferences_user
-        FOREIGN KEY (user_id)
-            REFERENCES user_profiles (user_id)
+    CONSTRAINT fk_uip_user_profile
+        FOREIGN KEY (user_profile_id)
+            REFERENCES user_profiles (id)
             ON DELETE CASCADE,
 
     CONSTRAINT chk_answer_time_seconds

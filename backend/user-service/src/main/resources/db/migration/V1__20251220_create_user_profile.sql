@@ -1,5 +1,5 @@
--- V1__create_user_profile.sql
-CREATE TABLE user_profile (
+-- V1__20251220_create_user_profile.sql
+CREATE TABLE user_profiles (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   keycloak_id VARCHAR(128) NOT NULL,
   profile_image_id BIGINT,
@@ -12,8 +12,8 @@ CREATE TABLE user_profile (
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL,
-  CONSTRAINT uk_user_profile_keycloak_id UNIQUE (keycloak_id),
-  CONSTRAINT uk_user_profile_nickname UNIQUE (nickname),
-  CONSTRAINT ck_user_profile_visibility CHECK (visibility IN ('PUBLIC','PRIVATE')),
-  CONSTRAINT ck_user_profile_status CHECK (status IN ('ACTIVE','SUSPENDED','DELETED'))
+  CONSTRAINT uk_user_profiles_keycloak_id UNIQUE (keycloak_id),
+  CONSTRAINT uk_user_profiles_nickname UNIQUE (nickname),
+  CONSTRAINT ck_user_profiles_visibility CHECK (visibility IN ('PUBLIC','PRIVATE')),
+  CONSTRAINT ck_user_profiles_status CHECK (status IN ('ACTIVE','SUSPENDED','DELETED'))
 );

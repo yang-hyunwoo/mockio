@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.OffsetDateTime;
@@ -42,6 +43,9 @@ class UserProfileControllerTest {
 
     @MockBean
     private CurrentUserWiringConfig currentUserWiringConfig;
+
+    @MockBean
+    JwtDecoder jwtDecoder;
 
     @Test
     @DisplayName("내 프로필 동기화 요청 시 200 OK와 응답 스펙을 반환한다")

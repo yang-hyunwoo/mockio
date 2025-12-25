@@ -10,23 +10,25 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 
-@Testcontainers
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class PostgresDataJpaTest {
 
     @Container
     static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:16-alpine");
+            new PostgreSQLContainer<>("postgres:16")
+                    .withDatabaseName("test")
+                    .withUsername("test")
+                    .withPassword("test");
 
     @DynamicPropertySource
-    static void overrideProps(DynamicPropertyRegistry registry) {
+    static void props(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
 
-        registry.add("spring.flyway.url", postgres::getJdbcUrl);
-        registry.add("spring.flyway.user", postgres::getUsername);
-        registry.add("spring.flyway.password", postgres::getPassword);
+        registry.add("spring.flyway.enabled", () -> true);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
 }

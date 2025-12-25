@@ -1,9 +1,12 @@
 package com.mockio.user_service.config;
 
+import com.mockio.common_security.util.CurrentUserPort;
+import com.mockio.common_spring.util.MessageUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,11 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 주의:
  * - 현재 AccessDeniedHandler(인가 실패) 케이스는 SecurityConfig에 role 규칙이 없어서 재현 불가
  */
-@SpringBootTest(properties = {
-        "spring.security.oauth2.resourceserver.jwt.issuer-uri="
-})
-@AutoConfigureMockMvc
-@Import(SecurityConfigTest.TestApi.class)
+@WebMvcTest(controllers = SecurityConfigTest.TestApi.PingController.class)
+@Import({ SecurityConfig.class, SecurityConfigTest.TestApi.class })
 class SecurityConfigTest {
 
     @Autowired
@@ -46,10 +46,16 @@ class SecurityConfigTest {
     @MockBean
     JwtDecoder jwtDecoder;
 
+    @MockBean
+    CurrentUserPort currentUserPort;
+
+    @MockBean
+    MessageUtil messageUtil;
+
     @Test
     @DisplayName("PUBLIC 경로는 토큰 없이 접근 가능하다 (200 OK)")
     void public_endpoint_allows_access_without_token() throws Exception {
-        mockMvc.perform(get("/api/user/public/ping"))
+        mockMvc.perform(get("/api/users/v1/public/ping"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
                 .andExpect(content().string("public-pong"));
@@ -58,7 +64,7 @@ class SecurityConfigTest {
     @Test
     @DisplayName("보호된 경로는 토큰이 없으면 EntryPoint가 동작하고 403 에러를 반환한다")
     void protected_endpoint_returns_403_and_invokes_entrypoint_when_token_missing()  throws Exception {
-        mockMvc.perform(get("/api/user/private/ping"))
+        mockMvc.perform(get("/api/users/v1/private/ping"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 // Response 포맷 검증
@@ -73,7 +79,7 @@ class SecurityConfigTest {
     @Test
     @DisplayName("보호된 경로는 유효한 JWT가 있으면 접근 가능하다 (200 OK)")
     void protected_endpoint_allows_access_with_valid_jwt() throws Exception {
-        mockMvc.perform(get("/api/user/private/ping").with(jwt()))
+        mockMvc.perform(get("/api/users/v1/private/ping").with(jwt()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN))
                 .andExpect(content().string("private-pong"));
@@ -85,12 +91,12 @@ class SecurityConfigTest {
         @RestController
         static class PingController {
 
-            @GetMapping(value = "/api/user/public/ping", produces = MediaType.TEXT_PLAIN_VALUE)
+            @GetMapping(value = "/api/users/v1/public/ping", produces = MediaType.TEXT_PLAIN_VALUE)
             public String publicPing() {
                 return "public-pong";
             }
 
-            @GetMapping(value = "/api/user/private/ping", produces = MediaType.TEXT_PLAIN_VALUE)
+            @GetMapping(value = "/api/users/v1/private/ping", produces = MediaType.TEXT_PLAIN_VALUE)
             public String privatePing() {
                 return "private-pong";
             }

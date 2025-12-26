@@ -1,0 +1,72 @@
+package com.mockio.user_service.kafka.producer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.user_service.dto.UserLifecycleEvent;
+import com.mockio.user_service.kafka.domain.OutboxUserEvent;
+import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Service
+@RequiredArgsConstructor
+public class OutboxUserEventPublishWorker {
+
+    private final OutboxUserEventRepository outboxRepository;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
+    private static final String TOPIC = "user.lifecycle";
+    private static final int MAX_ATTEMPTS = 10;
+    private static final long MAX_BACKOFF_SECONDS = 300; // 5분
+
+    // (1) 락 걸고 가져오기: 짧게 끝내는 트랜잭션
+    @Transactional
+    public List<Long> lockPendingIds(int limit) {
+        return outboxRepository.lockTop100Due().stream()
+                .map(OutboxUserEvent::getId)
+                .toList();
+    }
+
+    // (2) 건별 발행: 각각 독립 커밋
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void publishOne(Long id) {
+        OutboxUserEvent e = outboxRepository.findById(id).orElse(null);
+        if (e == null) return;
+
+        // 방어 로직: 상태/시간 체크
+        if (!e.isPendingLike()) return;
+        if (!e.isDue(OffsetDateTime.now())) return;
+
+        try {
+            var envelope = new UserLifecycleEvent(
+                    e.getEventId(),
+                    e.getAggregateType(),
+                    e.getAggregateId(),
+                    e.getEventType(),
+                    objectMapper.readTree(e.getPayload()), // jsonb String → JsonNode
+                    OffsetDateTime.now()
+            );
+
+            String json = objectMapper.writeValueAsString(envelope);
+
+            kafkaTemplate.send(TOPIC, String.valueOf(e.getAggregateId()), json).get(3, TimeUnit.SECONDS);
+
+
+            e.markSent();
+
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            e.markFailed(ie, MAX_ATTEMPTS, MAX_BACKOFF_SECONDS);
+
+        } catch (Exception ex) {
+            e.markFailed(ex, MAX_ATTEMPTS, MAX_BACKOFF_SECONDS);
+        }
+    }
+}

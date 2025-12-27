@@ -85,19 +85,18 @@ public class UserProfileService {
     /**
      * 유저 탈퇴
      */
-    public void updateProfileStatus(UserProfile userProfile) {
+    public void deleteProfile(UserProfile userProfile) {
         findByKeycloakId(userProfile.getKeycloakId()).changeStatus(UserStatus.DELETED);
+
         UserDeletedEvent event = UserDeletedEvent.of(userProfile.getId(), userProfile.getKeycloakId());
-        String payloadJson;
+
         try {
-            payloadJson = objectMapper.writeValueAsString(event);
+            outboxRepository.save(OutboxUserEvent.pending(event.eventId(), userProfile.getId(), event.eventType(), objectMapper.valueToTree(event)));
+
         } catch (Exception e) {
             throw new IllegalStateException("failed to serialize UserDeletedEvent", e);
         }
-
-        outboxRepository.save(OutboxUserEvent.pending(event.eventId(), userProfile.getId(), event.eventType(), payloadJson));
     }
-
     /**
      * 랜덤 닉네임 생성
      * @return

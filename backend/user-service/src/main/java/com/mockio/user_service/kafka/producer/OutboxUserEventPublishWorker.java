@@ -50,14 +50,13 @@ public class OutboxUserEventPublishWorker {
                     e.getAggregateType(),
                     e.getAggregateId(),
                     e.getEventType(),
-                    objectMapper.readTree(e.getPayload()), // jsonb String → JsonNode
+                    e.getPayload(), // jsonb String → JsonNode
                     OffsetDateTime.now()
             );
 
             String json = objectMapper.writeValueAsString(envelope);
 
             kafkaTemplate.send(TOPIC, String.valueOf(e.getAggregateId()), json).get(3, TimeUnit.SECONDS);
-
 
             e.markSent();
 

@@ -1,26 +1,34 @@
 package com.mockio.auth_service.config;
 
 
+import com.mockio.auth_service.controller.AuthRefreshController;
 import com.mockio.auth_service.dto.KeycloakTokenResponse;
 import com.mockio.auth_service.service.RefreshService;
 import com.mockio.auth_service.util.CookieFactory;
 import com.mockio.common_spring.constant.CommonErrorEnum;
 import com.mockio.common_spring.exception.RefreshTokenInvalidException;
+import com.mockio.common_spring.util.MessageUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,21 +47,41 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 3) denyAll chain
  *    - any other path -> 403
  */
-@SpringBootTest
+@WebMvcTest(controllers = {
+        TestEndpointsController.class,
+        AuthRefreshController.class
+})
 @AutoConfigureMockMvc
+@Import(SecurityConfig.class)
 class SecurityConfigTest {
 
     @Autowired MockMvc mockMvc;
 
-    @Autowired CookieFactory cookieFactory;
+    @MockBean CookieFactory cookieFactory;
 
     @MockBean RefreshService refreshService;
 
-    /**
-     * Test endpoints for security chain verification.
-     * In real service, /api/auth/v1/naver/userinfo will likely be a controller endpoint.
-     * For test isolation, we provide a minimal controller.
-     */
+    @MockBean MessageUtil messageUtil;
+
+    @Autowired
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping handlerMapping;
+
+    @BeforeEach
+    void setUp() {
+        Mockito.when(cookieFactory.refreshCookieName()).thenReturn("refresh_token");
+        Mockito.when(cookieFactory.refreshCookie(anyString(), anyLong()))
+                .thenAnswer(inv -> {
+                    String token = inv.getArgument(0, String.class);
+                    long maxAge = inv.getArgument(1, Long.class); // anyLong()이면 Boxing되어 Long으로 들어옵니다.
+
+                    return ResponseCookie.from("refresh_token", token)
+                            .httpOnly(true)
+                            .path("/")
+                            .maxAge(maxAge)
+                            .build();
+                });
+    }
+
     @RestController
     static class TestEndpoints {
         @GetMapping(value = "/api/auth/v1/naver/userinfo", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -75,7 +103,7 @@ class SecurityConfigTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.httpCode").value(401))
-                .andExpect(jsonPath("$.message", not(isEmptyOrNullString())))
+                .andExpect(jsonPath("$.message").doesNotExist())
                 .andExpect(jsonPath("$.errCode").value(CommonErrorEnum.ERR_REFRESH_TOKEN_MISSING.getCode()))
                 .andExpect(jsonPath("$.errCodeMsg", not(isEmptyOrNullString())))
                 .andExpect(jsonPath("$.timestamp", notNullValue()));
@@ -97,7 +125,7 @@ class SecurityConfigTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.httpCode").value(401))
-                .andExpect(jsonPath("$.message", not(isEmptyOrNullString())))
+                .andExpect(jsonPath("$.message").doesNotExist())
                 // 핸들러에서 ERR_REFRESH_TOKEN_INVALID로 매핑한다고 하셨으니 그 코드로 검증
                 .andExpect(jsonPath("$.errCode").value(CommonErrorEnum.ERR_REFRESH_TOKEN_INVALID.getCode()))
                 .andExpect(jsonPath("$.errCodeMsg", not(isEmptyOrNullString())))
@@ -164,7 +192,6 @@ class SecurityConfigTest {
                 .andExpect(jsonPath("$.message").value("ACCESS_TOKEN_REFRESHED"))
                 .andExpect(jsonPath("$.data.accessToken").value("new-access-token"))
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
-                // 최소한 쿠키 이름/값이 들어가는지 확인(나머지는 환경마다 다를 수 있음)
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString(cookieName + "=rotated-refresh-token")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")));
 

@@ -28,7 +28,7 @@ public class UserLifecycleConsumer {
         try {
             event = parser.parse(messageJson);
         } catch (Exception e) {
-            // ❌ 파싱 불가 → 재시도 의미 없음
+            //파싱 불가 → 재시도 의미 없음
             throw new NonRetryableEventException("Invalid message", e);
         }
 
@@ -44,10 +44,10 @@ public class UserLifecycleConsumer {
         try {
             handleBusiness(event);
         } catch (TransientBusinessException e) {
-            // 🔁 재시도 필요
+            //재시도 필요
             throw e;
         } catch (Exception e) {
-            // ❌ 재시도 의미 없음
+            //재시도 의미 없음
             throw new NonRetryableEventException("Business error", e);
         }
     }

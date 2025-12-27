@@ -2,6 +2,7 @@ package com.mockio.user_service;
 
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -12,23 +13,36 @@ import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTest
 
 @DataJpaTest
 @Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class PostgresDataJpaTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:16")
-                    .withDatabaseName("test")
-                    .withUsername("test")
-                    .withPassword("test");
+    @org.springframework.boot.testcontainers.service.connection.ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
-    @DynamicPropertySource
-    static void props(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
+//    @DynamicPropertySource
+//    static void overrideProps(DynamicPropertyRegistry r) {
+//        r.add("spring.datasource.url", postgres::getJdbcUrl);
+//        r.add("spring.datasource.username", postgres::getUsername);
+//        r.add("spring.datasource.password", postgres::getPassword);
+//    }
 
-        registry.add("spring.flyway.enabled", () -> true);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
-    }
+//    @Container
+//    @org.springframework.boot.testcontainers.service.connection.ServiceConnection
+//    static PostgreSQLContainer<?> postgres =
+//            new PostgreSQLContainer<>("postgres:16-alpine")
+//                    .withDatabaseName("test")
+//                    .withUsername("test")
+//                    .withPassword("test");
+//
+//    @DynamicPropertySource
+//    static void props(DynamicPropertyRegistry registry) {
+//        registry.add("spring.flyway.enabled", () -> true);
+//        registry.add("spring.flyway.locations", () -> "classpath:db/migration");
+//        registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
+//        registry.add("logging.level.org.flywaydb", () -> "DEBUG");
+//        registry.add("logging.level.org.flywaydb", () -> "INFO");
+//        registry.add("logging.level.org.springframework.jdbc.datasource", () -> "INFO");
+//    }
 }

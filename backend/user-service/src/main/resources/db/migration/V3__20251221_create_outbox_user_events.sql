@@ -12,9 +12,10 @@ CREATE TABLE outbox_user_events (
     next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_error TEXT,
     -- 멀티 인스턴스 중복 처리 방지/가시성
-    locked_at IMESTAMPTZ,
+    locked_at TIMESTAMPTZ,
     locked_by  VARCHAR(128),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     sent_at TIMESTAMPTZ,
 
 CONSTRAINT chk_outbox_user_events_status

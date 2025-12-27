@@ -1,11 +1,14 @@
 package com.mockio.user_service.kafka.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
 import com.mockio.user_service.constant.OutboxStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -35,8 +38,9 @@ public class OutboxUserEvent extends BaseTimeEntity {
     private String eventType;
 
     // jsonb 컬럼.
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
-    private String payload;
+    private JsonNode payload;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -48,8 +52,7 @@ public class OutboxUserEvent extends BaseTimeEntity {
     @Column(name = "next_attempt_at", nullable = false)
     private OffsetDateTime nextAttemptAt;
 
-    @Lob
-    @Column(name = "last_error")
+    @Column(name = "last_error", columnDefinition = "text")
     private String lastError;
 
     @Column(name = "locked_at")
@@ -68,7 +71,7 @@ public class OutboxUserEvent extends BaseTimeEntity {
             String aggregateType,
             Long aggregateId,
             String eventType,
-            String payload,
+            JsonNode payload,
             OutboxStatus status,
             int attemptCount,
             OffsetDateTime nextAttemptAt,
@@ -95,7 +98,7 @@ public class OutboxUserEvent extends BaseTimeEntity {
     public static OutboxUserEvent pending(UUID eventId,
                                           Long userId,
                                           String eventType,
-                                          String payloadJson) {
+                                          JsonNode payloadJson) {
         return OutboxUserEvent.builder()
                 .eventId(eventId)
                 .aggregateType("USER")

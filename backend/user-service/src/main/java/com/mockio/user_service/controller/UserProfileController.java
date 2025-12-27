@@ -53,9 +53,14 @@ public class UserProfileController {
         return Response.update(messageUtil.getMessage("response.update"));
     }
 
-    @PatchMapping("/me/update-profile-status")
-    public ResponseEntity<Response<Void>> updateProfileStatus(@CurrentUser UserProfile user) {
-        userProfileService.updateProfileStatus(user);
+    /**
+     * 유저 탈퇴
+     * @param user
+     * @return
+     */
+    @PatchMapping("/me/delete-profile")
+    public ResponseEntity<Response<Void>> deleteProfile(@CurrentUser UserProfile user) {
+        userProfileService.deleteProfile(user);
         return Response.update(messageUtil.getMessage("response.update"));
     }
 

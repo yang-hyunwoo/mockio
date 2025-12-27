@@ -85,7 +85,7 @@ class CustomExceptionHandlerTest {
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.httpCode").value(401))
                 .andExpect(jsonPath("$.message").value("refresh missing"))
-                .andExpect(jsonPath("$.errCode").value("ERR_TOKEN_EXPIRED"))
+                .andExpect(jsonPath("$.errCode").value("ERR_TOKEN_MISSING"))
                 .andExpect(jsonPath("$.errCodeMsg").value("리프레시 토큰이 없습니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
     }

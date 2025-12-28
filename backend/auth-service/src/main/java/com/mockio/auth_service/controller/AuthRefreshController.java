@@ -1,7 +1,7 @@
 package com.mockio.auth_service.controller;
 
-import com.mockio.auth_service.dto.KeycloakTokenResponse;
-import com.mockio.auth_service.dto.RefreshResponse;
+import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
+import com.mockio.auth_service.dto.response.RefreshResponse;
 import com.mockio.auth_service.service.RefreshService;
 import com.mockio.auth_service.util.CookieFactory;
 import com.mockio.common_spring.constant.CommonErrorEnum;
@@ -17,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_TOKEN_EXPIRED;
 
 @RestController
 @RequiredArgsConstructor

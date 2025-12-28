@@ -1,4 +1,4 @@
-package com.mockio.user_service.constant;
+package com.mockio.common_spring.constant;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum OutboxStatus {
     PENDING("대기"),
     PROCESSING("실행중"),
-    SENT("전송"),
+    SENT("완료"),
+    FAILED("실패(재시도 가능)"),
     DEAD("실패");
 
     private final String label;

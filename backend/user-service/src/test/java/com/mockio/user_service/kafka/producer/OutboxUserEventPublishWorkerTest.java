@@ -1,7 +1,7 @@
 package com.mockio.user_service.kafka.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.user_service.constant.OutboxStatus;
+import com.mockio.common_spring.constant.OutboxStatus;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
 import org.apache.kafka.clients.producer.ProducerRecord;

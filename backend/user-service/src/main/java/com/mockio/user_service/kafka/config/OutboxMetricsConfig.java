@@ -1,6 +1,6 @@
 package com.mockio.user_service.kafka.config;
 
-import com.mockio.user_service.constant.OutboxStatus;
+import com.mockio.common_spring.constant.OutboxStatus;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.binder.MeterBinder;

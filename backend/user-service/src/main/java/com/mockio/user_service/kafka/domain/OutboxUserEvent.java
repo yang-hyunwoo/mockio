@@ -2,7 +2,7 @@ package com.mockio.user_service.kafka.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
-import com.mockio.user_service.constant.OutboxStatus;
+import com.mockio.common_spring.constant.OutboxStatus;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

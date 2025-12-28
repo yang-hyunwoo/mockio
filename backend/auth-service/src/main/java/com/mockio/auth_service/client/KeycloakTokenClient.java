@@ -2,8 +2,8 @@ package com.mockio.auth_service.client;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.auth_service.dto.KeycloakErrorResponse;
-import com.mockio.auth_service.dto.KeycloakTokenResponse;
+import com.mockio.auth_service.dto.response.KeycloakErrorResponse;
+import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
 import com.mockio.common_spring.exception.KeycloakUnavailableException;
 import com.mockio.common_spring.exception.RefreshTokenInvalidException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;

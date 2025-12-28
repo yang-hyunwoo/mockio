@@ -1,6 +1,6 @@
 package com.mockio.user_service.kafka.schedule;
 
-import com.mockio.user_service.constant.OutboxStatus;
+import com.mockio.common_spring.constant.OutboxStatus;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

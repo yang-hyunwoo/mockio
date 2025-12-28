@@ -1,7 +1,7 @@
 package com.mockio.user_service.kafka.repository;
 
 
-import com.mockio.user_service.constant.OutboxStatus;
+import com.mockio.common_spring.constant.OutboxStatus;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -57,4 +57,5 @@ public interface OutboxUserEventRepository extends JpaRepository<OutboxUserEvent
                       @Param("status") OutboxStatus status,
                       @Param("attemptCount") int attemptCount,
                       @Param("nextAttemptAt") OffsetDateTime nextAttemptAt);
+
 }

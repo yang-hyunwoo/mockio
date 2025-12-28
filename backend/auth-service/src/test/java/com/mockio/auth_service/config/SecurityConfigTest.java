@@ -2,7 +2,7 @@ package com.mockio.auth_service.config;
 
 
 import com.mockio.auth_service.controller.AuthRefreshController;
-import com.mockio.auth_service.dto.KeycloakTokenResponse;
+import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
 import com.mockio.auth_service.service.RefreshService;
 import com.mockio.auth_service.util.CookieFactory;
 import com.mockio.common_spring.constant.CommonErrorEnum;
@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +24,6 @@ import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyLong;

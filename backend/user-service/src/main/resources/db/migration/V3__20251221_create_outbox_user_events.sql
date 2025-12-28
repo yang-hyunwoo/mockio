@@ -19,7 +19,7 @@ CREATE TABLE outbox_user_events (
     sent_at TIMESTAMPTZ,
 
 CONSTRAINT chk_outbox_user_events_status
-    CHECK (status IN ('PENDING', 'PROCESSING', 'SENT', 'DEAD'))
+    CHECK (status IN ('PENDING', 'PROCESSING', 'SENT', 'DEAD','FAILED'))
 );
 
 -- 처리 대상 조회 최적화: (status + next_attempt_at)

@@ -43,6 +43,7 @@ public class UserProfileService {
     private final OutboxUserEventRepository outboxRepository;
 
     private final ObjectMapper objectMapper;
+
     /**
      * 최초 사용자 로그인 시 userProfile 등록
      * @param jwt
@@ -50,20 +51,15 @@ public class UserProfileService {
     public UserProfileResponse loadOrCreateFromToken(Jwt jwt) {
         String keycloakId = jwt.getSubject();
         String email = jwt.getClaimAsString("email");
-        String fullName = jwt.getClaimAsString("name");
+
+        String fullName = resolveFullName(jwt);
 
         UserProfile userProfile = userRepository.findByKeycloakId(keycloakId)
                 .map(existing -> {
                     existing.updateLastLoginAt();
                     return existing;
                 })
-                .orElseGet(() -> {
-                    String nickname = generateRandomNickname();
-                    UserProfile created = UserProfile.createUserProfile(keycloakId, email, fullName, nickname);
-                    userInterviewPreferenceRepository.save(UserInterviewPreference.createUserInterviewPreference(created));
-                    created.updateLastLoginAt();
-                    return userRepository.save(created);
-                });
+                .orElseGet(() -> createNewProfile(keycloakId, email, fullName));
 
         return UserProfileMapper.from(userProfile);
     }
@@ -97,6 +93,35 @@ public class UserProfileService {
             throw new IllegalStateException("failed to serialize UserDeletedEvent", e);
         }
     }
+
+    private String resolveFullName(Jwt jwt) {
+        String provider = jwt.getClaimAsString("provider");
+
+        // 기본: name
+        String name = jwt.getClaimAsString("name");
+
+        if ("naver".equals(provider)) {
+            String givenName = jwt.getClaimAsString("given_name");
+            if (givenName != null && !givenName.isBlank()) {
+                return givenName;
+            }
+        }
+
+        return name;
+    }
+
+    private UserProfile createNewProfile(String keycloakId, String email, String fullName) {
+        String nickname = generateRandomNickname();
+
+        UserProfile created = UserProfile.createUserProfile(keycloakId, email, fullName, nickname);
+
+        created = userRepository.save(created);
+
+        userInterviewPreferenceRepository.save(UserInterviewPreference.createUserInterviewPreference(created));
+        created.updateLastLoginAt();
+        return created;
+    }
+
     /**
      * 랜덤 닉네임 생성
      * @return
@@ -119,4 +144,6 @@ public class UserProfileService {
         return userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
     }
+
+
 }

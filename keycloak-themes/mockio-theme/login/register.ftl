@@ -28,7 +28,7 @@
                     </#if>
 
                     <form id="kc-register-form" action="${url.registrationAction}" method="post">
-
+                        <input type="hidden" id="provider" name="user.attributes.provider" value="normal" />
                         <!-- 아이디 -->
                         <#assign usernameError = messagesPerField.exists('username')>
                         <div class="mok-field">
@@ -45,40 +45,54 @@
                                 </div>
                             </#if>
                         </div>
-
-                        <!-- 성(lastName) -->
-                        <#assign lastNameError = messagesPerField.exists('lastName')>
+                        <#assign nameError = messagesPerField.exists('name')>
                         <div class="mok-field">
                             <input type="text"
-                                   id="lastName"
-                                   name="lastName"
-                                   placeholder="성"
-                                   value="${(register.formData.lastName!'')}"
-                                   class="<#if lastNameError>mok-input-error</#if>"
+                                   id="name"
+                                   name="name"
+                                   placeholder="이름"
+                                   value="${(register.formData.name!'')}"
+                                   class="<#if nameError>mok-input-error</#if>"
                             />
-                            <#if lastNameError>
+                            <#if nameError>
                                 <div class="mok-field-error-text">
-                                    ${kcSanitize(messagesPerField.get('lastName'))?no_esc}
+                                    ${kcSanitize(messagesPerField.get('name'))?no_esc}
                                 </div>
                             </#if>
                         </div>
+                        <!-- 성(lastName) -->
+<#--                        <#assign lastNameError = messagesPerField.exists('lastName')>-->
+<#--                        <div class="mok-field">-->
+<#--                            <input type="text"-->
+<#--                                   id="lastName"-->
+<#--                                   name="lastName"-->
+<#--                                   placeholder="성"-->
+<#--                                   value="${(register.formData.lastName!'')}"-->
+<#--                                   class="<#if lastNameError>mok-input-error</#if>"-->
+<#--                            />-->
+<#--                            <#if lastNameError>-->
+<#--                                <div class="mok-field-error-text">-->
+<#--                                    ${kcSanitize(messagesPerField.get('lastName'))?no_esc}-->
+<#--                                </div>-->
+<#--                            </#if>-->
+<#--                        </div>-->
 
                         <!-- 이름(firstName) -->
-                        <#assign firstNameError = messagesPerField.exists('firstName')>
-                        <div class="mok-field">
-                            <input type="text"
-                                   id="firstName"
-                                   name="firstName"
-                                   placeholder="이름"
-                                   value="${(register.formData.firstName!'')}"
-                                   class="<#if firstNameError>mok-input-error</#if>"
-                            />
-                            <#if firstNameError>
-                                <div class="mok-field-error-text">
-                                    ${kcSanitize(messagesPerField.get('firstName'))?no_esc}
-                                </div>
-                            </#if>
-                        </div>
+<#--                        <#assign firstNameError = messagesPerField.exists('firstName')>-->
+<#--                        <div class="mok-field">-->
+<#--                            <input type="text"-->
+<#--                                   id="firstName"-->
+<#--                                   name="firstName"-->
+<#--                                   placeholder="이름"-->
+<#--                                   value="${(register.formData.firstName!'')}"-->
+<#--                                   class="<#if firstNameError>mok-input-error</#if>"-->
+<#--                            />-->
+<#--                            <#if firstNameError>-->
+<#--                                <div class="mok-field-error-text">-->
+<#--                                    ${kcSanitize(messagesPerField.get('firstName'))?no_esc}-->
+<#--                                </div>-->
+<#--                            </#if>-->
+<#--                        </div>-->
 
                         <!-- 이메일 -->
                         <#assign emailError = messagesPerField.exists('email')>

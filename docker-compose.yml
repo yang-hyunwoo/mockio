@@ -13,7 +13,6 @@ services:
     environment:
       KC_LOG_LEVEL: debug
       KC_LOG_CONSOLE_COLOR: true
-
 networks:
   backend:
     driver: bridge

@@ -11,6 +11,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.EnumSet;
 import java.util.UUID;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -95,6 +96,22 @@ public class OutboxUserEvent extends BaseTimeEntity {
         this.sentAt = sentAt;
     }
 
+    public static OutboxUserEvent createNew(UUID eventId,
+                                          Long userId,
+                                          String eventType,
+                                          JsonNode payloadJson) {
+        return OutboxUserEvent.builder()
+                .eventId(eventId)
+                .aggregateType("USER")
+                .aggregateId(userId)
+                .eventType(eventType)
+                .payload(payloadJson)
+                .status(OutboxStatus.NEW)
+                .attemptCount(0)
+                .nextAttemptAt(OffsetDateTime.now())
+                .build();
+    }
+
     public static OutboxUserEvent pending(UUID eventId,
                                           Long userId,
                                           String eventType,
@@ -115,14 +132,16 @@ public class OutboxUserEvent extends BaseTimeEntity {
         return !nextAttemptAt.isAfter(now);
     }
 
-    public boolean isPendingLike() {
-        return status == OutboxStatus.PENDING || status == OutboxStatus.PROCESSING;
+    public boolean isReadyToPublish() {
+        return status == OutboxStatus.PROCESSING;
     }
 
     public void markProcessing(String lockerId) {
-        this.status = OutboxStatus.PROCESSING;
-        this.lockedAt = OffsetDateTime.now();
-        this.lockedBy = lockerId;
+        if (CAN_MARK_PROCESSING.contains(this.status)) {
+            this.status = OutboxStatus.PROCESSING;
+            this.lockedAt = OffsetDateTime.now();
+            this.lockedBy = lockerId;
+        }
     }
 
     public void markSent() {
@@ -163,4 +182,6 @@ public class OutboxUserEvent extends BaseTimeEntity {
         if (s == null) return null;
         return s.length() <= maxLen ? s : s.substring(0, maxLen);
     }
+
+    private static final EnumSet<OutboxStatus> CAN_MARK_PROCESSING = EnumSet.of(OutboxStatus.NEW, OutboxStatus.FAILED);
 }

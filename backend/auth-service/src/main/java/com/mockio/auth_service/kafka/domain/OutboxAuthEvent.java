@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "outbox_auth_events")
 @Entity
 public class OutboxAuthEvent extends BaseTimeEntity {
 

@@ -43,7 +43,7 @@ class OutboxUserEventPublishWorkerTest {
 
     @BeforeEach
     void setUp() {
-        event = OutboxUserEvent.pending(
+        event = OutboxUserEvent.createNew(
                 UUID.randomUUID(),
                 10L,
                 "USER_DELETED",
@@ -57,7 +57,7 @@ class OutboxUserEventPublishWorkerTest {
     @Test
     void publishOne_success_marksSent() throws Exception {
         given(outboxRepository.findById(id)).willReturn(Optional.of(event));
-
+        event.markProcessing("test-worker");
         // json이 null이 되지 않도록 강제
         doReturn("{\"ok\":true}").when(objectMapper).writeValueAsString(any());
 
@@ -84,6 +84,7 @@ class OutboxUserEventPublishWorkerTest {
         given(kafkaTemplate.send(anyString(), anyString(), anyString()))
                 .willReturn(CompletableFuture.failedFuture(new RuntimeException("kafka down")));
 
+        event.markProcessing("test-worker");
         OffsetDateTime before = event.getNextAttemptAt();
         int beforeAttempt = event.getAttemptCount();
 
@@ -102,6 +103,7 @@ class OutboxUserEventPublishWorkerTest {
         // given
         // attemptCount를 9로 만들어서 다음 실패에 DEAD가 되도록 유도 (MAX_ATTEMPTS=10)
         ReflectionTestUtils.setField(event, "attemptCount", 9);
+        event.markProcessing("test-worker");
 
         given(outboxRepository.findById(id)).willReturn(Optional.of(event));
 
@@ -119,6 +121,7 @@ class OutboxUserEventPublishWorkerTest {
     @Test
     void publishOne_notDue_doesNotSend() {
         // given
+        event.markProcessing("test-worker");
         ReflectionTestUtils.setField(event, "nextAttemptAt", OffsetDateTime.now().plusMinutes(10));
         given(outboxRepository.findById(id)).willReturn(Optional.of(event));
 
@@ -127,6 +130,6 @@ class OutboxUserEventPublishWorkerTest {
 
         // then
         then(kafkaTemplate).should(never()).send(anyString(), anyString(), anyString());
-        assertThat(event.getStatus()).isEqualTo(OutboxStatus.PENDING);
+        assertThat(event.getStatus()).isEqualTo(OutboxStatus.PROCESSING);
     }
 }

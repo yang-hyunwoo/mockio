@@ -159,7 +159,7 @@ class UserProfileServiceTest {
         userProfileService.updateMyProfile(currentUser, req);
 
         // then
-        then(foundProfile).should().updateProfile("newNick", 1L ,"안녕하세요", ProfileVisibility.PUBLIC);
+        then(foundProfile).should().applyPatch("newNick", 1L ,"안녕하세요", ProfileVisibility.PUBLIC);
         then(userRepository).should(never()).save(any());
     }
 

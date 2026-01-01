@@ -2,6 +2,7 @@ package com.mockio.auth_service.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.auth_service.constant.EnqueueResult;
 import com.mockio.auth_service.kafka.domain.OutboxAuthEvent;
 import com.mockio.auth_service.kafka.dto.KeycloakDisableUserPayload;
 import com.mockio.auth_service.repository.OutboxAuthEventRepository;
@@ -22,8 +23,13 @@ public class OutboxAuthEnqueueService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void enqueueKeycloakDisable(UUID eventId, String keycloakUserId, String reason) {
+    public EnqueueResult enqueueKeycloakDisable(UUID eventId, String keycloakUserId, String reason) {
         String idempotencyKey =  "KEYCLOAK_DISABLE_USER:" + keycloakUserId;
+
+        // 1) 사전 체크
+        if (outboxRepo.existsByIdempotencyKey(idempotencyKey)) {
+            return EnqueueResult.ALREADY_ENQUEUED;
+        }
 
         KeycloakDisableUserPayload payload = new KeycloakDisableUserPayload(eventId, keycloakUserId, reason);
         JsonNode jsonNode = objectMapper.valueToTree(payload);
@@ -34,13 +40,37 @@ public class OutboxAuthEnqueueService {
                     .aggregateId(keycloakUserId)
                     .idempotencyKey(idempotencyKey)
                     .payload(jsonNode)
-                    .status(OutboxStatus.PENDING)
+                    .status(OutboxStatus.NEW)
                     .maxAttempts(10)
                     .nextAttemptAt(OffsetDateTime.now())
                     .build());
+
+            return EnqueueResult.ENQUEUED;
+
         } catch (DataIntegrityViolationException e) {
-            // 동일 유저 disable 작업이 이미 적재된 경우 -> 멱등 처리
+            if (isUniqueViolation(e)) {
+                // 멱등: 이미 누군가 먼저 적재함
+                return EnqueueResult.ALREADY_ENQUEUED;
+            }
+            throw e;
         }
+    }
+
+    private boolean isUniqueViolation(DataIntegrityViolationException e) {
+        Throwable t = e;
+        while (t != null) {
+            // Postgres의 경우 org.postgresql.util.PSQLException
+            if (t.getClass().getName().equals("org.postgresql.util.PSQLException")) {
+                try {
+                    String sqlState = (String) t.getClass().getMethod("getSQLState").invoke(t);
+                    return "23505".equals(sqlState); //unique_violation
+                } catch (Exception ignore) {
+                    return false;
+                }
+            }
+            t = t.getCause();
+        }
+        return false;
     }
 
 }

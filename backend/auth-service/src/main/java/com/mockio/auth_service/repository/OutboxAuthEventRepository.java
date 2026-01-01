@@ -16,15 +16,15 @@ public interface OutboxAuthEventRepository extends JpaRepository<OutboxAuthEvent
     Optional<OutboxAuthEvent> findByIdempotencyKey(String idempotencyKey);
 
     @Query(value = """
-        SELECT *
-        FROM outbox_auth_events
-        WHERE status IN ('PENDING', 'FAILED')
-          AND next_attempt_at <= now()
-        ORDER BY next_attempt_at ASC, created_at ASC
-        LIMIT 100
-        FOR UPDATE SKIP LOCKED
-        """, nativeQuery = true)
-    List<OutboxAuthEvent> lockTop100Due();
+    SELECT *
+    FROM outbox_auth_events
+    WHERE status IN ('NEW','PENDING','FAILED') 
+      AND next_attempt_at <= now()
+    ORDER BY next_attempt_at ASC, created_at ASC
+    LIMIT :limit
+    FOR UPDATE SKIP LOCKED
+    """, nativeQuery = true)
+    List<OutboxAuthEvent> lockTopDue(@Param("limit") int limit);
 
     @Modifying
     @Query("""
@@ -48,7 +48,7 @@ public interface OutboxAuthEventRepository extends JpaRepository<OutboxAuthEvent
     @Modifying
     @Query("""
         update OutboxAuthEvent e
-           set e.status = 'SUCCEEDED',
+           set e.status = 'SENT',
                e.lastError = null,
                e.lockedAt = null,
                e.lockedBy = null,
@@ -71,4 +71,6 @@ public interface OutboxAuthEventRepository extends JpaRepository<OutboxAuthEvent
     int markProcessing(@Param("id") Long id,
                        @Param("lockedBy") String lockedBy,
                        @Param("now") OffsetDateTime now);
+
+    boolean existsByIdempotencyKey(String IdempotencyKey);
 }

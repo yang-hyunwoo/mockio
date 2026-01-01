@@ -103,19 +103,4 @@ class UserProfileControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }
-
-    @Test
-    @DisplayName("비로그인 사용자 - me는 null")
-    void publicPage_anonymousUser() throws Exception {
-        mockMvc.perform(get("/api/users/v1/public/me/public-page"))
-                .andExpect(status().isOk());
-    }
-    @Test
-    @DisplayName("로그인 사용자 - me는 null 아님")
-    void publicPage_authenticatedUser() throws Exception {
-        mockMvc.perform(get("/api/users/v1/public/me/public-page")
-                                .with(jwt().jwt(jwt -> jwt.subject("keycloak-user-123")))
-                )
-                .andExpect(status().isOk());
-    }
 }

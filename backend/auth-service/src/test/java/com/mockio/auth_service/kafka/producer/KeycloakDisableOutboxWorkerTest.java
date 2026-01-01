@@ -1,9 +1,14 @@
 package com.mockio.auth_service.kafka.producer;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.auth_service.kafka.domain.OutboxAuthEvent;
+import com.mockio.auth_service.kafka.dto.OutboxAuthEventTask;
 import com.mockio.auth_service.kafka.processor.KeycloakDisableProcessor;
+import com.mockio.auth_service.kafka.service.OutboxResultService;
+import com.mockio.auth_service.kafka.service.OutboxTxService;
 import com.mockio.auth_service.repository.OutboxAuthEventRepository;
 import com.mockio.common_spring.constant.OutboxStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,66 +26,87 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 class KeycloakDisableOutboxWorkerTest {
 
-    @Mock OutboxAuthEventRepository outboxRepo;
+    @Mock OutboxTxService outboxTxService;
     @Mock KeycloakDisableProcessor processor;
-
+    @Mock OutboxResultService outboxResultService;
+    @Mock ObjectMapper ObjectMapper;
     KeycloakDisableOutboxWorker worker;
-
+    JsonNode payload;
+    JsonNode payload2;
     @BeforeEach
-    void setUp() {
-        // 테스트용 workerId 고정
-        worker = new KeycloakDisableOutboxWorker(outboxRepo, processor, "auth-test-worker");
+    void setUp() throws JsonProcessingException {
+        worker = new KeycloakDisableOutboxWorker(outboxTxService, processor, outboxResultService);
+        ObjectMapper = new ObjectMapper();
+
+        payload = ObjectMapper.readTree("""
+            {
+              "eventId": "x",
+              "keycloakUserId": "kc-123",
+              "reason": "USER_DELETED"
+            }
+            """);
+        payload2 = ObjectMapper.readTree("""
+            {
+              "eventId": "x",
+              "keycloakUserId": "kc-999",
+              "reason": "USER_DELETED"
+            }
+            """);
+        // workerId가 필드로 있다면 테스트에서 고정 (필드명이 다르면 바꾸세요)
+        ReflectionTestUtils.setField(worker, "workerId", "auth-test-worker");
     }
 
     @Test
-    void run_picksDueEvents_marksProcessing_thenProcesses() {
+    void run_fetchesTasks_callsProcessor_thenMarksSucceeded() throws JsonProcessingException {
+
         // given
-        OutboxAuthEvent e = OutboxAuthEvent.builder()
-                .eventType("KEYCLOAK_DISABLE_USER")
-                .aggregateId("kc-123")
-                .idempotencyKey("KEYCLOAK_DISABLE_USER:kc-123")
-                .payload(mock(JsonNode.class))
-                .status(OutboxStatus.PENDING)
-                .maxAttempts(10)
-                .nextAttemptAt(OffsetDateTime.now().minusSeconds(1))
-                .build();
+        OutboxAuthEventTask task = new OutboxAuthEventTask(
+                1L,
+                "kc-123",
+                payload,
+                0,
+                10
+        );
 
-        ReflectionTestUtils.setField(e, "id", 1L);
-
-        given(outboxRepo.lockTop100Due()).willReturn(List.of(e));
+        given(outboxTxService.fetchAndMarkProcessing(100, "auth-test-worker"))
+                .willReturn(List.of(task));
 
         // when
         worker.run();
 
         // then
-        then(outboxRepo).should().markProcessing(eq(1L), eq("auth-test-worker"), any(OffsetDateTime.class));
-        then(processor).should().process(eq(1L), anyString());
+        then(processor).should().callExternal(task.payload().toString());
+        then(outboxResultService).should().markSucceeded(eq(1L));
+        then(outboxResultService).should(never()).markFailedOrDead(anyLong(), anyInt(), anyInt(), anyString());
     }
 
     @Test
     void run_whenProcessorThrows_marksFailedOrDead() {
         // given
-        OutboxAuthEvent e = OutboxAuthEvent.builder()
-                .eventType("KEYCLOAK_DISABLE_USER")
-                .aggregateId("kc-999")
-                .idempotencyKey("KEYCLOAK_DISABLE_USER:kc-999")
-                .payload(mock(JsonNode.class))
-                .status(OutboxStatus.PENDING)
-                .maxAttempts(10)
-                .nextAttemptAt(OffsetDateTime.now().minusSeconds(1))
-                .build();
+        OutboxAuthEventTask task = new OutboxAuthEventTask(
+                2L,
+                "kc-999",
+                payload2,
+                0,
+                10
+        );
 
-        ReflectionTestUtils.setField(e, "id", 2L);
-        ReflectionTestUtils.setField(e, "attemptCount", 0);
-        ReflectionTestUtils.setField(e, "maxAttempts", 10);
+        given(outboxTxService.fetchAndMarkProcessing(100, "auth-test-worker"))
+                .willReturn(List.of(task));
 
-        given(outboxRepo.lockTop100Due()).willReturn(List.of(e));
-        willThrow(new RuntimeException("boom")).given(processor).process(eq(2L), anyString());
+        willThrow(new RuntimeException("boom"))
+                .given(processor).callExternal(task.payload().toString());
 
         // when
         worker.run();
 
         // then
-        then(processor).should().markFailedOrDead(eq(2L), eq(0), eq(10), contains("boom"));
+        then(outboxResultService).should().markFailedOrDead(
+                eq(2L),
+                eq(0),
+                eq(10),
+                contains("boom")
+        );
+        then(outboxResultService).should(never()).markSucceeded(anyLong());
     }
 }

@@ -1,26 +1,28 @@
-CREATE TABLE outbox_user_events (
-    id BIGSERIAL PRIMARY KEY,
-    event_id UUID  NOT NULL UNIQUE,
-    aggregate_type VARCHAR(50) NOT NULL,   -- e.g. USER
-    aggregate_id  BIGINT NOT NULL,   -- userId
-    event_type VARCHAR(50) NOT NULL,   -- USER_DELETED
-    payload JSONB  NOT NULL,
-    -- 운영 권장 상태: PENDING / PROCESSING / SENT / DEAD
-    status  VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+CREATE TABLE outbox_user_events
+(
+    id              BIGSERIAL PRIMARY KEY,
+    event_id        UUID        NOT NULL UNIQUE,
+    aggregate_type  VARCHAR(50) NOT NULL, -- e.g. USER
+    aggregate_id    BIGINT      NOT NULL, -- userId
+    event_type      VARCHAR(50) NOT NULL, -- USER_DELETED
+    payload         JSONB       NOT NULL,
+    --  상태: NEW / PENDING / PROCESSING / SENT / FAILED / DEAD
+    status          VARCHAR(20) NOT NULL DEFAULT 'NEW',
     -- 재시도/백오프
-    attempt_count INT NOT NULL DEFAULT 0,
+    attempt_count   INT         NOT NULL DEFAULT 0,
     next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_error TEXT,
+    last_error      TEXT,
     -- 멀티 인스턴스 중복 처리 방지/가시성
-    locked_at TIMESTAMPTZ,
-    locked_by  VARCHAR(128),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    sent_at TIMESTAMPTZ,
+    locked_at       TIMESTAMPTZ,
+    locked_by       VARCHAR(128),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    sent_at         TIMESTAMPTZ,
 
-CONSTRAINT chk_outbox_user_events_status
-    CHECK (status IN ('PENDING', 'PROCESSING', 'SENT', 'DEAD','FAILED'))
+    CONSTRAINT chk_outbox_user_events_status
+        CHECK (status IN ('NEW', 'PENDING', 'PROCESSING', 'SENT', 'DEAD', 'FAILED'))
 );
+
 
 -- 처리 대상 조회 최적화: (status + next_attempt_at)
 CREATE INDEX idx_outbox_user_events_status_next_attempt_at

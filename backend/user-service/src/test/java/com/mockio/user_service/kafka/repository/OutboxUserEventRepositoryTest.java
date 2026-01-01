@@ -72,7 +72,7 @@ class OutboxUserEventRepositoryTest extends PostgresDataJpaTest {
 
         Future<Set<Long>> f1 = pool.submit(() ->
                 tx1.execute(status -> {
-                    List<OutboxUserEvent> locked = repo.lockTop100Due();
+                    List<OutboxUserEvent> locked = repo.lockTopDue(100);
                     Set<Long> ids = locked.stream().map(OutboxUserEvent::getId).collect(Collectors.toSet());
 
                     // tx1이 row-lock을 잡은 시점
@@ -93,7 +93,7 @@ class OutboxUserEventRepositoryTest extends PostgresDataJpaTest {
             tx1Locked.await(3, TimeUnit.SECONDS);
 
             return tx2.execute(status -> {
-                List<OutboxUserEvent> locked = repo.lockTop100Due();
+                List<OutboxUserEvent> locked = repo.lockTopDue(100);
                 return locked.stream().map(OutboxUserEvent::getId).collect(Collectors.toSet());
             });
         });

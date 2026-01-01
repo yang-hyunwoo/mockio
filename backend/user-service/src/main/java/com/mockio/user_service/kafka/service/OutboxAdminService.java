@@ -24,13 +24,7 @@ public class OutboxAdminService {
         for (OutboxUserEvent e : dead) {
             if (count >= max) break;
 
-            int updated = repo.resetForRetry(
-                    e.getId(),
-                    OutboxStatus.PENDING,
-                    0,
-                    OffsetDateTime.now()
-            );
-
+            int updated = repo.resetForRetry(e.getId(), OutboxStatus.PENDING, 0, OffsetDateTime.now());
             count += updated;
         }
 

@@ -7,8 +7,8 @@ java {
 }
 
 dependencies {
-	compileOnly 'org.projectlombok:lombok:1.18.32'
-	annotationProcessor 'org.projectlombok:lombok:1.18.32'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	api 'jakarta.validation:jakarta.validation-api:3.0.2'
 	api 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
 }

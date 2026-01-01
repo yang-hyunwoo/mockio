@@ -1,16 +1,13 @@
 package com.mockio.auth_service.kafka.producer;
 
-import com.mockio.auth_service.kafka.domain.OutboxAuthEvent;
+import com.mockio.auth_service.kafka.dto.OutboxAuthEventTask;
 import com.mockio.auth_service.kafka.processor.KeycloakDisableProcessor;
-import com.mockio.auth_service.repository.OutboxAuthEventRepository;
-import lombok.RequiredArgsConstructor;
+import com.mockio.auth_service.kafka.service.OutboxResultService;
+import com.mockio.auth_service.kafka.service.OutboxTxService;
+import com.mockio.auth_service.util.P6SpyLogToggle;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,52 +15,50 @@ import java.util.UUID;
 @Component
 public class KeycloakDisableOutboxWorker {
 
-    private final OutboxAuthEventRepository outboxRepo;
+    private final OutboxTxService txService;
     private final KeycloakDisableProcessor processor;
+    private final OutboxResultService resultService;
 
-    private final String workerId ;
+    private final String workerId;
 
-    @Autowired
-    public KeycloakDisableOutboxWorker(OutboxAuthEventRepository outboxRepo,
-                                       KeycloakDisableProcessor processor) {
-        this.outboxRepo = outboxRepo;
+    public KeycloakDisableOutboxWorker(
+            OutboxTxService txService,
+            KeycloakDisableProcessor processor,
+            OutboxResultService resultService
+    ) {
+        this.txService = txService;
         this.processor = processor;
+        this.resultService = resultService;
         this.workerId = "auth-" + UUID.randomUUID();
     }
 
-    // 테스트에서만 직접 new 로 호출
-    KeycloakDisableOutboxWorker(OutboxAuthEventRepository outboxRepo,
-                                KeycloakDisableProcessor processor,
-                                String workerId) {
-        this.outboxRepo = outboxRepo;
-        this.processor = processor;
-        this.workerId = workerId;
-    }
-
     @Scheduled(fixedDelay = 10_000)
-    @Transactional
     public void run() {
-        List<OutboxAuthEvent> due = outboxRepo.lockTop100Due();
-        if (due.isEmpty()) return;
+        P6SpyLogToggle.withoutP6Spy(() -> {
+            // 1단계 (TX): due 조회 + PROCESSING 마킹 후 Task 목록 반환
+            List<OutboxAuthEventTask> tasks = txService.fetchAndMarkProcessing(100, workerId);
+            if (tasks.isEmpty()) return;
 
-        OffsetDateTime now = OffsetDateTime.now();
+            // 2단계 (No TX): 외부 호출
+            for (OutboxAuthEventTask task : tasks) {
+                try {
+                    processor.callExternal(task.payload().toString());
 
-        for (OutboxAuthEvent e : due) {
-            outboxRepo.markProcessing(e.getId(), workerId, now);
+                    // 3단계 (REQUIRES_NEW): 성공 업데이트
+                    resultService.markSucceeded(task.id());
 
-            try {
-                processor.process(e.getId(), e.getPayload().toString());
-            } catch (Exception ex) {
-                log.warn("Keycloak disable failed. outboxId={}, aggregateId={}",
-                        e.getId(), e.getAggregateId(), ex);
+                } catch (Exception ex) {
+                    log.warn("Keycloak disable failed. outboxId={}, aggregateId={}", task.id(), task.aggregateId(), ex);
 
-                processor.markFailedOrDead(
-                        e.getId(),
-                        e.getAttemptCount(),
-                        e.getMaxAttempts(),
-                        ex.getMessage()
-                );
+                    // 3단계 (REQUIRES_NEW): 실패/DEAD 업데이트
+                    resultService.markFailedOrDead(
+                            task.id(),
+                            task.attemptCount(),
+                            task.maxAttempts(),
+                            ex.getMessage()
+                    );
+                }
             }
-        }
+        });
     }
 }

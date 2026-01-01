@@ -5,17 +5,21 @@ import com.mockio.user_service.dto.UserLifecycleEvent;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OutboxUserEventPublishWorker {
 
     private final OutboxUserEventRepository outboxRepository;
@@ -29,7 +33,14 @@ public class OutboxUserEventPublishWorker {
     // (1) 락 걸고 가져오기: 짧게 끝내는 트랜잭션
     @Transactional
     public List<Long> lockPendingIds(int limit) {
-        return outboxRepository.lockTop100Due().stream()
+        String lockerId = workerId();
+        List<OutboxUserEvent> events = outboxRepository.lockTopDue(100);
+
+        for (OutboxUserEvent e : events) {
+            e.markProcessing(lockerId);
+        }
+
+        return events.stream()
                 .map(OutboxUserEvent::getId)
                 .toList();
     }
@@ -38,10 +49,11 @@ public class OutboxUserEventPublishWorker {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishOne(Long id) {
         OutboxUserEvent e = outboxRepository.findById(id).orElse(null);
+        log.info("status={}, nextAttemptAt={}", e.getStatus(), e.getNextAttemptAt());
         if (e == null) return;
 
         // 방어 로직: 상태/시간 체크
-        if (!e.isPendingLike()) return;
+        if (!e.isReadyToPublish()) return;
         if (!e.isDue(OffsetDateTime.now())) return;
 
         try {
@@ -67,5 +79,20 @@ public class OutboxUserEventPublishWorker {
         } catch (Exception ex) {
             e.markFailed(ex, MAX_ATTEMPTS, MAX_BACKOFF_SECONDS);
         }
+    }
+
+    /**
+     * wworkerId
+     * @return
+     */
+    private String workerId() {
+        String host;
+        try {
+            host = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            host = "unknown-host";
+        }
+        long pid = ProcessHandle.current().pid();
+        return host + "-" + pid;
     }
 }

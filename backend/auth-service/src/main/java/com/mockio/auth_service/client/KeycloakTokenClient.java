@@ -80,7 +80,7 @@ public class KeycloakTokenClient {
         }
     }
 
-    protected  KeycloakTokenResponse refreshFallback(String refreshToken, Throwable t) {
+    protected KeycloakTokenResponse refreshFallback(String refreshToken, Throwable t) {
         // refresh는 대체 성공 응답이 불가능 → 빠르게 장애로 반환
         throw new KeycloakUnavailableException("Keycloak refresh temporarily unavailable (circuit open)", t);
     }
@@ -100,4 +100,5 @@ public class KeycloakTokenClient {
             return null;
         }
     }
+
 }

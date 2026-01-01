@@ -14,15 +14,15 @@ import java.util.List;
 public interface OutboxUserEventRepository extends JpaRepository<OutboxUserEvent, Long> {
 
     @Query(value = """
-        SELECT *
-        FROM outbox_user_events
-        WHERE status IN ('PENDING', 'PROCESSING')
-          AND next_attempt_at <= now()
-        ORDER BY next_attempt_at ASC, created_at ASC
-        LIMIT 100
-        FOR UPDATE SKIP LOCKED
-        """, nativeQuery = true)
-    List<OutboxUserEvent> lockTop100Due();
+    SELECT *
+    FROM outbox_user_events
+    WHERE status IN ('NEW','PENDING','FAILED') 
+      AND next_attempt_at <= now()
+    ORDER BY next_attempt_at ASC, created_at ASC
+    LIMIT :limit
+    FOR UPDATE SKIP LOCKED
+    """, nativeQuery = true)
+    List<OutboxUserEvent> lockTopDue(@Param("limit") int limit);
 
     @Query("""
         select count(e)

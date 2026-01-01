@@ -14,9 +14,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Optional;
+
+import static java.util.Optional.*;
 
 @Entity
 @Getter
@@ -113,13 +117,47 @@ public class UserProfile extends BaseTimeEntity {
     }
 
     /** 프로필 수정 */
-    public void updateProfile(String nickname,
-                              Long profileImageId ,
-                              String bio,
-                              ProfileVisibility visibility) {
+    public void applyPatch(String nickname,
+                           Long profileImageId,
+                           String bio,
+                           ProfileVisibility visibility) {
+
+        ofNullable(nickname).filter(s -> !s.isBlank()).ifPresent(this::changeNickname);
+        ofNullable(profileImageId).ifPresent(this::changeProfileImage);
+        ofNullable(bio).ifPresent(this::changeBio);
+        ofNullable(visibility).ifPresent(this::changeVisibility);
+
+    }
+
+    /**
+     * 닉네임 변경
+     * @param nickname
+     */
+    public void changeNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    /**
+     * 프로필 이미지 id 변경
+     * @param profileImageId
+     */
+    public void changeProfileImage(Long profileImageId) {
         this.profileImageId = profileImageId;
+    }
+
+    /**
+     * 자기소개 변경
+     * @param bio
+     */
+    public void changeBio(String bio) {
         this.bio = bio;
+    }
+
+    /**
+     * 공개 여부 변경
+     * @param visibility
+     */
+    public void changeVisibility(ProfileVisibility visibility) {
         this.visibility = visibility;
     }
 
@@ -128,16 +166,17 @@ public class UserProfile extends BaseTimeEntity {
         this.status = status;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         UserProfile that = (UserProfile) o;
-        return Objects.equals(id, that.id) && Objects.equals(profileImageId, that.profileImageId);
+        return Objects.equals(id, that.id) && Objects.equals(keycloakId, that.keycloakId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, profileImageId);
+        return Objects.hash(id, keycloakId);
     }
 
     @Override

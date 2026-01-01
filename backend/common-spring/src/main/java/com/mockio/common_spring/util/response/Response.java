@@ -2,14 +2,13 @@ package com.mockio.common_spring.util.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mockio.common_core.error.ErrorCode;
-import com.mockio.common_spring.util.MessageUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
@@ -43,7 +42,7 @@ public class Response<T> {
 
     @Schema(description = "시간")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
 
     private static final String SUCCESS_CODE = "SUCCESS";
 
@@ -58,7 +57,7 @@ public class Response<T> {
      * @param <T>
      */
     public static <T> ResponseEntity<Response<T>> error(int httpStatus, String message, ErrorCode errorCode, T messageOrData) {
-        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), messageOrData, LocalDateTime.now()));
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), messageOrData, OffsetDateTime.now()));
     }
 
     /**
@@ -69,7 +68,7 @@ public class Response<T> {
      * @return
      */
     public static ResponseEntity<Response<ValidationErrorResponse>> validationError(int httpStatus, String message,ErrorCode errorCode , String field) {
-        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), new ValidationErrorResponse(field, message), LocalDateTime.now()));
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), new ValidationErrorResponse(field, message), OffsetDateTime.now()));
     }
 
     public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(int httpStatus, String message, ErrorCode errorCode, List<ValidationErrorResponse> errors) {
@@ -81,7 +80,7 @@ public class Response<T> {
                         errorCode.getCode(),
                         errorCode.getMessage(),
                         errors,
-                        LocalDateTime.now()
+                        OffsetDateTime.now()
                 )
         );
     }
@@ -115,26 +114,26 @@ public class Response<T> {
     }
 
     protected static Response<String> error(int httpStatus, ErrorCode errorCode ,String message) {
-        return new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), null, LocalDateTime.now());
+        return new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), null, OffsetDateTime.now());
     }
 
     protected static <T> Response<T> successRead(String message, T data) {
-        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,data,LocalDateTime.now());
+        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,data,OffsetDateTime.now());
     }
 
     protected static <T> Response<T> successCreate(String message, T data) {
-        return new Response<>(SUCCESS_CODE, HttpStatus.CREATED.value(), message,null,null, data,LocalDateTime.now());
+        return new Response<>(SUCCESS_CODE, HttpStatus.CREATED.value(), message,null,null, data,OffsetDateTime.now());
     }
 
     protected static <T> Response<T> successUpdate(String message, T data) {
-        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,LocalDateTime.now());
+        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,OffsetDateTime.now());
     }
     protected static <T> Response<T> successUpdate(String message) {
-        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,null,LocalDateTime.now());
+        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,null,OffsetDateTime.now());
     }
 
     protected static <T> Response<T> successDelete(String message, T data) {
-        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,LocalDateTime.now());
+        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,OffsetDateTime.now());
     }
 
     @Override

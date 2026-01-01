@@ -1,3 +1,17 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        mavenCentral()
+    }
+}
+
 rootProject.name = "mockio"
 
 include "gateway"
@@ -21,4 +35,4 @@ project(":common-jpa").projectDir = file("backend/common-jpa")
 include "common-security"
 project(":common-security").projectDir = file("backend/common-security")
 
-include 'naver-keycloak-spi'
+include "naver-keycloak-spi"

@@ -33,9 +33,8 @@ public class UserLifecycleConsumer {
         }
 
         try {
-            processedEventRepository.save(
-                    ProcessedEvent.of(event.eventId(), CONSUMER_NAME)
-            );
+            processedEventRepository.save(ProcessedEvent.of(event.eventId(), CONSUMER_NAME));
+
         } catch (DataIntegrityViolationException e) {
             // 이미 처리됨 → 정상 종료(ACK)
             return;

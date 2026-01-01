@@ -21,7 +21,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users/v1")
+@RequestMapping("/api/users/v1/me")
 @RequiredArgsConstructor
 public class UserProfileController {
 
@@ -33,7 +33,7 @@ public class UserProfileController {
      * @param jwt
      * @return
      */
-    @PostMapping("/me/sync")
+    @PostMapping("/sync")
     public ResponseEntity<Response<UserProfileResponse>> syncMyProfile(@AuthenticationPrincipal Jwt jwt) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 userProfileService.loadOrCreateFromToken(jwt));
@@ -46,7 +46,7 @@ public class UserProfileController {
      * @param userProfileUpdateRequest
      * @return
      */
-    @PatchMapping("/me/update-profile")
+    @PatchMapping("/update-profile")
     public ResponseEntity<Response<Void>> updateMyProfile(@CurrentUser UserProfile user,
                                                           @RequestBody UserProfileUpdateRequest userProfileUpdateRequest) {
         userProfileService.updateMyProfile(user, userProfileUpdateRequest);
@@ -58,7 +58,7 @@ public class UserProfileController {
      * @param user
      * @return
      */
-    @PatchMapping("/me/delete-profile")
+    @PatchMapping("/delete-profile")
     public ResponseEntity<Response<Void>> deleteProfile(@CurrentUser UserProfile user) {
         userProfileService.deleteProfile(user);
         return Response.update(messageUtil.getMessage("response.update"));

@@ -70,7 +70,7 @@ public class UserProfileService {
      * @param userProfileUpdateRequest
      */
     public void updateMyProfile(UserProfile userProfile, UserProfileUpdateRequest userProfileUpdateRequest) {
-        findByKeycloakId(userProfile.getKeycloakId()).updateProfile(
+        findByKeycloakId(userProfile.getKeycloakId()).applyPatch(
                 userProfileUpdateRequest.nickname(),
                 userProfileUpdateRequest.profileImageId(),
                 userProfileUpdateRequest.bio(),
@@ -87,7 +87,7 @@ public class UserProfileService {
         UserDeletedEvent event = UserDeletedEvent.of(userProfile.getId(), userProfile.getKeycloakId());
 
         try {
-            outboxRepository.save(OutboxUserEvent.pending(event.eventId(), userProfile.getId(), event.eventType(), objectMapper.valueToTree(event)));
+            outboxRepository.save(OutboxUserEvent.createNew(event.eventId(), userProfile.getId(), event.eventType(), objectMapper.valueToTree(event)));
 
         } catch (Exception e) {
             throw new IllegalStateException("failed to serialize UserDeletedEvent", e);

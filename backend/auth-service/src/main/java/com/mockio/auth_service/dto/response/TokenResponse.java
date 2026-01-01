@@ -1,7 +1,9 @@
 package com.mockio.auth_service.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record TokenResponse(
-        String accessToken,
-        Long expiresIn,
-        String tokenType
+        @JsonProperty("access_token") String accessToken,
+        @JsonProperty("token_type") String tokenType,
+        @JsonProperty("expires_in") long expiresIn
 ) {}

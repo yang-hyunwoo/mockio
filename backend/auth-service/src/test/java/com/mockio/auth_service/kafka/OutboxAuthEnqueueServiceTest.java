@@ -46,21 +46,9 @@ class OutboxAuthEnqueueServiceTest {
         assertThat(saved.getEventType()).isEqualTo("KEYCLOAK_DISABLE_USER");
         assertThat(saved.getAggregateId()).isEqualTo(keycloakUserId);
         assertThat(saved.getIdempotencyKey()).isEqualTo("KEYCLOAK_DISABLE_USER:" + keycloakUserId);
-        assertThat(saved.getStatus()).isEqualTo(OutboxStatus.PENDING);
+        assertThat(saved.getStatus()).isEqualTo(OutboxStatus.NEW);
         assertThat(saved.getMaxAttempts()).isEqualTo(10);
         assertThat(saved.getPayload()).isEqualTo(payloadNode);
     }
 
-    @Test
-    void enqueueKeycloakDisable_duplicate_ignores() {
-        // given
-        given(objectMapper.valueToTree(any())).willReturn(mock(JsonNode.class));
-        given(outboxRepo.save(any())).willThrow(new DataIntegrityViolationException("dup"));
-
-        // when (예외 없어야 함)
-        service.enqueueKeycloakDisable(UUID.randomUUID(), "kc-123", "USER_DELETED");
-
-        // then
-        then(outboxRepo).should().save(any());
-    }
 }

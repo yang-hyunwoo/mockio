@@ -1,4 +1,4 @@
-package com.mockio.user_service.util;
+package com.mockio.user_service.config;
 
 import com.mockio.common_security.annotation.CurrentUserArgumentResolver;
 import com.mockio.common_security.util.CurrentUserFacade;
@@ -16,15 +16,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CurrentUserWiringConfig implements WebMvcConfigurer {
 
-    private final CurrentUserPort<UserProfile> currentUserPort;
+    private final CurrentUserFacade<UserProfile> currentUserFacade;
 
     @Bean
-    public CurrentUserFacade<UserProfile> currentUserFacade() {
+    public CurrentUserFacade<UserProfile> currentUserFacade(CurrentUserPort<UserProfile> currentUserPort) {
         return new CurrentUserFacade<>(currentUserPort);
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new CurrentUserArgumentResolver<>(currentUserFacade(), UserProfile.class));
+        resolvers.add(new CurrentUserArgumentResolver<>(currentUserFacade, UserProfile.class));
     }
 }

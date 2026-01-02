@@ -4,7 +4,7 @@ import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.user_service.TestSecurityPermitAllConfig;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.service.UserProfileService;
-import com.mockio.user_service.util.CurrentUserWiringConfig;
+import com.mockio.user_service.config.CurrentUserWiringConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

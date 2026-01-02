@@ -1,9 +1,9 @@
-package com.mockio.user_service.dto.response;
+package com.mockio.interview_service.dto.response;
 
 import com.mockio.common_spring.util.response.EnumResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record UserInterviewPreferenceReadResponse(
+public record UserInterviewSettingReadResponse(
     @Schema(description = "면접_설정_pk", example = "1")
     Long id,
     @Schema(description = "면접_분야", example = "DATA")
@@ -15,7 +15,7 @@ public record UserInterviewPreferenceReadResponse(
     @Schema(description = "면접_모드", example = "TEXT")
     EnumResponse interviewMode,
     @Schema(description = "면접_답변_시간", example = "90")
-    int answerTimeSeconds
+    Integer answerTimeSeconds
 ) {
 
 }

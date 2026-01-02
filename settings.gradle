@@ -23,6 +23,20 @@ project(":auth-service").projectDir = file("backend/auth-service")
 include "user-service"
 project(":user-service").projectDir = file("backend/user-service")
 
+include "ai-service"
+project(":ai-service").projectDir = file("backend/ai-service")
+
+include "interview-service"
+project(":interview-service").projectDir = file("backend/interview-service")
+
+include "chat-service"
+project(":chat-service").projectDir = file("backend/chat-service")
+
+
+include "notification-service"
+project(":notification-service").projectDir = file("backend/notification-service")
+
+
 include "common-core"
 project(":common-core").projectDir = file("backend/common-core")
 

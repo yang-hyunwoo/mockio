@@ -1,10 +1,13 @@
-package com.mockio.user_service.dto.request;
+package com.mockio.interview_service.dto.request;
 
-import com.mockio.user_service.constant.*;
+import com.mockio.interview_service.constant.InterviewDifficulty;
+import com.mockio.interview_service.constant.InterviewTrack;
+import com.mockio.interview_service.constant.FeedbackStyle;
+import com.mockio.interview_service.constant.InterviewMode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record UserInterviewPreferenceUpdateRequest(
-        @Schema(description = "면접_질문_분료", example = "SOFTWARE_ENGINEER" )
+public record UserInterviewSettingUpdateRequest(
+        @Schema(description = "면접_질문_분류", example = "SOFTWARE_ENGINEER" )
         InterviewTrack track,
         @Schema(description = "면접_난이도", example = "EASY" )
         InterviewDifficulty difficulty,
@@ -13,6 +16,6 @@ public record UserInterviewPreferenceUpdateRequest(
         @Schema(description = "면접_모드", example = "TEXT" )
         InterviewMode interviewMode,
         @Schema(description = "면접_답변_시간", example = "90" )
-        int answerTimeSeconds
+        Integer answerTimeSeconds
 ) {
 }

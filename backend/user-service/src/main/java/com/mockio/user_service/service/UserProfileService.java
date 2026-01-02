@@ -9,15 +9,14 @@ package com.mockio.user_service.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.user_service.Mapper.UserProfileMapper;
+import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.UserStatus;
-import com.mockio.user_service.domain.UserInterviewPreference;
 import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.UserDeletedEvent;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
-import com.mockio.user_service.repository.UserInterviewPreferenceRepository;
 import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +36,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class UserProfileService {
 
     private final UserProfileRepository userRepository;
-
-    private final UserInterviewPreferenceRepository userInterviewPreferenceRepository;
-
+    private final InterviewServiceClient interviewServiceClient;
     private final OutboxUserEventRepository outboxRepository;
 
     private final ObjectMapper objectMapper;
@@ -114,10 +111,9 @@ public class UserProfileService {
         String nickname = generateRandomNickname();
 
         UserProfile created = UserProfile.createUserProfile(keycloakId, email, fullName, nickname);
-
         created = userRepository.save(created);
+        interviewServiceClient.ensureInterviewSetting(keycloakId);
 
-        userInterviewPreferenceRepository.save(UserInterviewPreference.createUserInterviewPreference(created));
         created.updateLastLoginAt();
         return created;
     }

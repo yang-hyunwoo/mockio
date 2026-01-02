@@ -1,4 +1,4 @@
-package com.mockio.user_service.constant;
+package com.mockio.interview_service.constant;
 
 /** 면접 분야 enum
  *  InterviewTrack

@@ -28,6 +28,10 @@ public class SecurityConfig {
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(ex -> ex
                         .pathMatchers("/api/users/v1/public/**",
+                                "/api/user-interview/v1/public/**",
+                                "/api/notification/v1/public/**",
+                                "/api/chat/v1/public/**",
+                                "/api/ai/v1/public/**",
                                 "/api/auth/v1/public/**").permitAll()
                         .anyExchange().authenticated()
                 )

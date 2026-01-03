@@ -102,7 +102,7 @@ public class Response<T> {
     }
 
     public static <T> ResponseEntity<Response<T>> update(String message) {
-        return ResponseEntity.status(HttpStatus.OK).body(successUpdate(message));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(successUpdate(message));
     }
 
     public static <T> ResponseEntity<Response<T>> delete(String message, T data) {
@@ -129,7 +129,7 @@ public class Response<T> {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,OffsetDateTime.now());
     }
     protected static <T> Response<T> successUpdate(String message) {
-        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null,null,OffsetDateTime.now());
+        return new Response<>(SUCCESS_CODE, HttpStatus.NO_CONTENT.value(), message,null,null,null,OffsetDateTime.now());
     }
 
     protected static <T> Response<T> successDelete(String message, T data) {

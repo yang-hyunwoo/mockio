@@ -13,18 +13,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Configuration
-@RequiredArgsConstructor
 public class CurrentUserWiringConfig implements WebMvcConfigurer {
 
-    private final CurrentUserFacade<UserProfile> currentUserFacade;
+    private final CurrentUserPort<UserProfile> currentUserPort;
 
-    @Bean
-    public CurrentUserFacade<UserProfile> currentUserFacade(CurrentUserPort<UserProfile> currentUserPort) {
-        return new CurrentUserFacade<>(currentUserPort);
+    public CurrentUserWiringConfig(CurrentUserPort<UserProfile> currentUserPort) {
+        this.currentUserPort = currentUserPort;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new CurrentUserArgumentResolver<>(currentUserFacade, UserProfile.class));
+        CurrentUserFacade<UserProfile> facade = new CurrentUserFacade<>(currentUserPort);
+        resolvers.add(new CurrentUserArgumentResolver<>(facade, UserProfile.class));
     }
 }

@@ -2,12 +2,26 @@ package com.mockio.interview_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-@SpringBootTest
+@Testcontainers
+@ActiveProfiles("test")
 class InterviewServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+	@MockBean
+	JwtDecoder jwtDecoder;
+
+	@Container
+	@ServiceConnection
+	static PostgreSQLContainer<?> postgres =
+			new PostgreSQLContainer<>("postgres:16-alpine");
+
+	@Test void contextLoads() {}
 
 }

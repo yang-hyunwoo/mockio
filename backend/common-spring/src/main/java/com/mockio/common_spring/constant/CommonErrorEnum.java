@@ -31,6 +31,7 @@ public enum CommonErrorEnum implements ErrorCode {
     ERR_500(INTERNAL_SERVER_ERROR.value(), "SERVER_ERROR", "서버 오류가 발생했습니다."),
     ENCRYPTION_FAILED(INTERNAL_SERVER_ERROR.value(), "INTERNAL_SERVER_ERROR", "암호화에 실패했습니다."),
     DECRYPTION_FAILED(BAD_REQUEST.value(), "BAD_REQUEST", "복호화에 실패했습니다."),
+    ILLEGALSTATE(INTERNAL_SERVER_ERROR.value(), "ILLEAGAL_STATE", "500에러."),
     ;
     private final int httpStatus;
     private final String code;

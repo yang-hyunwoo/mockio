@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_012;
+import static com.mockio.common_spring.constant.CommonErrorEnum.ILLEGALSTATE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
@@ -87,7 +89,7 @@ public class UserProfileService {
             outboxRepository.save(OutboxUserEvent.createNew(event.eventId(), userProfile.getId(), event.eventType(), objectMapper.valueToTree(event)));
 
         } catch (Exception e) {
-            throw new IllegalStateException("failed to serialize UserDeletedEvent", e);
+            throw new CustomApiException(INTERNAL_SERVER_ERROR.value(),ILLEGALSTATE,"failed to serialize UserDeletedEvent");
         }
     }
 

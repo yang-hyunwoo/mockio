@@ -2,6 +2,7 @@ package com.mockio.auth_service.client;
 
 import com.mockio.auth_service.dto.request.UserUpdateRequest;
 import com.mockio.auth_service.dto.response.TokenResponse;
+import com.mockio.common_spring.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -10,6 +11,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
+import static com.mockio.common_spring.constant.CommonErrorEnum.ILLEGALSTATE;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.*;
 
 @Component
@@ -42,13 +46,13 @@ public class KeycloakUserClient {
                 .retrieve()
                 .onStatus(s -> s.is4xxClientError() || s.is5xxServerError(), (req, res) -> {
                     String body = new String(res.getBody().readAllBytes());
-                    throw new IllegalStateException("Keycloak token request failed. status="
+                    throw new CustomApiException(INTERNAL_SERVER_ERROR.value(),ILLEGALSTATE,"Keycloak token request failed. status="
                             + res.getStatusCode() + ", body=" + body);
                 })
                 .body(TokenResponse.class);
 
         if (resp == null || resp.accessToken() == null || resp.accessToken().isBlank()) {
-            throw new IllegalStateException("Failed to get Keycloak admin access token.");
+            throw new CustomApiException(INTERNAL_SERVER_ERROR.value(),ILLEGALSTATE,"Failed to get Keycloak admin access token.");
         }
 
         return resp.accessToken();

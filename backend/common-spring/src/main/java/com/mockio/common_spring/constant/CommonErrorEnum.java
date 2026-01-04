@@ -3,8 +3,6 @@ package com.mockio.common_spring.constant;
 import com.mockio.common_core.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
-
 import static org.springframework.http.HttpStatus.*;
 
 @AllArgsConstructor

@@ -1,11 +1,12 @@
 package com.mockio.common_spring.constant;
 
+import com.mockio.common_core.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum OutboxStatus {
+public enum OutboxStatus  {
     NEW("발행 대기"),
     PENDING("대기"),
     PROCESSING("실행중"),

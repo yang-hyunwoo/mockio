@@ -13,10 +13,10 @@ CREATE TABLE interviews (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT ck_interviews_track CHECK (track IN ('SOFTWARE_ENGINEER','DATA','DESIGN','PRODUCT','BUSINESS','MARKETING','SALES','HR','GENERAL'))
-    CONSTRAINT ck_interviews_difficulty CHECK (difficulty IN ('EASY','MEDIUM','HARD'))
-    CONSTRAINT ck_interviews_feedback_style CHECK (feedback_style IN ('STRICT','COACHING','FRIENDLY'))
-    CONSTRAINT ck_interviews_interview_mode CHECK (interview_mode IN ('TEXT','VOICE'))
+    CONSTRAINT ck_interviews_track CHECK (track IN ('SOFTWARE_ENGINEER','DATA','DESIGN','PRODUCT','BUSINESS','MARKETING','SALES','HR','GENERAL')),
+    CONSTRAINT ck_interviews_difficulty CHECK (difficulty IN ('EASY','MEDIUM','HARD')),
+    CONSTRAINT ck_interviews_feedback_style CHECK (feedback_style IN ('STRICT','COACHING','FRIENDLY')),
+    CONSTRAINT ck_interviews_interview_mode CHECK (interview_mode IN ('TEXT','VOICE')),
     CONSTRAINT ck_interviews_status CHECK (status IN ('CREATED','IN_PROGRESS','COMPLETED','FAILED'))
 
 );

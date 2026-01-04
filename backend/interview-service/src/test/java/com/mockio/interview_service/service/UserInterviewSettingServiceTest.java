@@ -31,8 +31,6 @@ class UserInterviewSettingServiceTest {
     private UserInterviewSettingService service;
 
     UserInterviewSettingServiceTest() {
-        // MockitoExtension이 @Mock 주입하기 전에 호출될 수 있으므로
-        // 생성자에서 만들지 말고, lazy로 만들거나 @BeforeEach 사용 권장.
     }
 
     private UserInterviewSettingService createService() {

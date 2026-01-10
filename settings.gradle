@@ -49,4 +49,7 @@ project(":common-jpa").projectDir = file("backend/common-jpa")
 include "common-security"
 project(":common-security").projectDir = file("backend/common-security")
 
+include "common-ai-contractor"
+project(":common-ai-contractor").projectDir = file("backend/common-ai-contractor")
+
 include "naver-keycloak-spi"

@@ -1,3 +1,29 @@
+server:
+  port: 9100
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  model: gpt-4o-mini
+
+ai:
+  generator: openai
+
 spring:
+  messages:
+    basename: messages/apiResponseMessage
+    encoding: UTF-8
+  profiles:
+    active: local
   application:
     name: ai-service
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

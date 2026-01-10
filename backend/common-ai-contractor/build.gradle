@@ -1,0 +1,17 @@
+plugins {
+	id 'java-library'
+
+}
+
+java {
+	toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+dependencies {
+	// lombok (@Slf4j, @Getter 등)
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+	api project(':common-core')
+}

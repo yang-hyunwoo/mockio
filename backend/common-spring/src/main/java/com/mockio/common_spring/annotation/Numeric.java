@@ -1,6 +1,6 @@
 package com.mockio.common_spring.annotation;
 
-import com.mockio.common_spring.annotationValidator.NumericValidator;
+import com.mockio.common_spring.annotation.annotationValidator.NumericValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

@@ -25,7 +25,6 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
@@ -40,11 +39,8 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
 	implementation project(':common-spring')
-	implementation project(':common-jpa')
 	implementation project(':common-ai-contractor')
 
-	//p6spy
-	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 
 	//jwt
 //	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -66,31 +62,4 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 	systemProperty "spring.profiles.active", "test"  //test는 profile test로
-}
-//tasks.withType(Test).configureEach {
-//	enabled = false
-//}
-
-// ==============================
-// QueryDSL Q-class generation
-// ==============================
-def querydslGeneratedDir = file("$buildDir/generated/sources/annotationProcessor/java/main")
-
-tasks.withType(JavaCompile).configureEach {
-	// Q파일 생성 경로를 build/ 아래로 강제
-	options.generatedSourceOutputDirectory.set(querydslGeneratedDir)
-}
-
-sourceSets {
-	main {
-		java {
-			srcDirs += querydslGeneratedDir
-		}
-	}
-}
-
-tasks.named("clean") {
-	doFirst {
-		delete querydslGeneratedDir
-	}
 }

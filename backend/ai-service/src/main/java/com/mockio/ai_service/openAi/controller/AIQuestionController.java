@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/ai/questions")
+@RequestMapping("api/ai/v1/questions")
 @RequiredArgsConstructor
 public class AIQuestionController {
 
     private final InterviewQuestionGenerator questionGenerator;
 
     @PostMapping("/generate")
-    public List<GeneratedQuestion> generate(@RequestBody GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(@RequestBody GenerateQuestionCommand command) {
         return questionGenerator.generate(command);
     }
 }

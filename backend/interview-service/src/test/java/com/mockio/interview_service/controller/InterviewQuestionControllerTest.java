@@ -54,7 +54,7 @@ class InterviewQuestionControllerTest {
                 )
         );
 
-        given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId), eq(3)))
+        given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId)))
                 .willReturn(response);
 
         GenerateInterviewQuestionsRequest req = new GenerateInterviewQuestionsRequest(3);
@@ -71,7 +71,7 @@ class InterviewQuestionControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         then(interviewQuestionService).should(times(1))
-                .generateAndSaveQuestions(interviewId, userId, 3);
+                .generateAndSaveQuestions(interviewId, userId);
     }
 
     @Test
@@ -87,7 +87,7 @@ class InterviewQuestionControllerTest {
                 List.of(new InterviewQuestionReadResponse.Item(1L, 1, "Q1"))
         );
 
-        given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId), isNull()))
+        given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId)))
                 .willReturn(response);
 
         // when / then
@@ -100,12 +100,9 @@ class InterviewQuestionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
-        // count가 null로 들어갔는지 캡처로도 확인 가능
-        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
         then(interviewQuestionService).should(times(1))
-                .generateAndSaveQuestions(eq(interviewId), eq(userId), captor.capture());
+                .generateAndSaveQuestions(eq(interviewId), eq(userId));
 
-        assertThat(captor.getValue()).isNull();
     }
 
     @Test

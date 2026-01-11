@@ -26,7 +26,7 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
     private String mode;
 
     @Override
-    public List<GeneratedQuestion> generate(GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
         if ("ollama".equalsIgnoreCase(mode)) {
             return ollama.generate(command);

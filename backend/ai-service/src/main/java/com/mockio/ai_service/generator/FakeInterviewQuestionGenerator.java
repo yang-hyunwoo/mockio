@@ -12,7 +12,7 @@ import java.util.List;
 public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
     @Override
-    public List<GeneratedQuestion> generate(GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(GenerateQuestionCommand command) {
         int n = Math.max(1, command.questionCount());
 
         List<String> pool = List.of(
@@ -26,10 +26,10 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
                 "Redis를 캐시로 쓸 때 캐시 스탬피드/캐시 무효화 전략을 어떻게 가져갈지 설명해보세요."
         );
 
-        List<GeneratedQuestion> result = new ArrayList<>(n);
+        List<GeneratedQuestion.Item> result = new ArrayList<>(n);
         for (int i = 1; i <= n; i++) {
             String text = pool.get((i - 1) % pool.size());
-            result.add(new GeneratedQuestion(
+            result.add(new GeneratedQuestion.Item(
                     i,
                     "[" + command.track() + "/" + command.difficulty() + "] " + text,
                     "FAKE",
@@ -38,6 +38,6 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
                     0.0
             ));
         }
-        return result;
+        return new GeneratedQuestion(result);
     }
 }

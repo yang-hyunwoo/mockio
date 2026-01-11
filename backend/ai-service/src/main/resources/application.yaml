@@ -16,14 +16,3 @@ spring:
     active: local
   application:
     name: ai-service
-
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: true
-  flyway:
-    enabled: true
-    locations: classpath:db/migration

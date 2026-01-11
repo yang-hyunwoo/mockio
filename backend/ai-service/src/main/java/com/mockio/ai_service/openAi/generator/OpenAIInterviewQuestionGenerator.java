@@ -19,7 +19,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     private final String model = "gpt-4o-mini";
 
     @Override
-    public List<GeneratedQuestion> generate(GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
         String prompt = """
             %s 면접 질문을 %d개 생성해 주세요.
@@ -46,18 +46,16 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                 .distinct()
                 .limit(command.questionCount())
                 .toList();
-        List<GeneratedQuestion> result = new ArrayList<>();
+        List<GeneratedQuestion.Item> result = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++) {
-            result.add(new GeneratedQuestion(
-                    i + 1,
+            result.add(new GeneratedQuestion.Item(((i + 1) * 10),
                     lines.get(i).trim(),
                     "OPENAI",
                     model,
                     "v1",
-                    0.0
-            ));
+                    0.0));
         }
+       return new GeneratedQuestion(result);
 
-        return result;
     }
 }

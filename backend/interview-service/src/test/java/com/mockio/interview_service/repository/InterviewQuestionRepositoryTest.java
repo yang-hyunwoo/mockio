@@ -1,7 +1,10 @@
 package com.mockio.interview_service.repository;
 
+import com.mockio.common_ai_contractor.constant.*;
 import com.mockio.interview_service.PostgresDataJpaTest;
-import com.mockio.interview_service.constant.*;
+import com.mockio.interview_service.constant.QuestionGenerationStatus;
+import com.mockio.interview_service.constant.QuestionStatus;
+import com.mockio.interview_service.constant.QuestionType;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import org.junit.jupiter.api.DisplayName;
@@ -75,7 +78,8 @@ class InterviewQuestionRepositoryTest extends PostgresDataJpaTest {
                 .feedbackStyle(FeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
-                .status(InterviewStatus.CREATED)
+                .questionGenStatus(QuestionGenerationStatus.NONE)
+                .status(InterviewStatus.ACTIVE)
                 .startedAt(null)
                 .endedAt(null)
                 .build();
@@ -90,6 +94,9 @@ class InterviewQuestionRepositoryTest extends PostgresDataJpaTest {
                 .model("test-model")
                 .promptVersion("v0")
                 .temperature(0.0)
+                .type(QuestionType.BASE)
+                .depth(0)
+                .status(QuestionStatus.READY)
                 .generatedAt(OffsetDateTime.now())
                 .build();
     }

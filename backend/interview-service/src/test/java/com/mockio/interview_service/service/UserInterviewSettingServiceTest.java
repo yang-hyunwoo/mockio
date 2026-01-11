@@ -148,7 +148,8 @@ class UserInterviewSettingServiceTest {
                 req.difficulty(),
                 req.feedbackStyle(),
                 req.interviewMode(),
-                req.answerTimeSeconds()
+                req.answerTimeSeconds(),
+                req.interviewQuestionCount()
         );
         // save 호출이 없어도 정상 (JPA dirty checking 전제)
         verify(repository, never()).save(any());

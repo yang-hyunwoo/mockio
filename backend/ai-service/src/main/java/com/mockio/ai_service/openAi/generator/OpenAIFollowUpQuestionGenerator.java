@@ -1,5 +1,19 @@
 package com.mockio.ai_service.openAi.generator;
 
+/**
+ * OpenAI 기반 후속(팔로업) 질문 생성기.
+ *
+ * <p>최근 인터뷰 문답을 바탕으로 다음에 이어질 후속 질문 1개를 생성한다.
+ * OpenAI Chat Completion API를 사용하며, 응답은 JSON 스키마로만 출력되도록
+ * 강하게 제약된 프롬프트를 적용한다.</p>
+ *
+ * <p>응답 파싱 실패에 대비해 1회 리페어(repair) 요청을 수행하고,
+ * 그마저 실패할 경우 서비스 연속성을 위해 고정된 폴백 질문을 반환한다.</p>
+ *
+ * <p>ai.generator=openai 설정에서만 활성화되며,
+ * FollowUpQuestionGenerator 전략 구현체로 사용된다.</p>
+ */
+
 import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.ai_service.util.JsonSupport;
 import com.mockio.common_ai_contractor.dto.FollowUpQuestionCommand;
@@ -22,7 +36,19 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
 
     private final OpenAIClient client;
 
-
+    /**
+     * 최근 인터뷰 문답을 기반으로 후속 질문을 생성한다.
+     *
+     * <p>처리 흐름:
+     * <ol>
+     *   <li>OpenAI 호출 및 JSON 파싱 시도</li>
+     *   <li>파싱 실패 시 JSON-only 출력 리페어 요청</li>
+     *   <li>최종 실패 시 고정 폴백 질문 반환</li>
+     * </ol>
+     *
+     * @param command 후속 질문 생성을 위한 입력 정보
+     * @return 생성된 후속 질문 결과
+     */
     @Override
     public FollowUpQuestionResult generate(FollowUpQuestionCommand command) {
         String prompt = buildPrompt(command);

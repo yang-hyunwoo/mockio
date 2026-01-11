@@ -6,10 +6,10 @@ package com.mockio.interview_service.domain;
  */
 
 import com.mockio.common_jpa.domain.BaseTimeEntity;
-import com.mockio.interview_service.constant.InterviewDifficulty;
-import com.mockio.interview_service.constant.InterviewTrack;
-import com.mockio.interview_service.constant.FeedbackStyle;
-import com.mockio.interview_service.constant.InterviewMode;
+import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
+import com.mockio.common_ai_contractor.constant.InterviewTrack;
+import com.mockio.common_ai_contractor.constant.FeedbackStyle;
+import com.mockio.common_ai_contractor.constant.InterviewMode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -53,6 +53,9 @@ public class UserInterviewSetting extends BaseTimeEntity {
     @Column(name = "answer_time_seconds", nullable = false)
     private Integer answerTimeSeconds;
 
+    @Column(name = "interview_question_count", nullable = false)
+    private int interviewQuestionCount;
+
 
     @Builder
     private UserInterviewSetting(
@@ -62,7 +65,8 @@ public class UserInterviewSetting extends BaseTimeEntity {
         InterviewDifficulty difficulty,
         FeedbackStyle feedbackStyle,
         InterviewMode interviewMode,
-        Integer answerTimeSeconds
+        Integer answerTimeSeconds,
+        int interviewQuestionCount
     ) {
         this.id = id;
         this.userId = userId;
@@ -71,6 +75,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
         this.feedbackStyle = feedbackStyle;
         this.interviewMode = interviewMode;
         this.answerTimeSeconds = answerTimeSeconds;
+        this.interviewQuestionCount = interviewQuestionCount;
     }
 
     public static UserInterviewSetting createUserInterviewPreference(String keycloakId) {
@@ -81,6 +86,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
                 .feedbackStyle(FeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
+                .interviewQuestionCount(3)
                 .build();
     }
 
@@ -97,12 +103,14 @@ public class UserInterviewSetting extends BaseTimeEntity {
                            InterviewDifficulty difficulty,
                            FeedbackStyle feedbackStyle,
                            InterviewMode interviewMode,
-                           Integer answerTimeSeconds) {
+                           Integer answerTimeSeconds,
+                           int interviewQuestionCount) {
         ofNullable(track).ifPresent(this::changeTrack);
         ofNullable(difficulty).ifPresent(this::changeDifficulty);
         ofNullable(feedbackStyle).ifPresent(this::changeFeedbackStyle);
         ofNullable(interviewMode).ifPresent(this::changeInterviewMode);
         ofNullable(answerTimeSeconds).ifPresent(this::changeAnswerTimeSeconds);
+        changeInterviewQuestionCount(interviewQuestionCount);
 
     }
 
@@ -144,6 +152,14 @@ public class UserInterviewSetting extends BaseTimeEntity {
      */
     public void changeAnswerTimeSeconds(int answerTimeSeconds) {
         this.answerTimeSeconds = answerTimeSeconds;
+    }
+
+    /**
+     * 면접 질문 갯수 변경
+     * @param interviewQuestionCount
+     */
+    public void changeInterviewQuestionCount(int interviewQuestionCount) {
+        this.interviewQuestionCount = interviewQuestionCount;
     }
 
 

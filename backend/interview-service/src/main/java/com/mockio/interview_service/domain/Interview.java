@@ -1,9 +1,10 @@
 package com.mockio.interview_service.domain;
 
+import com.mockio.common_ai_contractor.constant.*;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
 import com.mockio.common_spring.constant.CommonErrorEnum;
 import com.mockio.common_spring.exception.CustomApiException;
-import com.mockio.interview_service.constant.*;
+import com.mockio.interview_service.constant.QuestionGenerationStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,6 +14,8 @@ import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
+import static java.time.OffsetDateTime.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Getter
@@ -48,8 +51,27 @@ public class Interview extends BaseTimeEntity {
     private Integer answerTimeSeconds;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "question_gen_status", nullable = false, length = 20)
+    private QuestionGenerationStatus questionGenStatus;
+
+    @Column(name = "question_gen_started_at")
+    private OffsetDateTime questionGenStartedAt;
+
+    @Column(name = "question_gen_ended_at")
+    private OffsetDateTime questionGenEndedAt;
+
+    @Column(name = "question_gen_error", length = 500)
+    private String questionGenError;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private InterviewStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private InterviewEndReason endReason;
+
+    private int count;
 
     @Column(name = "started_at")
     private OffsetDateTime startedAt;
@@ -59,18 +81,23 @@ public class Interview extends BaseTimeEntity {
 
 
     @Builder
-    private Interview(
-            Long id,
-            String userId,
-            InterviewTrack track,
-            InterviewDifficulty difficulty,
-            FeedbackStyle feedbackStyle,
-            InterviewMode interviewMode,
-            Integer answerTimeSeconds,
-            InterviewStatus status,
-            OffsetDateTime startedAt,
-            OffsetDateTime endedAt
+    private Interview(Long id,
+                      String userId,
+                      InterviewTrack track,
+                      InterviewDifficulty difficulty,
+                      FeedbackStyle feedbackStyle,
+                      InterviewMode interviewMode,
+                      Integer answerTimeSeconds,
+                      QuestionGenerationStatus questionGenStatus,
+                      OffsetDateTime questionGenStartedAt,
+                      OffsetDateTime questionGenEndedAt,
+                      String questionGenError,
+                      InterviewStatus status,
+                      int count,
+                      OffsetDateTime startedAt,
+                      OffsetDateTime endedAt
     ) {
+
         this.id = id;
         this.userId = userId;
         this.track = track;
@@ -78,9 +105,15 @@ public class Interview extends BaseTimeEntity {
         this.feedbackStyle = feedbackStyle;
         this.interviewMode = interviewMode;
         this.answerTimeSeconds = answerTimeSeconds;
+        this.questionGenStatus = questionGenStatus;
+        this.questionGenStartedAt = questionGenStartedAt;
+        this.questionGenEndedAt = questionGenEndedAt;
+        this.questionGenError = questionGenError;
         this.status = status;
+        this.count = count;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
+
     }
 
     public static Interview create(
@@ -89,7 +122,8 @@ public class Interview extends BaseTimeEntity {
             InterviewDifficulty difficulty,
             FeedbackStyle feedbackStyle,
             InterviewMode interviewMode,
-            Integer answerTimeSeconds
+            Integer answerTimeSeconds,
+            int count
     ) {
         return Interview.builder()
                 .userId(userId)
@@ -98,28 +132,52 @@ public class Interview extends BaseTimeEntity {
                 .feedbackStyle(feedbackStyle)
                 .interviewMode(interviewMode)
                 .answerTimeSeconds(answerTimeSeconds)
-                .status(InterviewStatus.CREATED)
+                .questionGenStatus(QuestionGenerationStatus.NONE)
+                .status(InterviewStatus.ACTIVE)
+                .count(count)
+                .startedAt(now())
                 .build();
     }
 
-    public void start(OffsetDateTime now) {
-        if (this.status != InterviewStatus.CREATED) {
-            throw new CustomApiException(INTERNAL_SERVER_ERROR.value(), CommonErrorEnum.ILLEGALSTATE, "Interview can be started only from CREATED status.");
-        }
-        this.status = InterviewStatus.IN_PROGRESS;
-        this.startedAt = (this.startedAt == null) ? now : this.startedAt;
+    public boolean isQuestionGenerated() {
+        return this.questionGenStatus == QuestionGenerationStatus.DONE;
     }
 
+    public void markGenerating() {
+        if (this.questionGenStatus == QuestionGenerationStatus.DONE) {
+            throw new CustomApiException(QUESTIONS_ALREADY_DONE.getHttpStatus(), QUESTIONS_ALREADY_DONE, QUESTIONS_ALREADY_DONE.getMessage());
+        }
+        if (this.questionGenStatus == QuestionGenerationStatus.GENERATING) {
+            throw new CustomApiException(QUESTIONS_ALREADY_GENERATED.getHttpStatus(), QUESTIONS_ALREADY_GENERATED, QUESTIONS_ALREADY_GENERATED.getMessage());
+        }
+        this.questionGenStatus = QuestionGenerationStatus.GENERATING;
+        this.questionGenStartedAt = now();
+        this.questionGenError = null;
+    }
+
+    public void markGenerated() {
+        this.questionGenStatus = QuestionGenerationStatus.DONE;
+        this.questionGenEndedAt = now();
+    }
+
+    public void markGenerateFailed(String error) {
+        this.questionGenStatus = QuestionGenerationStatus.FAILED;
+        this.questionGenEndedAt = now();
+        this.questionGenError = error;
+    }
+
+
+
     public void complete(OffsetDateTime now) {
-        if (this.status != InterviewStatus.IN_PROGRESS) {
+        if (this.status != InterviewStatus.ACTIVE) {
             throw new CustomApiException(INTERNAL_SERVER_ERROR.value(), CommonErrorEnum.ILLEGALSTATE, "Interview can be completed only from IN_PROGRESS status.");
         }
-        this.status = InterviewStatus.COMPLETED;
+        this.status = InterviewStatus.ENDED;
         this.endedAt = now;
     }
 
     public void fail(OffsetDateTime now) {
-        if (this.status == InterviewStatus.COMPLETED) {
+        if (this.status == InterviewStatus.ENDED) {
             throw new CustomApiException(INTERNAL_SERVER_ERROR.value(), CommonErrorEnum.ILLEGALSTATE, "Completed interview cannot be failed.");
         }
         this.status = InterviewStatus.FAILED;

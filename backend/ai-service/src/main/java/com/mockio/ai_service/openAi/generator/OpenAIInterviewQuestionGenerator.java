@@ -1,5 +1,16 @@
 package com.mockio.ai_service.openAi.generator;
 
+/**
+ * OpenAI 기반 인터뷰 질문 생성기 구현체.
+ *
+ * <p>GenerateQuestionCommand를 기반으로 면접 질문 생성을 위한 프롬프트를 구성하고,
+ * OpenAI Chat Completion API를 호출하여 질문 목록을 생성한다.</p>
+ *
+ * <p>응답 결과는 한 줄에 질문 하나 형태로 정규화되며,
+ * 번호/불필요한 기호 제거, 중복 제거, 길이 필터링 등을 통해
+ * 최종 질문 목록으로 가공된다.</p>
+ */
+
 import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
@@ -18,6 +29,16 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     private final OpenAIClient client;
     private final String model = "gpt-4o-mini";
 
+    /**
+     * 인터뷰 질문 생성 요청을 처리한다.
+     *
+     * <p>OpenAI 응답을 줄 단위로 분리한 뒤,
+     * 질문 번호 및 불필요한 접두어를 제거하고
+     * 요청된 개수만큼 질문을 선별하여 반환한다.</p>
+     *
+     * @param command 질문 생성에 필요한 입력 정보
+     * @return 생성된 인터뷰 질문 목록
+     */
     @Override
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
@@ -55,6 +76,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                     "v1",
                     0.0));
         }
+
        return new GeneratedQuestion(result);
 
     }

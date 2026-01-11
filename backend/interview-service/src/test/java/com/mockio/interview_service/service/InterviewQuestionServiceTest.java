@@ -1,27 +1,33 @@
 package com.mockio.interview_service.service;
 
+import com.mockio.common_ai_contractor.constant.*;
+import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.interview_service.PostgresDataJpaTest;
-import com.mockio.interview_service.constant.*;
+import com.mockio.interview_service.constant.QuestionGenerationStatus;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
-import com.mockio.interview_service.generator.GeneratedQuestion;
-import com.mockio.interview_service.generator.InterviewQuestionGenerator;
+import com.mockio.interview_service.forward.ai.AIServiceClient;
 import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
-import static com.mockio.interview_service.constant.InterviewErrorCode.*;
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 import static java.time.OffsetDateTime.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 
 @Import({InterviewQuestionService.class, InterviewQuestionServiceTest.TestConfig.class})
 class InterviewQuestionServiceTest extends PostgresDataJpaTest {
@@ -35,6 +41,9 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
     @Autowired
     private InterviewQuestionRepository interviewQuestionRepository;
 
+    @MockBean
+    private AIServiceClient aiServiceClient;
+
     @Test
     @DisplayName("generateAndSaveQuestions: interviewId가 없으면 INTERVIEW_NOT_FOUND 예외")
     void generateAndSaveQuestions_interviewNotFound() {
@@ -43,32 +52,31 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
 
         // when / then
         assertThatThrownBy(() ->
-                interviewQuestionService.generateAndSaveQuestions(notExistId, "user-1", 3)
+                interviewQuestionService.generateAndSaveQuestions(notExistId, "user-1")
         ).isInstanceOf(CustomApiException.class)
                 .hasMessageContaining(INTERVIEW_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("generateAndSaveQuestions: 소유자가 아니면 INTERVIEW_FORBIDDEN 예외")
+    @DisplayName("generateAndSaveQuestions: 소유자가 아니면 INTERVIEW_NOT_FOUND")
     void generateAndSaveQuestions_forbidden() {
-        // given
         Interview interview = interviewRepository.save(createInterview("owner-1"));
 
-        // when / then
         assertThatThrownBy(() ->
-                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "other-user", 3)
+                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "other-user")
         ).isInstanceOf(CustomApiException.class)
-                .hasMessageContaining(INTERVIEW_FORBIDDEN.getMessage());
+                .hasMessageContaining(INTERVIEW_NOT_FOUND.getMessage());
     }
 
     @Test
     @DisplayName("generateAndSaveQuestions: 이미 질문이 있으면 QUESTIONS_ALREADY_GENERATED 예외")
     void generateAndSaveQuestions_alreadyGenerated() {
         // given
-        Interview interview = interviewRepository.save(createInterview("user-1"));
 
         // 기존 질문 1개 저장
-        InterviewQuestion existing = InterviewQuestion.create(
+
+        Interview interview = interviewRepository.save(createInterview("user-1"));
+        InterviewQuestion existing = InterviewQuestion.createInterviewQuestion(
                 interview,
                 1,
                 "existing question",
@@ -78,24 +86,35 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
                 0.0,
                 now()
         );
+        interview.markGenerated();
+        interviewRepository.saveAndFlush(interview);
+
         interviewQuestionRepository.save(existing);
 
-        // when / then
-        assertThatThrownBy(() ->
-                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "user-1", 3)
-        ).isInstanceOf(CustomApiException.class)
-                .hasMessageContaining(QUESTIONS_ALREADY_GENERATED.getMessage());
+// when
+        InterviewQuestionReadResponse response =
+                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "user-1");
+
+// then
+        assertThat(response.questions()).hasSize(1);
+        assertThat(response.questions().get(0).questionText()).isEqualTo("existing question");
     }
 
     @Test
     @DisplayName("generateAndSaveQuestions: 정상 - n개 질문 저장 후 응답 DTO 반환")
     void generateAndSaveQuestions_success() {
         // given
+        given(aiServiceClient.generateQuestions(any()))
+                .willReturn(new GeneratedQuestion(List.of(
+                        new GeneratedQuestion.Item(1,"FAKE-Q1","FAKE","fake","v0",0.0),
+                        new GeneratedQuestion.Item(2,"FAKE-Q2","FAKE","fake","v0",0.0),
+                        new GeneratedQuestion.Item(3,"FAKE-Q3","FAKE","fake","v0",0.0)
+                )));
         Interview interview = interviewRepository.save(createInterview("user-1"));
 
         // when
         InterviewQuestionReadResponse response =
-                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "user-1", 3);
+                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "user-1");
 
         // then (응답 검증)
         assertThat(response).isNotNull();
@@ -119,9 +138,9 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
         Interview interview = interviewRepository.save(createInterview("user-1"));
 
         interviewQuestionRepository.saveAll(List.of(
-                InterviewQuestion.create(interview, 3, "Q3", "TEST", "m", "v", 0.0, now()),
-                InterviewQuestion.create(interview, 1, "Q1", "TEST", "m", "v", 0.0, now()),
-                InterviewQuestion.create(interview, 2, "Q2", "TEST", "m", "v", 0.0, now())
+                InterviewQuestion.createInterviewQuestion(interview, 3, "Q3", "TEST", "m", "v", 0.0, now()),
+                InterviewQuestion.createInterviewQuestion(interview, 1, "Q1", "TEST", "m", "v", 0.0, now()),
+                InterviewQuestion.createInterviewQuestion(interview, 2, "Q2", "TEST", "m", "v", 0.0, now())
         ));
 
         // when
@@ -144,16 +163,19 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
         public InterviewQuestionGenerator interviewQuestionGenerator() {
             return command -> {
                 int n = Math.max(1, command.questionCount());
-                return java.util.stream.IntStream.rangeClosed(1, n)
-                        .mapToObj(i -> new GeneratedQuestion(
-                                i,
-                                "FAKE-Q" + i + " [" + command.track() + "/" + command.difficulty() + "]",
-                                "FAKE",
-                                "fake-model",
-                                "v0",
-                                0.0
-                        ))
-                        .toList();
+                List<GeneratedQuestion.Item> items =
+                        java.util.stream.IntStream.rangeClosed(1, n)
+                                .mapToObj(i -> new GeneratedQuestion.Item(
+                                        i,
+                                        "FAKE-Q" + i + " [" + command.track() + "/" + command.difficulty() + "]",
+                                        "FAKE",
+                                        "fake-model",
+                                        "v0",
+                                        0.0
+                                ))
+                                .toList();
+
+                return new GeneratedQuestion(items);
             };
         }
     }
@@ -172,7 +194,8 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
                 .feedbackStyle(FeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
-                .status(InterviewStatus.CREATED)
+                .questionGenStatus(QuestionGenerationStatus.NONE)
+                .status(InterviewStatus.ACTIVE)
                 .startedAt(null)
                 .endedAt(null)
                 .build();

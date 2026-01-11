@@ -35,12 +35,10 @@ public class UserInterviewSettingService {
      */
     public void ensureInterviewSettingSave(EnsureInterviewSettingRequest request) {
         try {
-            userInterviewSettingRepository.save(
-                    UserInterviewSetting.createUserInterviewPreference(request.keycloakId())
-            );
+            userInterviewSettingRepository.save(UserInterviewSetting.createUserInterviewPreference(request.keycloakId()));
         } catch (DataIntegrityViolationException e) {
             // 이미 존재 → ensure 관점에서는 정상
-            // 아무 것도 하지 않음
+            // no-op
         }
 
     }
@@ -68,7 +66,8 @@ public class UserInterviewSettingService {
                 userRequest.difficulty(),
                 userRequest.feedbackStyle(),
                 userRequest.interviewMode(),
-                userRequest.answerTimeSeconds()
+                userRequest.answerTimeSeconds(),
+                userRequest.interviewQuestionCount()
         );
 
     }

@@ -31,7 +31,8 @@ public class UserInterviewSettingController {
      * @return
      */
     @PostMapping("/interview-setting/ensure")
-    public ResponseEntity<Response<Void>> ensureInterviewSettingSave(@RequestBody EnsureInterviewSettingRequest request) {
+    public ResponseEntity<Response<Void>> ensureInterviewSettingSave(@CurrentSubject String keycloakId,
+                                                                     @RequestBody EnsureInterviewSettingRequest request) {
         userInterviewSettingService.ensureInterviewSettingSave(request);
         return Response.create(messageUtil.getMessage("response.create"), null);
 

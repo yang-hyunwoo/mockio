@@ -15,10 +15,10 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
 //    private final WebClient openAiWebClient;
 //    private final AiProperties props;
     @Override
-    public List<GeneratedQuestion> generate(GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(GenerateQuestionCommand command) {
         // 1) prompt 구성
         // 2) POST /api/generate (stream:false, format:"json")
         // 3) JSON 배열 파싱 -> List<GeneratedQuestion> 반환
-        return List.of();
+        return null;
     }
 }

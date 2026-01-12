@@ -26,5 +26,4 @@ public enum InterviewTrack {
 
     private final String label;
 
-
 }

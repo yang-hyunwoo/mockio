@@ -41,6 +41,7 @@ dependencies {
 	implementation project(':common-spring')
 	implementation project(':common-ai-contractor')
 
+	implementation "io.github.resilience4j:resilience4j-spring-boot3"
 
 	//jwt
 //	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'

@@ -11,23 +11,28 @@ package com.mockio.ai_service.openAi.generator;
  * 최종 질문 목록으로 가공된다.</p>
  */
 
+import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
     private final OpenAIClient client;
     private final String model = "gpt-4o-mini";
+
 
     /**
      * 인터뷰 질문 생성 요청을 처리한다.
@@ -40,6 +45,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
      * @return 생성된 인터뷰 질문 목록
      */
     @Override
+    @CircuitBreaker(name = "openaiChat", fallbackMethod = "fallbackGenerate")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
         String prompt = """
@@ -78,6 +84,28 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
         }
 
        return new GeneratedQuestion(result);
+    }
 
+
+
+    private GeneratedQuestion fallbackGenerate(GenerateQuestionCommand command, Throwable ex) {
+        log.warn("OpenAI generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
+                command.track(), command.questionCount(), command.difficulty(), ex.toString());
+
+        // 폴백 전략 1: 사전 정의 템플릿 질문(최소 품질 보장)
+        List<GeneratedQuestion.Item> fallback = new ArrayList<>();
+        int n = command.questionCount();
+        List<String> base = FallbackQuestionRegistry.get(command.track(), command.difficulty());
+
+        for (int i = 0; i < Math.min(n, base.size()); i++) {
+            fallback.add(new GeneratedQuestion.Item(((i + 1) * 10),
+                    base.get(i),
+                    "FALLBACK",
+                    "N/A",
+                    "v1",
+                    0.0));
+        }
+
+        return new GeneratedQuestion(fallback);
     }
 }

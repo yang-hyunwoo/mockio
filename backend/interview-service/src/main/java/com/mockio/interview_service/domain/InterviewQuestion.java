@@ -158,24 +158,23 @@ public class InterviewQuestion extends BaseTimeEntity {
             String provider,
             String model,
             String promptVersion,
-            Double temperature,
-            OffsetDateTime generatedAt
+            Double temperature
     ) {
         return InterviewQuestion.builder()
                 .interview(interview)
                 .seq(seq)
-                .questionText(questionText)
-                .status(QuestionStatus.READY)
-                .type(QuestionType.FOLLOW_UP)
                 .parentQuestionId(parentQuestionId)
                 .depth(parentDepth + 1)
                 .triggerAnswerId(triggerAnswerId)
                 .idempotencyKey(idempotencyKey)
+                .questionText(questionText)
                 .provider(provider)
                 .model(model)
                 .promptVersion(promptVersion)
                 .temperature(temperature)
-                .generatedAt(generatedAt)
+                .status(QuestionStatus.READY)
+                .type(QuestionType.FOLLOW_UP)
+                .generatedAt(OffsetDateTime.now())
                 .build();
     }
 

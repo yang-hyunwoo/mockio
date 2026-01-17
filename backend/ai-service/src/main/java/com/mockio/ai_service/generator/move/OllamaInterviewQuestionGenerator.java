@@ -1,4 +1,4 @@
-package com.mockio.ai_service.generator;
+package com.mockio.ai_service.generator.move;
 
 /**
  * Ollama 기반 로컬 LLM을 사용하여 인터뷰 질문을 생성하는 Generator 구현체.

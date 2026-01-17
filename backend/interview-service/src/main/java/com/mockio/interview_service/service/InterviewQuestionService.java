@@ -15,7 +15,6 @@ import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
 import com.mockio.interview_service.repository.UserInterviewSettingRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,7 +72,7 @@ public class InterviewQuestionService {
 
         // 중복 생성 방지: 정책 1) 이미 생성되었으면 기존 결과 반환
         if (interview.isQuestionGenerated()) {
-            return getQuestions(interviewId);
+            return getQuestions(interviewId,userId);
         }
 
         interview.markGenerating();
@@ -91,7 +90,7 @@ public class InterviewQuestionService {
             questionSave(interview, generatedQuestion);
             interview.markGenerated();
 
-            return getQuestions(interviewId);
+            return getQuestions(interviewId,userId);
         } catch (Exception e) {
             interview.markGenerateFailed(e.getMessage());
             throw new CustomApiException(AI_SERVICE_FAILED.getHttpStatus(), AI_SERVICE_FAILED, AI_SERVICE_FAILED.getMessage());
@@ -118,7 +117,13 @@ public class InterviewQuestionService {
     }
 
     @Transactional(readOnly = true)
-    public InterviewQuestionReadResponse getQuestions(Long interviewId) {
-        return InterviewQuestionMapper.fromList(interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interviewId));
+    public InterviewQuestionReadResponse getQuestions(Long interviewId,String userId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(), INTERVIEW_NOT_FOUND, INTERVIEW_NOT_FOUND.getMessage()));
+        if(interview.getUserId().equals(userId)) {
+            return InterviewQuestionMapper.fromList(interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interviewId));
+        } else {
+            throw new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(), INTERVIEW_FORBIDDEN, INTERVIEW_FORBIDDEN.getMessage());
+        }
     }
 }

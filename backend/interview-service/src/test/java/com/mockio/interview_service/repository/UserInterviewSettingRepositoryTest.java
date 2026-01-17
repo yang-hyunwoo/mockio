@@ -1,10 +1,7 @@
 package com.mockio.interview_service.repository;
 
+import com.mockio.common_ai_contractor.constant.*;
 import com.mockio.interview_service.PostgresDataJpaTest;
-import com.mockio.common_ai_contractor.constant.FeedbackStyle;
-import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
-import com.mockio.common_ai_contractor.constant.InterviewMode;
-import com.mockio.common_ai_contractor.constant.InterviewTrack;
 import com.mockio.interview_service.domain.UserInterviewSetting;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +26,7 @@ class UserInterviewSettingRepositoryTest extends PostgresDataJpaTest {
                 .userId(userId)
                 .track(InterviewTrack.GENERAL)
                 .difficulty(InterviewDifficulty.EASY)
-                .feedbackStyle(FeedbackStyle.COACHING)
+                .feedbackStyle(InterviewFeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(120)
                 .build();

@@ -42,6 +42,11 @@ public class InterviewAnswer extends BaseTimeEntity {
     @Column(name = "is_current", nullable = false)
     private boolean current;
 
+    @Column(name="followup_reason" , nullable = false)
+    private String followupReason;
+
+    private OffsetDateTime followupAt;
+
     @Builder
     private InterviewAnswer(
             Long id,
@@ -50,7 +55,9 @@ public class InterviewAnswer extends BaseTimeEntity {
             String answerText,
             Integer answerDurationSeconds,
             OffsetDateTime answeredAt,
-            boolean current
+            boolean current,
+            String followupReason,
+            OffsetDateTime followupAt
     ) {
         this.id = id;
         this.question = question;
@@ -59,27 +66,30 @@ public class InterviewAnswer extends BaseTimeEntity {
         this.answerDurationSeconds = answerDurationSeconds;
         this.answeredAt = answeredAt;
         this.current = current;
+        this.followupReason = followupReason;
+        this.followupAt = followupAt;
     }
 
-    public static InterviewAnswer createCurrent(
+    public static InterviewAnswer createAnswer(
             InterviewQuestion question,
             int attempt,
             String answerText,
-            Integer answerDurationSeconds,
-            OffsetDateTime answeredAt
+            Integer answerDurationSeconds
     ) {
         return InterviewAnswer.builder()
                 .question(question)
                 .attempt(attempt)
                 .answerText(answerText)
                 .answerDurationSeconds(answerDurationSeconds)
-                .answeredAt(answeredAt)
+                .answeredAt(OffsetDateTime.now())
                 .current(true)
                 .build();
     }
 
-    public void markNotCurrent() {
-        this.current = false;
+    public void followupUpdate(String followupReason) {
+        this.followupReason = followupReason;
+        this.followupAt = OffsetDateTime.now();
+
     }
 
     @Override

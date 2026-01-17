@@ -75,7 +75,7 @@ class InterviewQuestionRepositoryTest extends PostgresDataJpaTest {
                 .userId(userId)
                 .track(InterviewTrack.GENERAL)
                 .difficulty(InterviewDifficulty.MEDIUM)
-                .feedbackStyle(FeedbackStyle.COACHING)
+                .feedbackStyle(InterviewFeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
                 .questionGenStatus(QuestionGenerationStatus.NONE)

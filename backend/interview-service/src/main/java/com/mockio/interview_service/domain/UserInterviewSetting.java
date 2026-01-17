@@ -5,11 +5,8 @@ package com.mockio.interview_service.domain;
  * UserProfile
  */
 
+import com.mockio.common_ai_contractor.constant.*;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
-import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
-import com.mockio.common_ai_contractor.constant.InterviewTrack;
-import com.mockio.common_ai_contractor.constant.FeedbackStyle;
-import com.mockio.common_ai_contractor.constant.InterviewMode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -43,8 +40,8 @@ public class UserInterviewSetting extends BaseTimeEntity {
     private InterviewDifficulty difficulty;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "feedback_style", nullable = false, length = 30)
-    private FeedbackStyle feedbackStyle;
+    @Column(name = "interview_feedback_style", nullable = false, length = 30)
+    private InterviewFeedbackStyle feedbackStyle;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "interview_mode", nullable = false, length = 30)
@@ -63,7 +60,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
         String userId,
         InterviewTrack track,
         InterviewDifficulty difficulty,
-        FeedbackStyle feedbackStyle,
+        InterviewFeedbackStyle feedbackStyle,
         InterviewMode interviewMode,
         Integer answerTimeSeconds,
         int interviewQuestionCount
@@ -83,7 +80,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
                 .userId(keycloakId)
                 .track(InterviewTrack.GENERAL)
                 .difficulty(InterviewDifficulty.MEDIUM)
-                .feedbackStyle(FeedbackStyle.COACHING)
+                .feedbackStyle(InterviewFeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
                 .interviewQuestionCount(3)
@@ -101,7 +98,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
      */
     public void applyPatch(InterviewTrack track,
                            InterviewDifficulty difficulty,
-                           FeedbackStyle feedbackStyle,
+                           InterviewFeedbackStyle feedbackStyle,
                            InterviewMode interviewMode,
                            Integer answerTimeSeconds,
                            int interviewQuestionCount) {
@@ -134,7 +131,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
      * 면접 피드백 변경
      * @param feedbackStyle
      */
-    public void changeFeedbackStyle(FeedbackStyle feedbackStyle) {
+    public void changeFeedbackStyle(InterviewFeedbackStyle feedbackStyle) {
         this.feedbackStyle = feedbackStyle;
     }
 

@@ -1,9 +1,6 @@
 package com.mockio.interview_service.dto.request;
 
-import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
-import com.mockio.common_ai_contractor.constant.InterviewTrack;
-import com.mockio.common_ai_contractor.constant.FeedbackStyle;
-import com.mockio.common_ai_contractor.constant.InterviewMode;
+import com.mockio.common_ai_contractor.constant.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record UserInterviewSettingUpdateRequest(
@@ -12,7 +9,7 @@ public record UserInterviewSettingUpdateRequest(
         @Schema(description = "면접_난이도", example = "EASY" )
         InterviewDifficulty difficulty,
         @Schema(description = "면접_피드백_스타일", example = "COACHING" )
-        FeedbackStyle feedbackStyle,
+        InterviewFeedbackStyle feedbackStyle,
         @Schema(description = "면접_모드", example = "TEXT" )
         InterviewMode interviewMode,
         @Schema(description = "면접_답변_시간", example = "90" )

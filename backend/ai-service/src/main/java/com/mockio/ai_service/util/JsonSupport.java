@@ -12,7 +12,7 @@ package com.mockio.ai_service.util;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.common_ai_contractor.dto.FollowUpQuestionResult;
+import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
 
 public final class JsonSupport {
 
@@ -26,14 +26,14 @@ public final class JsonSupport {
      * @param raw LLM이 반환한 원본 응답 텍스트
      * @return 파싱 성공 시 FollowUpQuestionResult, 실패 시 null
      */
-    public static FollowUpQuestionResult tryParseFollowUp(String raw) {
+    public static FollowUpQuestion tryParseFollowUp(String raw) {
         if (raw == null || raw.isBlank()) return null;
 
         String json = extractJsonObject(raw);
         if (json == null) return null;
 
         try {
-            return om.readValue(json, FollowUpQuestionResult.class);
+            return om.readValue(json, FollowUpQuestion.class);
         } catch (Exception ignored) {
             return null;
         }

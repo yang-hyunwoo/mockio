@@ -1,4 +1,4 @@
-package com.mockio.ai_service.openAi.controller;
+package com.mockio.ai_service.controller;
 
 /**
  * AI 기반 인터뷰 질문 생성을 위한 API 컨트롤러.
@@ -11,9 +11,7 @@ package com.mockio.ai_service.openAi.controller;
  * 요청/응답 중계 역할에 집중한다.</p>
  */
 
-import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +21,16 @@ import org.springframework.web.bind.annotation.*;
 public class AIQuestionController {
 
     private final InterviewQuestionGenerator questionGenerator;
+    private final FollowUpQuestionGenerator followUpQuestionGenerator;
 
     @PostMapping("/generate")
     public GeneratedQuestion generate(@RequestBody GenerateQuestionCommand command) {
         return questionGenerator.generate(command);
+    }
+
+    @PostMapping("/followup")
+    public FollowUpQuestion followup(@RequestBody FollowUpQuestionCommand command) {
+        return followUpQuestionGenerator.generate(command);
     }
 
 }

@@ -1,7 +1,7 @@
-package com.mockio.ai_service.openAi.generator;
+package com.mockio.ai_service.ollama.generator;
 
 /**
- * OpenAI 기반 인터뷰 질문 생성기 구현체.
+ * Ollama 기반 인터뷰 질문 생성기 구현체.
  *
  * <p>GenerateQuestionCommand를 기반으로 면접 질문 생성을 위한 프롬프트를 구성하고,
  * OpenAI Chat Completion API를 호출하여 질문 목록을 생성한다.</p>
@@ -12,6 +12,7 @@ package com.mockio.ai_service.openAi.generator;
  */
 
 import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
+import com.mockio.ai_service.ollama.client.OllamaClient;
 import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
@@ -30,14 +31,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
-    private final OpenAIClient client;
-    private final String MODEL = "gpt-4o-mini";
+    private final OllamaClient client;
+    private final String model = "ollama";
 
 
     /**
      * 인터뷰 질문 생성 요청을 처리한다.
      *
-     * <p>OpenAI 응답을 줄 단위로 분리한 뒤,
+     * <p>Ollama 응답을 줄 단위로 분리한 뒤,
      * 질문 번호 및 불필요한 접두어를 제거하고
      * 요청된 개수만큼 질문을 선별하여 반환한다.</p>
      *
@@ -45,7 +46,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
      * @return 생성된 인터뷰 질문 목록
      */
     @Override
-    @CircuitBreaker(name = "openaiChat", fallbackMethod = "fallbackGenerate")
+    @CircuitBreaker(name = "ollamaChat", fallbackMethod = "fallbackGenerate")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
         String prompt = """
@@ -63,7 +64,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                 command.difficulty()
         );
 
-        String answer = client.chat(MODEL, prompt);
+        String answer = client.chat(model, prompt);
 
         List<String> lines = Arrays.stream(answer.split("\n"))
                 .map(String::trim)
@@ -78,7 +79,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
             result.add(new GeneratedQuestion.Item(((i + 1) * 10),
                     lines.get(i).trim(),
                     "OPENAI",
-                    MODEL,
+                    model,
                     "v1",
                     0.0));
         }
@@ -87,9 +88,9 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     }
 
 
-    @SuppressWarnings("unused")
+
     private GeneratedQuestion fallbackGenerate(GenerateQuestionCommand command, Throwable ex) {
-        log.warn("OpenAI generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
+        log.warn("Ollama generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
                 command.track(), command.questionCount(), command.difficulty(), ex.toString());
         List<GeneratedQuestion.Item> fallback = new ArrayList<>();
         int n = command.questionCount();

@@ -121,7 +121,7 @@ class InterviewQuestionControllerTest {
                 )
         );
 
-        given(interviewQuestionService.getQuestions(interviewId)).willReturn(response);
+        given(interviewQuestionService.getQuestions(interviewId,userId)).willReturn(response);
 
         // when / then
         mockMvc.perform(
@@ -131,6 +131,6 @@ class InterviewQuestionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
-        then(interviewQuestionService).should(times(1)).getQuestions(interviewId);
+        then(interviewQuestionService).should(times(1)).getQuestions(interviewId,userId);
     }
 }

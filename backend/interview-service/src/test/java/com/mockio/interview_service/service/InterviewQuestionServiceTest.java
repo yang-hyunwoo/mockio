@@ -144,7 +144,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
         ));
 
         // when
-        InterviewQuestionReadResponse response = interviewQuestionService.getQuestions(interview.getId());
+        InterviewQuestionReadResponse response = interviewQuestionService.getQuestions(interview.getId(),"user-1");
 
         // then
         assertThat(response.questions()).hasSize(3);
@@ -191,7 +191,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
                 .userId(userId)
                 .track(InterviewTrack.GENERAL)
                 .difficulty(InterviewDifficulty.MEDIUM)
-                .feedbackStyle(FeedbackStyle.COACHING)
+                .feedbackStyle(InterviewFeedbackStyle.COACHING)
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
                 .questionGenStatus(QuestionGenerationStatus.NONE)

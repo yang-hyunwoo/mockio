@@ -1,4 +1,4 @@
-package com.mockio.ai_service.generator;
+package com.mockio.ai_service.generator.move;
 
 import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.GeneratedQuestion;

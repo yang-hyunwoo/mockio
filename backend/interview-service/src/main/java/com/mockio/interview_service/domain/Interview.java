@@ -41,7 +41,7 @@ public class Interview extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "feedback_style", nullable = false, length = 30)
-    private FeedbackStyle feedbackStyle;
+    private InterviewFeedbackStyle feedbackStyle;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "interview_mode", nullable = false, length = 30)
@@ -85,7 +85,7 @@ public class Interview extends BaseTimeEntity {
                       String userId,
                       InterviewTrack track,
                       InterviewDifficulty difficulty,
-                      FeedbackStyle feedbackStyle,
+                      InterviewFeedbackStyle feedbackStyle,
                       InterviewMode interviewMode,
                       Integer answerTimeSeconds,
                       QuestionGenerationStatus questionGenStatus,
@@ -120,7 +120,7 @@ public class Interview extends BaseTimeEntity {
             String userId,
             InterviewTrack track,
             InterviewDifficulty difficulty,
-            FeedbackStyle feedbackStyle,
+            InterviewFeedbackStyle feedbackStyle,
             InterviewMode interviewMode,
             Integer answerTimeSeconds,
             int count

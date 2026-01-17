@@ -39,7 +39,7 @@ public class InterviewQuestionController {
             @PathVariable Long interviewId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"),
-                interviewQuestionService.getQuestions(interviewId)
+                interviewQuestionService.getQuestions(interviewId,userId)
         );
     }
 

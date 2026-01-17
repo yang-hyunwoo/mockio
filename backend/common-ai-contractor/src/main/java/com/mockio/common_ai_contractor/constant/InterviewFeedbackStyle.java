@@ -9,7 +9,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum FeedbackStyle {
+public enum InterviewFeedbackStyle {
     STRICT("엄격"),
     COACHING("조언"),
     FRIENDLY("친근")

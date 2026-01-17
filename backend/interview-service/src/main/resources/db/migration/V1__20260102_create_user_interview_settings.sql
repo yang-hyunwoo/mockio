@@ -3,7 +3,7 @@ CREATE TABLE user_interview_settings (
      user_id VARCHAR(50) NOT NULL,
      track VARCHAR(30) NOT NULL,
      difficulty VARCHAR(30) NOT NULL,
-     feedback_style VARCHAR(30) NOT NULL,
+     interview_feedback_style VARCHAR(30) NOT NULL,
      interview_mode VARCHAR(30) NOT NULL DEFAULT 'TEXT',
      answer_time_seconds INT NOT NULL DEFAULT 90,
      interview_question_count INT NOT NULL DEFAULT 5,
@@ -11,7 +11,7 @@ CREATE TABLE user_interview_settings (
      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
      CONSTRAINT ck_user_profiles_difficulty CHECK (difficulty IN ('EASY','MEDIUM','HARD')),
-     CONSTRAINT ck_user_profiles_feedback_style CHECK (feedback_style IN ('STRICT','COACHING','FRIENDLY')),
+     CONSTRAINT ck_user_profiles_interview_feedback_style CHECK (interview_feedback_style IN ('STRICT','COACHING','FRIENDLY')),
      CONSTRAINT ck_user_profiles_interview_mode CHECK (interview_mode IN ('TEXT','VOICE')),
 
      CONSTRAINT uk_interview_setting_user_id UNIQUE (user_id),

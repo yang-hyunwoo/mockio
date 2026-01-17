@@ -12,6 +12,8 @@ package com.mockio.ai_service.generator;
  */
 
 import com.mockio.ai_service.constant.AIErrorEnum;
+import com.mockio.ai_service.generator.move.FakeInterviewQuestionGenerator;
+import com.mockio.ai_service.generator.move.OllamaInterviewQuestionGenerator;
 import com.mockio.ai_service.openAi.generator.OpenAIInterviewQuestionGenerator;
 import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.GeneratedQuestion;

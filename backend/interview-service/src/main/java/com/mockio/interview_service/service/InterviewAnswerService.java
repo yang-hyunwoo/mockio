@@ -4,6 +4,7 @@ import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.FollowUpQuestionCommand;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
+import com.mockio.interview_service.constant.QuestionType;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewAnswer;
 import com.mockio.interview_service.domain.InterviewQuestion;
@@ -60,12 +61,15 @@ public class InterviewAnswerService {
 
         FollowUpDecision decision = followUpDecider.decide(interviewQuestion, interviewAnswerRequest, interview);
 
+        int questionCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(),QuestionType.BASE.name());
+        int followUpCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(), QuestionType.FOLLOW_UP.name());
+
         /**
          * 꼬리 질문 유효성 검사에 걸렸다면
          * ai서비스에서 꼬리 질문을 추가 후 꼬리 질문 리터
          * 그렇지 않다면 다음 seq 리턴
          */
-        if (decision.askFollowUp()) {
+        if (decision.askFollowUp() && canAskFollowUp(questionCount,followUpCount)) {
             FollowUpQuestionCommand followUpQuestionCommand = new FollowUpQuestionCommand(
                     interview.getTrack(),
                     interview.getDifficulty(),
@@ -82,7 +86,7 @@ public class InterviewAnswerService {
 
             InterviewQuestion saveFollowQuestion = InterviewQuestion.createFollowUp(
                     interview,
-                    (interviewQuestion.getSeq() + 1),
+                    (interviewQuestion.getSeq() + 5),
                     interviewQuestion.getId(),
                     interviewQuestion.getDepth(),
                     interviewQuestion.getId(),
@@ -97,9 +101,18 @@ public class InterviewAnswerService {
             interviewQuestionRepository.save(saveFollowQuestion);
             answer.followupUpdate(decision.reason());
             return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion));
+
         } else {
-            InterviewQuestion nextQuestion = interviewQuestionRepository.findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq()).orElse(null);
-            return InterviewQuestionMapper.fromList(List.of(nextQuestion));
+            return interviewQuestionRepository
+                    .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq())
+                    .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
+                    .orElseGet(() -> {
+                        interview.complete();
+                        //TODO : 완료시 피드백 생성 하기
+
+
+                        return InterviewQuestionMapper.fromList(List.of());
+                    });
         }
 
     }
@@ -111,6 +124,10 @@ public class InterviewAnswerService {
                         INTERVIEW_FORBIDDEN,
                         INTERVIEW_FORBIDDEN.getMessage()
                 ));
+    }
+
+    private boolean canAskFollowUp(int totalCount, int followUpCount) {
+        return followUpCount * 100 < totalCount * 60;
     }
 
 }

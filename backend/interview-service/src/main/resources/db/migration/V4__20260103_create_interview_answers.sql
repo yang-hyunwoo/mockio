@@ -6,7 +6,8 @@ CREATE TABLE interview_answers (
    answer_duration_seconds INTEGER NULL,
    answered_at TIMESTAMPTZ NOT NULL,
    is_current BOOLEAN NOT NULL DEFAULT FALSE,
-
+   followup_reason TEXT NULL,
+   followup_at TIMESTAMPTZ NULL,
    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 

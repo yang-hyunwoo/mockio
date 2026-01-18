@@ -196,6 +196,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
                 .answerTimeSeconds(90)
                 .questionGenStatus(QuestionGenerationStatus.NONE)
                 .status(InterviewStatus.ACTIVE)
+                .feedbackStatus(InterviewFeedbackStatus.NONE)
                 .startedAt(null)
                 .endedAt(null)
                 .build();

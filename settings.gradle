@@ -32,6 +32,8 @@ project(":interview-service").projectDir = file("backend/interview-service")
 include "chat-service"
 project(":chat-service").projectDir = file("backend/chat-service")
 
+include "feedback-service"
+project(":feedback-service").projectDir = file("backend/feedback-service")
 
 include "notification-service"
 project(":notification-service").projectDir = file("backend/notification-service")

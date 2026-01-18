@@ -29,11 +29,4 @@ public class InterviewQuestionMapper {
                         .toList()
         );
     }
-
-    /** 엔티티  → Response */
-    public static InterviewQuestionReadResponse from2(InterviewQuestion questions) {
-        return new InterviewQuestionReadResponse(
-
-        );
-    }
 }

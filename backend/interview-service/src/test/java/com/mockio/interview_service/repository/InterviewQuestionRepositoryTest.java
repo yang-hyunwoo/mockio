@@ -79,6 +79,7 @@ class InterviewQuestionRepositoryTest extends PostgresDataJpaTest {
                 .interviewMode(InterviewMode.TEXT)
                 .answerTimeSeconds(90)
                 .questionGenStatus(QuestionGenerationStatus.NONE)
+                .feedbackStatus(InterviewFeedbackStatus.NONE)
                 .status(InterviewStatus.ACTIVE)
                 .startedAt(null)
                 .endedAt(null)

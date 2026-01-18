@@ -68,6 +68,11 @@ public class Interview extends BaseTimeEntity {
     private InterviewStatus status;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "feedback_status", nullable = false, length = 30)
+    private InterviewFeedbackStatus feedbackStatus;
+
+
+    @Enumerated(EnumType.STRING)
     @Column(length = 10)
     private InterviewEndReason endReason;
 
@@ -93,6 +98,7 @@ public class Interview extends BaseTimeEntity {
                       OffsetDateTime questionGenEndedAt,
                       String questionGenError,
                       InterviewStatus status,
+                      InterviewFeedbackStatus feedbackStatus,
                       int count,
                       OffsetDateTime startedAt,
                       OffsetDateTime endedAt
@@ -110,6 +116,7 @@ public class Interview extends BaseTimeEntity {
         this.questionGenEndedAt = questionGenEndedAt;
         this.questionGenError = questionGenError;
         this.status = status;
+        this.feedbackStatus = feedbackStatus;
         this.count = count;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
@@ -134,6 +141,7 @@ public class Interview extends BaseTimeEntity {
                 .answerTimeSeconds(answerTimeSeconds)
                 .questionGenStatus(QuestionGenerationStatus.NONE)
                 .status(InterviewStatus.ACTIVE)
+                .feedbackStatus(InterviewFeedbackStatus.NONE)
                 .count(count)
                 .startedAt(now())
                 .build();
@@ -168,12 +176,12 @@ public class Interview extends BaseTimeEntity {
 
 
 
-    public void complete(OffsetDateTime now) {
+    public void complete() {
         if (this.status != InterviewStatus.ACTIVE) {
             throw new CustomApiException(INTERNAL_SERVER_ERROR.value(), CommonErrorEnum.ILLEGALSTATE, "Interview can be completed only from IN_PROGRESS status.");
         }
         this.status = InterviewStatus.ENDED;
-        this.endedAt = now;
+        this.endedAt = now();
     }
 
     public void fail(OffsetDateTime now) {

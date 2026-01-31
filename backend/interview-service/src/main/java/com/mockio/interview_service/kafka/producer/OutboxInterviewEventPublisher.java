@@ -1,6 +1,6 @@
-package com.mockio.user_service.kafka.producer;
+package com.mockio.interview_service.kafka.producer;
 
-import com.mockio.user_service.util.P6SpyLogToggle;
+import com.mockio.interview_service.util.P6SpyLogToggle;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -13,10 +13,10 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Profile("!test")
-public class OutboxUserEventPublisher {
-    private final OutboxUserEventPublishWorker worker;
+public class OutboxInterviewEventPublisher {
+    private final OutboxInterviewEventPublishWorker worker;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 500)
     public void publishPending() {
         P6SpyLogToggle.withoutP6Spy(() -> {
             String lockerId = worker.workerId(); // workerId를 public으로 열거나 별도 메서드로
@@ -24,7 +24,6 @@ public class OutboxUserEventPublisher {
             for (Long id : ids) {
                 worker.publishOne(lockerId, id);
             }
-
         });
 
     }

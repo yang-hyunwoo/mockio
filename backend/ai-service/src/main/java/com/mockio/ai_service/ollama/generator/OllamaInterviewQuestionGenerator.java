@@ -13,7 +13,6 @@ package com.mockio.ai_service.ollama.generator;
 
 import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.ai_service.ollama.client.OllamaClient;
-import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
@@ -29,7 +28,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenerator {
+public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
     private final OllamaClient client;
     private final String model = "ollama";

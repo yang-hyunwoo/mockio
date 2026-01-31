@@ -6,6 +6,7 @@ package com.mockio.user_service.service;
  *  유저 관련 비즈니스 로직을 담당합니다.
  */
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.user_service.Mapper.UserProfileMapper;
@@ -40,8 +41,9 @@ public class UserProfileService {
     private final UserProfileRepository userRepository;
     private final InterviewServiceClient interviewServiceClient;
     private final OutboxUserEventRepository outboxRepository;
-
     private final ObjectMapper objectMapper;
+
+    private final String NAVER_NAME = "naver";
 
     /**
      * 최초 사용자 로그인 시 userProfile 등록
@@ -84,13 +86,9 @@ public class UserProfileService {
         findByKeycloakId(userProfile.getKeycloakId()).changeStatus(UserStatus.DELETED);
 
         UserDeletedEvent event = UserDeletedEvent.of(userProfile.getId(), userProfile.getKeycloakId());
+        JsonNode jsonNode = objectMapper.valueToTree(event);
+        outboxRepository.save(OutboxUserEvent.createNew(event.eventId(), userProfile.getId(), event.eventType(), jsonNode));
 
-        try {
-            outboxRepository.save(OutboxUserEvent.createNew(event.eventId(), userProfile.getId(), event.eventType(), objectMapper.valueToTree(event)));
-
-        } catch (Exception e) {
-            throw new CustomApiException(INTERNAL_SERVER_ERROR.value(),ILLEGALSTATE,"failed to serialize UserDeletedEvent");
-        }
     }
 
     private String resolveFullName(Jwt jwt) {
@@ -99,7 +97,7 @@ public class UserProfileService {
         // 기본: name
         String name = jwt.getClaimAsString("name");
 
-        if ("naver".equals(provider)) {
+        if (NAVER_NAME.equals(provider)) {
             String givenName = jwt.getClaimAsString("given_name");
             if (givenName != null && !givenName.isBlank()) {
                 return givenName;

@@ -1,4 +1,4 @@
-package com.mockio.user_service.kafka.domain;
+package com.mockio.interview_service.kafka.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
@@ -17,10 +17,10 @@ import java.util.UUID;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
-@Table(name = "outbox_user_events")
+@Table(name = "outbox_interview_events")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-public class OutboxUserEvent extends BaseTimeEntity {
+public class OutboxInterviewEvent extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,7 +66,7 @@ public class OutboxUserEvent extends BaseTimeEntity {
     private OffsetDateTime sentAt;
 
     @Builder
-    private OutboxUserEvent(
+    private OutboxInterviewEvent(
             Long id,
             UUID eventId,
             String aggregateType,
@@ -96,14 +96,15 @@ public class OutboxUserEvent extends BaseTimeEntity {
         this.sentAt = sentAt;
     }
 
-    public static OutboxUserEvent createNew(UUID eventId,
-                                          Long userId,
-                                          String eventType,
-                                          JsonNode payloadJson) {
-        return OutboxUserEvent.builder()
-                .eventId(eventId)
-                .aggregateType("USER")
-                .aggregateId(userId)
+    public static OutboxInterviewEvent createNew(String aggregateType,
+                                                 Long answerId,
+                                                 String eventType,
+                                                 JsonNode payloadJson) {
+
+        return OutboxInterviewEvent.builder()
+                .eventId(UUID.randomUUID())
+                .aggregateType(aggregateType)
+                .aggregateId(answerId)
                 .eventType(eventType)
                 .payload(payloadJson)
                 .status(OutboxStatus.NEW)
@@ -112,13 +113,14 @@ public class OutboxUserEvent extends BaseTimeEntity {
                 .build();
     }
 
-    public static OutboxUserEvent pending(UUID eventId,
-                                          Long userId,
-                                          String eventType,
-                                          JsonNode payloadJson) {
-        return OutboxUserEvent.builder()
+    public static OutboxInterviewEvent pending(UUID eventId,
+                                               String aggregateType,
+                                               Long userId,
+                                               String eventType,
+                                               JsonNode payloadJson) {
+        return OutboxInterviewEvent.builder()
                 .eventId(eventId)
-                .aggregateType("USER")
+                .aggregateType(aggregateType)
                 .aggregateId(userId)
                 .eventType(eventType)
                 .payload(payloadJson)
@@ -127,7 +129,6 @@ public class OutboxUserEvent extends BaseTimeEntity {
                 .nextAttemptAt(OffsetDateTime.now())
                 .build();
     }
-
 
     public boolean isPublishableBy(String lockerId, OffsetDateTime now) {
         if (!"PROCESSING".equals(this.status)) return false;

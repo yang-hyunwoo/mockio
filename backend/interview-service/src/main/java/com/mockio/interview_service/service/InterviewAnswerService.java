@@ -1,5 +1,7 @@
 package com.mockio.interview_service.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.FollowUpQuestionCommand;
 import com.mockio.common_spring.exception.CustomApiException;
@@ -11,6 +13,10 @@ import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.request.InterviewAnswerRequest;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.forward.ai.AIServiceClient;
+import com.mockio.interview_service.kafka.domain.OutboxInterviewEvent;
+import com.mockio.interview_service.kafka.dto.request.InterviewAnswerSubmittedPayload;
+import com.mockio.interview_service.kafka.dto.request.InterviewCompletedPayload;
+import com.mockio.interview_service.kafka.repository.OutboxInterviewEventRepository;
 import com.mockio.interview_service.repository.InterviewAnswerRepository;
 import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
@@ -32,6 +38,8 @@ public class InterviewAnswerService {
     private final InterviewRepository interviewRepository;
     private final FollowUpDecider followUpDecider;
     private final AIServiceClient aiServiceClient;
+    private final OutboxInterviewEventRepository outboxInterviewEventRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public InterviewQuestionReadResponse interviewAnswerSave(String userId, InterviewAnswerRequest interviewAnswerRequest) {
@@ -64,9 +72,28 @@ public class InterviewAnswerService {
         int questionCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(),QuestionType.BASE.name());
         int followUpCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(), QuestionType.FOLLOW_UP.name());
 
+        InterviewAnswerSubmittedPayload payload = new InterviewAnswerSubmittedPayload(
+                interview.getId(),
+                interviewQuestion.getId(),
+                answer.getId(),
+                nextAttempt,
+                interview.getTrack().name(),
+                interview.getDifficulty().name(),
+                interview.getFeedbackStyle().name()
+        );
+        JsonNode payloadJsonNode = objectMapper.valueToTree(payload);
+        outboxInterviewEventRepository.save(
+                OutboxInterviewEvent.createNew(
+                        "FEEDBACK",
+                        answer.getId(),
+                        "InterviewAnswerSubmitted",
+                        payloadJsonNode
+                )
+        );
+
         /**
          * 꼬리 질문 유효성 검사에 걸렸다면
-         * ai서비스에서 꼬리 질문을 추가 후 꼬리 질문 리터
+         * ai서비스에서 꼬리 질문을 추가 후 꼬리 질문 리턴
          * 그렇지 않다면 다음 seq 리턴
          */
         if (decision.askFollowUp() && canAskFollowUp(questionCount,followUpCount)) {
@@ -109,7 +136,23 @@ public class InterviewAnswerService {
                     .orElseGet(() -> {
                         interview.complete();
                         //TODO : 완료시 피드백 생성 하기
+                        InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
+                                interview.getId(),
+                                interview.getTrack().name(),
+                                interview.getDifficulty().name(),
+                                interview.getFeedbackStyle().name()
+                        );
 
+                        JsonNode completedPayloadJsonNode = objectMapper.valueToTree(completedPayload);
+
+                        outboxInterviewEventRepository.save(
+                                OutboxInterviewEvent.createNew(
+                                        "FEEDBACK",
+                                        interview.getId(),
+                                        "InterviewCompleted",
+                                        completedPayloadJsonNode
+                                )
+                        );
 
                         return InterviewQuestionMapper.fromList(List.of());
                     });

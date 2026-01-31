@@ -1,4 +1,4 @@
-package com.mockio.interview_service.domain;
+package com.mockio.feedback_service.domain;
 
 import com.mockio.common_jpa.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -10,25 +10,28 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "interview_feedbacks")
-public class InterviewFeedback extends BaseTimeEntity {
+@Table(name = "interview_summary_feedbacks")
+public class InterviewSummaryFeedback extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 한 답변에 대해 피드백을 여러 번(모델 변경/재평가)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "answer_id", nullable = false)
-    private InterviewAnswer answer;
+    @Column(name = "interview_id", nullable = false)
+    private Long interviewId;
 
-    @Column(name = "feedback_text", nullable = false, columnDefinition = "TEXT")
-    private String feedbackText;
+    @Column(name = "summary_text", nullable = false, columnDefinition = "TEXT")
+    private String summaryText;
 
-    @Column(name = "score")
-    private Integer score;
+    @Column(name = "total_score")
+    private Integer totalScore;
 
-    // AI 메타(피드백 생성 추적용)
+    @Column(name = "strengths", columnDefinition = "TEXT")
+    private String strengths;
+
+    @Column(name = "improvements", columnDefinition = "TEXT")
+    private String improvements;
+
     @Column(name = "provider", length = 30)
     private String provider;
 
@@ -45,11 +48,13 @@ public class InterviewFeedback extends BaseTimeEntity {
     private OffsetDateTime generatedAt;
 
     @Builder
-    private InterviewFeedback(
+    private InterviewSummaryFeedback(
             Long id,
-            InterviewAnswer answer,
-            String feedbackText,
-            Integer score,
+            Long interviewId,
+            String summaryText,
+            Integer totalScore,
+            String strengths,
+            String improvements,
             String provider,
             String model,
             String promptVersion,
@@ -57,9 +62,11 @@ public class InterviewFeedback extends BaseTimeEntity {
             OffsetDateTime generatedAt
     ) {
         this.id = id;
-        this.answer = answer;
-        this.feedbackText = feedbackText;
-        this.score = score;
+        this.interviewId = interviewId;
+        this.summaryText = summaryText;
+        this.totalScore = totalScore;
+        this.strengths = strengths;
+        this.improvements = improvements;
         this.provider = provider;
         this.model = model;
         this.promptVersion = promptVersion;
@@ -67,20 +74,24 @@ public class InterviewFeedback extends BaseTimeEntity {
         this.generatedAt = generatedAt;
     }
 
-    public static InterviewFeedback create(
-            InterviewAnswer answer,
-            String feedbackText,
-            Integer score,
+    public static InterviewSummaryFeedback create(
+            Long interviewId,
+            String summaryText,
+            Integer totalScore,
+            String strengths,
+            String improvements,
             String provider,
             String model,
             String promptVersion,
             Double temperature,
             OffsetDateTime generatedAt
     ) {
-        return InterviewFeedback.builder()
-                .answer(answer)
-                .feedbackText(feedbackText)
-                .score(score)
+        return InterviewSummaryFeedback.builder()
+                .interviewId(interviewId)
+                .summaryText(summaryText)
+                .totalScore(totalScore)
+                .strengths(strengths)
+                .improvements(improvements)
                 .provider(provider)
                 .model(model)
                 .promptVersion(promptVersion)
@@ -92,7 +103,7 @@ public class InterviewFeedback extends BaseTimeEntity {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        InterviewFeedback that = (InterviewFeedback) o;
+        InterviewSummaryFeedback that = (InterviewSummaryFeedback) o;
         return Objects.equals(id, that.id);
     }
 

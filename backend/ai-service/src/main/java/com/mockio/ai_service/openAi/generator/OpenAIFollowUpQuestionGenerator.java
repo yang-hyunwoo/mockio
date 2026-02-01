@@ -15,11 +15,9 @@ package com.mockio.ai_service.openAi.generator;
  */
 
 import com.mockio.ai_service.openAi.client.OpenAIClient;
-import com.mockio.ai_service.util.JsonSupport;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestionCommand;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestionGenerator;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -58,6 +56,10 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         String qText = (qa == null || qa.question() == null) ? "N/A" : qa.question();
         String aText = (qa == null || qa.answer() == null) ? "" : qa.answer();
 
+        String commandText = "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
+
+        Double temperature = 0.7;
+
         String prompt = """
         당신은 %s 기술면접관입니다.
         아래 문답을 바탕으로, 다음에 이어질 꼬리질문 1개를 생성해 주세요.
@@ -82,8 +84,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                 qText,
                 aText
         );
-
-        String answer = client.chat(MODEL, prompt);
+        String answer = client.chat(MODEL, prompt,commandText,temperature);
 
         String line = Arrays.stream(answer.split("\n"))
                 .map(String::trim)
@@ -98,7 +99,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         String normalized = normalizeQuestionLine(line);
 
         return new FollowUpQuestion(new FollowUpQuestion.Item(
-                normalized, "OPENAI", MODEL, "v1", 0.0
+                normalized, "OPENAI", MODEL, "v1", temperature
         ));
     }
 
@@ -115,7 +116,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
     private FollowUpQuestion fallbackFollow(FollowUpQuestionCommand command, Throwable t) {
         String q = "방금 답변에서 핵심 근거를 한 문장으로 요약하고, 그 근거가 깨질 수 있는 반례를 하나 들어보세요.";
         return new FollowUpQuestion(new FollowUpQuestion.Item(
-                q, "FALLBACK", MODEL, "v1", 0.0
+                q, "FALLBACK", "N/A", "v1", 0.0
         ));
     }
 

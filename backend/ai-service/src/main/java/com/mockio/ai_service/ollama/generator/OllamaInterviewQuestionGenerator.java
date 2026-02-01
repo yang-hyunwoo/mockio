@@ -13,9 +13,9 @@ package com.mockio.ai_service.ollama.generator;
 
 import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.ai_service.ollama.client.OllamaClient;
-import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +47,8 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     @Override
     @CircuitBreaker(name = "ollamaChat", fallbackMethod = "fallbackGenerate")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
+        String commandText =  "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
+        Double temperature = 0.7;
 
         String prompt = """
             %s 면접 질문을 %d개 생성해 주세요.
@@ -63,7 +65,7 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
                 command.difficulty()
         );
 
-        String answer = client.chat(model, prompt);
+        String answer = client.chat(model, prompt, commandText, temperature);
 
         List<String> lines = Arrays.stream(answer.split("\n"))
                 .map(String::trim)
@@ -77,10 +79,10 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
         for (int i = 0; i < lines.size(); i++) {
             result.add(new GeneratedQuestion.Item(((i + 1) * 10),
                     lines.get(i).trim(),
-                    "OPENAI",
+                    "Ollama",
                     model,
                     "v1",
-                    0.0));
+                    temperature));
         }
 
        return new GeneratedQuestion(result);

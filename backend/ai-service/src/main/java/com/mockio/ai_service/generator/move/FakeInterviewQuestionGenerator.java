@@ -1,8 +1,8 @@
 package com.mockio.ai_service.generator.move;
 
-import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

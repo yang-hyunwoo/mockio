@@ -11,7 +11,12 @@ package com.mockio.ai_service.controller;
  * 요청/응답 중계 역할에 집중한다.</p>
  */
 
-import com.mockio.common_ai_contractor.generator.*;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

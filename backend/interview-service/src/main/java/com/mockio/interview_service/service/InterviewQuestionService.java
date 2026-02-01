@@ -1,9 +1,7 @@
 package com.mockio.interview_service.service;
 
-import com.mockio.common_ai_contractor.constant.InterviewStatus;
-import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
 import com.mockio.interview_service.domain.Interview;

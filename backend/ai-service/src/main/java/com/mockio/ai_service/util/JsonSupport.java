@@ -12,7 +12,7 @@ package com.mockio.ai_service.util;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 
 public final class JsonSupport {
 

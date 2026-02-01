@@ -131,7 +131,7 @@ public class OutboxInterviewEvent extends BaseTimeEntity {
     }
 
     public boolean isPublishableBy(String lockerId, OffsetDateTime now) {
-        if (!"PROCESSING".equals(this.status)) return false;
+        if (OutboxStatus.PROCESSING != this.status) return false;
         if (this.lockedBy == null || !this.lockedBy.equals(lockerId)) return false;
         if (this.lockedAt == null) return false;
         if (this.nextAttemptAt != null && this.nextAttemptAt.isAfter(now)) return false;

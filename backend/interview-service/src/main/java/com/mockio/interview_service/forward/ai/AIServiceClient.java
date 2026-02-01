@@ -1,10 +1,10 @@
 package com.mockio.interview_service.forward.ai;
 
 import com.mockio.common_ai_contractor.constant.InterviewErrorCode;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_spring.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

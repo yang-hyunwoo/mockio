@@ -17,11 +17,6 @@ CREATE TABLE interview_feedbacks (
 
      CONSTRAINT chk_interview_feedbacks_status
          CHECK (status IN ('PENDING', 'SUCCEEDED', 'FAILED', 'RETRY'))
-
-     CONSTRAINT fk_interview_feedbacks_answer
-         FOREIGN KEY (answer_id)
-             REFERENCES interview_answers (id)
-             ON DELETE CASCADE
 );
 
 CREATE UNIQUE INDEX ux_interview_feedbacks_answer_id

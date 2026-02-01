@@ -1,8 +1,8 @@
 package com.mockio.feedback_service.config;
 
 import com.mockio.common_spring.exception.CustomApiException;
-import com.mockio.feedback_service.kafka.dto.response.GenerateFeedbackCommand;
-import com.mockio.feedback_service.kafka.dto.response.GeneratedFeedback;
+import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -26,7 +26,7 @@ public class AiFeedbackClient {
 
     public GeneratedFeedback generateQuestionFeedback(GenerateFeedbackCommand req) {
         return aiWebClient.post()
-                .uri("/api/ai/v1/feedback/question") // ← 실제 AI 서비스 URI에 맞추세요
+                .uri("/api/ai/v1/feedback/question")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .retrieve()
@@ -45,6 +45,7 @@ public class AiFeedbackClient {
                         .maxBackoff(Duration.ofSeconds(2)))
                 .block();
     }
+
 
     private boolean isRetryable(Throwable t) {
         return t instanceof TimeoutException

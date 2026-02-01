@@ -1,6 +1,7 @@
 package com.mockio.interview_service.service;
 
 import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewAnswer;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
@@ -10,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 
 @Service
@@ -18,14 +22,12 @@ public class InternalInterviewReadService {
 
     private final InterviewAnswerRepository interviewAnswerRepository;
 
-    @Transactional
-    public InterviewAnswerDetailResponse getInterviewDetail(Long answerId,String userId) {
+    @Transactional(readOnly = true)
+    public InterviewAnswerDetailResponse getInterviewDetail(Long answerId) {
         InterviewAnswer interviewAnswer = interviewAnswerRepository.findById(answerId)
                 .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(),
                         INTERVIEW_NOT_FOUND,
                         INTERVIEW_NOT_FOUND.getMessage()));
-        if (interviewAnswer.getQuestion().getInterview().getUserId().equals(userId)) {
-
             InterviewAnswerDetailResponse interviewAnswerDetailResponse = new InterviewAnswerDetailResponse(
                     interviewAnswer.getId(),
                     interviewAnswer.getQuestion().getInterview().getId(),
@@ -35,12 +37,15 @@ public class InternalInterviewReadService {
                     interviewAnswer.getAnswerText(),
                     interviewAnswer.getAnswerDurationSeconds()
             );
-            return interviewAnswerDetailResponse;
 
-        } else {
-            throw new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(),
-                    INTERVIEW_FORBIDDEN,
-                    INTERVIEW_FORBIDDEN.getMessage());
-        }
+            return interviewAnswerDetailResponse;
     }
+
+
+    @Transactional(readOnly = true)
+    public List<InterviewAnswerDetailResponse> getInterviewList(Long interviewId) {
+        return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
+    }
+
+
 }

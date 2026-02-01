@@ -2,7 +2,7 @@ package com.mockio.feedback_service.kafka.consumer;
 
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.feedback_service.domain.InterviewFeedback;
-import com.mockio.feedback_service.kafka.dto.response.GeneratedFeedback;
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.feedback_service.repository.InterviewFeedbackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,8 +25,10 @@ public class FeedbackTxService {
             return interviewFeedbackRepository.findByAnswerId(answerId)
                     .orElseGet(() -> interviewFeedbackRepository.save(InterviewFeedback.create(answerId)));
         } catch (DataIntegrityViolationException e) {
-            return interviewFeedbackRepository.findByAnswerId(answerId).orElseThrow();
+            return interviewFeedbackRepository.findByAnswerId(answerId)
+                    .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
         }
+
     }
 
     @Transactional(propagation = REQUIRES_NEW)

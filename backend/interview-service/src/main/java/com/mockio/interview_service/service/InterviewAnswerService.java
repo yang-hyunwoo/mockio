@@ -2,8 +2,8 @@ package com.mockio.interview_service.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestion;
-import com.mockio.common_ai_contractor.generator.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
 import com.mockio.interview_service.constant.QuestionType;
@@ -69,9 +69,8 @@ public class InterviewAnswerService {
 
         FollowUpDecision decision = followUpDecider.decide(interviewQuestion, interviewAnswerRequest, interview);
 
-        int questionCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(),QuestionType.BASE.name());
-        int followUpCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(), QuestionType.FOLLOW_UP.name());
-
+        int questionCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(),QuestionType.BASE);
+        int followUpCount = interviewQuestionRepository.countByInterviewIdAndType(interviewAnswerRequest.interviewId(), QuestionType.FOLLOW_UP);
         InterviewAnswerSubmittedPayload payload = new InterviewAnswerSubmittedPayload(
                 interview.getId(),
                 interviewQuestion.getId(),
@@ -81,7 +80,9 @@ public class InterviewAnswerService {
                 interview.getDifficulty().name(),
                 interview.getFeedbackStyle().name()
         );
+        //outbox 피드백 저장
         JsonNode payloadJsonNode = objectMapper.valueToTree(payload);
+
         outboxInterviewEventRepository.save(
                 OutboxInterviewEvent.createNew(
                         "FEEDBACK",
@@ -135,7 +136,7 @@ public class InterviewAnswerService {
                     .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
                     .orElseGet(() -> {
                         interview.complete();
-                        //TODO : 완료시 피드백 생성 하기
+
                         InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
                                 interview.getId(),
                                 interview.getTrack().name(),
@@ -143,6 +144,7 @@ public class InterviewAnswerService {
                                 interview.getFeedbackStyle().name()
                         );
 
+                        //outbox 피드백 저장
                         JsonNode completedPayloadJsonNode = objectMapper.valueToTree(completedPayload);
 
                         outboxInterviewEventRepository.save(

@@ -1,4 +1,4 @@
-package com.mockio.common_ai_contractor.generator;
+package com.mockio.common_ai_contractor.generator.question;
 
 
 import com.mockio.common_ai_contractor.constant.InterviewDifficulty;

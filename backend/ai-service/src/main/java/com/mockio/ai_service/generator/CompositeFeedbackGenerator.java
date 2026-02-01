@@ -14,7 +14,11 @@ package com.mockio.ai_service.generator;
 import com.mockio.ai_service.constant.AIErrorEnum;
 import com.mockio.ai_service.generator.move.FakeInterviewQuestionGenerator;
 import com.mockio.ai_service.ollama.generator.OllamaInterviewQuestionGenerator;
+import com.mockio.ai_service.openAi.generator.OpenAIFeedbackGenerator;
 import com.mockio.ai_service.openAi.generator.OpenAIInterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
+import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
@@ -27,35 +31,37 @@ import org.springframework.stereotype.Component;
 @Component
 @Primary
 @RequiredArgsConstructor
-public class CompositeInterviewQuestionGenerator implements InterviewQuestionGenerator {
+public class CompositeFeedbackGenerator implements FeedbackGenerator {
 
-    private final OpenAIInterviewQuestionGenerator openAi;
-    private final OllamaInterviewQuestionGenerator ollama;
-    private final FakeInterviewQuestionGenerator fake;
+    private final OpenAIFeedbackGenerator openAi;
+//    private final OllamaInterviewQuestionGenerator ollama;
+//    private final FakeInterviewQuestionGenerator fake;
 
     @Value("${ai.generator}")
     private String mode;
 
     @Override
-    public GeneratedQuestion generate(GenerateQuestionCommand command) {
+    public GeneratedFeedback generate(GenerateFeedbackCommand command) {
 
-        if ("ollama".equalsIgnoreCase(mode)) {
-            return ollama.generate(command);
-        }
-        if ("fake".equalsIgnoreCase(mode)) {
-            return fake.generate(command);
-        }
+//        if ("ollama".equalsIgnoreCase(mode)) {
+//            return ollama.generate(command);
+//        }
+//        if ("fake".equalsIgnoreCase(mode)) {
+//            return fake.generate(command);
+//        }
 
         // 기본: openai 시도 -> 실패 시 폴백
-        try {
-            return openAi.generate(command);
-        } catch (CustomApiException e) {
-             if (e.getErrorEnum() == AIErrorEnum.RATE_LIMIT) {
-                //TODO : 요청 많을 경우는 어떻게 처리 할지?..
-             }
-            return ollama.generate(command);
-        } catch (Exception e) {
-            return ollama.generate(command);
-        }
+//        try {
+//            return openAi.generate(command);
+//        } catch (CustomApiException e) {
+//             if (e.getErrorEnum() == AIErrorEnum.RATE_LIMIT) {
+//                //TODO : 요청 많을 경우는 어떻게 처리 할지?..
+//             }
+//            return ollama.generate(command);
+//        } catch (Exception e) {
+//            return ollama.generate(command);
+//        }
+
+        return openAi.generate(command);
     }
 }

@@ -1,5 +1,6 @@
 package com.mockio.interview_service.repository;
 
+import com.mockio.interview_service.constant.QuestionType;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -18,6 +19,7 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
 
     int countByInterviewId(Long interviewId);
 
-    int countByInterviewIdAndType(Long interviewId , String type);
+    int countByInterviewIdAndType(Long interviewId , QuestionType type);
+
 
 }

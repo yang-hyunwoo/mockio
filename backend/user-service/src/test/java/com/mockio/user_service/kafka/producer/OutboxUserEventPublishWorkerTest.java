@@ -67,7 +67,7 @@ class OutboxUserEventPublishWorkerTest {
         given(kafkaTemplate.send(anyString(), anyString(), anyString()))
                 .willReturn(CompletableFuture.completedFuture(sendResult));
 
-        worker.publishOne(id);
+        worker.publishOne("test-worker",id);
 
         then(kafkaTemplate).should().send(anyString(), anyString(), anyString());
 
@@ -89,7 +89,7 @@ class OutboxUserEventPublishWorkerTest {
         int beforeAttempt = event.getAttemptCount();
 
         // when
-        worker.publishOne(id);
+        worker.publishOne("test-worker",id);
 
         // then
         assertThat(event.getAttemptCount()).isEqualTo(beforeAttempt + 1);
@@ -111,7 +111,7 @@ class OutboxUserEventPublishWorkerTest {
                 .willReturn(CompletableFuture.failedFuture(new RuntimeException("still down")));
 
         // when
-        worker.publishOne(id);
+        worker.publishOne("test-worker",id);
 
         // then
         assertThat(event.getAttemptCount()).isEqualTo(10);
@@ -126,7 +126,7 @@ class OutboxUserEventPublishWorkerTest {
         given(outboxRepository.findById(id)).willReturn(Optional.of(event));
 
         // when
-        worker.publishOne(id);
+        worker.publishOne("test-worker",id);
 
         // then
         then(kafkaTemplate).should(never()).send(anyString(), anyString(), anyString());

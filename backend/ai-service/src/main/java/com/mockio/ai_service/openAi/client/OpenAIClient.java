@@ -45,17 +45,17 @@ public class OpenAIClient implements AIChatClient {
     private final WebClient webClient;
 
     @Override
-    public String chat(String model, String prompt) {
+    public String chat(String model, String prompt,String commandText,Double temperature) {
         OpenAIChatRequest req = new OpenAIChatRequest(
                 model,
                 List.of(
                         new OpenAIChatRequest.Message(
                                 "system",
-                                "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요."
+                                commandText
                         ),
                         new OpenAIChatRequest.Message("user", prompt)
                 ),
-                0.7
+                temperature
         );
 
         OpenAIChatResponse res = webClient.post()

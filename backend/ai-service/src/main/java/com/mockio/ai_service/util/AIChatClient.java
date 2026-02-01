@@ -1,5 +1,5 @@
 package com.mockio.ai_service.util;
 
 public interface AIChatClient {
-    String chat(String model, String prompt);
+    String chat(String model, String prompt, String commandText,Double temperature);
 }

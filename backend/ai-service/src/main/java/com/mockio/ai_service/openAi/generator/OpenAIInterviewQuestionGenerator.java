@@ -13,9 +13,9 @@ package com.mockio.ai_service.openAi.generator;
 
 import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.ai_service.openAi.client.OpenAIClient;
-import com.mockio.common_ai_contractor.generator.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +48,8 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     @CircuitBreaker(name = "openaiChat", fallbackMethod = "fallbackGenerate")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
+        String commandText =  "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
+
         String prompt = """
             %s 면접 질문을 %d개 생성해 주세요.
            조건:
@@ -62,8 +64,8 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                 command.track(),
                 command.difficulty()
         );
-
-        String answer = client.chat(MODEL, prompt);
+        Double temperature = 0.7;
+        String answer = client.chat(MODEL, prompt, commandText, temperature);
 
         List<String> lines = Arrays.stream(answer.split("\n"))
                 .map(String::trim)
@@ -80,7 +82,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                     "OPENAI",
                     MODEL,
                     "v1",
-                    0.0));
+                    temperature));
         }
 
        return new GeneratedQuestion(result);

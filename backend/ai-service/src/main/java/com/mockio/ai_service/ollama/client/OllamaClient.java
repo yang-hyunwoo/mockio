@@ -32,17 +32,17 @@ public class OllamaClient implements AIChatClient {
     private final WebClient webClient;
 
     @Override
-    public String chat(String model, String prompt) {
+    public String chat(String model, String prompt,String commandText,Double temperature) {
         OllamaChatRequest req = new OllamaChatRequest(
                 model,
                 List.of(
                         new OllamaChatRequest.Message(
                                 "system",
-                                "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요."
+                                commandText
                         ),
                         new OllamaChatRequest.Message("user", prompt)
                 ),
-                0.7
+                temperature
         );
 
         OllamaChatResponse res = webClient.post()

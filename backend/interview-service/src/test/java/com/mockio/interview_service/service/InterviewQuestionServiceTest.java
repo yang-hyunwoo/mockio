@@ -1,8 +1,8 @@
 package com.mockio.interview_service.service;
 
 import com.mockio.common_ai_contractor.constant.*;
-import com.mockio.common_ai_contractor.generator.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
+import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import com.mockio.common_spring.exception.CustomApiException;
 import com.mockio.interview_service.PostgresDataJpaTest;
 import com.mockio.interview_service.constant.QuestionGenerationStatus;
@@ -14,7 +14,6 @@ import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;

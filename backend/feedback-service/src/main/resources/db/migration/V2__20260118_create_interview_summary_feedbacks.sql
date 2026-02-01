@@ -16,7 +16,7 @@ CREATE TABLE interview_summary_feedbacks (
 );
 
 CREATE UNIQUE INDEX ux_interview_summary_feedbacks_interview_id
-    ON feedback.interview_summary_feedbacks (interview_id);
+    ON interview_summary_feedbacks (interview_id);
 
-CREATE INDEX IF ix_interview_summary_feedbacks_generated_at
-    ON feedback.interview_summary_feedbacks (generated_at);
+CREATE INDEX ix_interview_summary_feedbacks_generated_at
+    ON interview_summary_feedbacks (generated_at);

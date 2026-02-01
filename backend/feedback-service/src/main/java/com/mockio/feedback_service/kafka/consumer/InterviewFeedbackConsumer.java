@@ -8,8 +8,8 @@ import com.mockio.feedback_service.kafka.domain.ProcessedEvent;
 import com.mockio.feedback_service.kafka.dto.InterviewAnswerSubmittedPayload;
 import com.mockio.feedback_service.kafka.dto.InterviewCompletedPayload;
 import com.mockio.feedback_service.kafka.dto.InterviewLifecycleEvent;
-import com.mockio.feedback_service.kafka.dto.response.GenerateFeedbackCommand;
-import com.mockio.feedback_service.kafka.dto.response.GeneratedFeedback;
+import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.feedback_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.feedback_service.kafka.support.InterviewEventParser;
@@ -20,6 +20,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class InterviewFeedbackConsumer {
@@ -28,12 +30,10 @@ public class InterviewFeedbackConsumer {
     private final InterviewEventParser parser;
     private final InterviewServiceClient interviewServiceClient;
     private final AiFeedbackClient aiFeedbackClient;
-    private final InterviewFeedbackRepository interviewFeedbackRepository;
     private final FeedbackTxService feedbackTxService;
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
 
     @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
-    @Transactional
     public void onMessage(String messageJson) {
         InterviewLifecycleEvent event;
 
@@ -86,26 +86,26 @@ public class InterviewFeedbackConsumer {
     }
 
     //TODO 진행중
-    private void handleInterviewCompleted(InterviewLifecycleEvent event) {
-        InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
-
-        // 인터뷰 전체 답변 목록 조회
-        List<AnswerDetail> answers = interviewServiceClient.getInterviewAnswers(payload.interviewId());
-
-        FeedbackSummaryResult result = aiFeedbackClient.generateSummaryFeedback(answers, payload);
-
-        // 저장: interview_id UNIQUE
-        summaryRepository.upsertByInterviewId(
-                payload.interviewId(),
-                result.summaryText(),
-                result.totalScore(),
-                result.strengths(),
-                result.improvements(),
-                result.provider(),
-                result.model(),
-                result.promptVersion(),
-                result.temperature(),
-                result.generatedAt()
-        );
-    }
+//    private void handleInterviewCompleted(InterviewLifecycleEvent event) {
+//        InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
+//
+//        // 인터뷰 전체 답변 목록 조회
+//        List<InterviewAnswerDetailResponse> answers = interviewServiceClient.getInterviewList(payload.interviewId());
+//
+//       aiFeedbackClient.generateSummaryFeedback(answers, payload);
+//
+//        // 저장: interview_id UNIQUE
+//        summaryRepository.upsertByInterviewId(
+//                payload.interviewId(),
+//                result.summaryText(),
+//                result.totalScore(),
+//                result.strengths(),
+//                result.improvements(),
+//                result.provider(),
+//                result.model(),
+//                result.promptVersion(),
+//                result.temperature(),
+//                result.generatedAt()
+//        );
+//    }
 }

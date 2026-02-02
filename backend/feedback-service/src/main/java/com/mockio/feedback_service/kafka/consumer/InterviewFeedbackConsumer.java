@@ -1,10 +1,14 @@
 package com.mockio.feedback_service.kafka.consumer;
 
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
 import com.mockio.common_spring.exception.NonRetryableEventException;
 import com.mockio.feedback_service.config.AiFeedbackClient;
 import com.mockio.feedback_service.config.InterviewServiceClient;
 import com.mockio.feedback_service.domain.InterviewFeedback;
+import com.mockio.feedback_service.domain.InterviewSummaryFeedback;
 import com.mockio.feedback_service.kafka.domain.ProcessedEvent;
+import com.mockio.feedback_service.kafka.dto.GeneratedSummaryFeedbackMapper;
 import com.mockio.feedback_service.kafka.dto.InterviewAnswerSubmittedPayload;
 import com.mockio.feedback_service.kafka.dto.InterviewCompletedPayload;
 import com.mockio.feedback_service.kafka.dto.InterviewLifecycleEvent;
@@ -14,6 +18,8 @@ import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailRespo
 import com.mockio.feedback_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.feedback_service.kafka.support.InterviewEventParser;
 import com.mockio.feedback_service.repository.InterviewFeedbackRepository;
+import com.mockio.feedback_service.repository.SummaryFeedbackRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -31,6 +37,7 @@ public class InterviewFeedbackConsumer {
     private final InterviewServiceClient interviewServiceClient;
     private final AiFeedbackClient aiFeedbackClient;
     private final FeedbackTxService feedbackTxService;
+    private final SummaryFeedbackTxService summaryFeedbackTxService;
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
 
     @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
@@ -86,26 +93,22 @@ public class InterviewFeedbackConsumer {
     }
 
     //TODO 진행중
-//    private void handleInterviewCompleted(InterviewLifecycleEvent event) {
-//        InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
-//
-//        // 인터뷰 전체 답변 목록 조회
-//        List<InterviewAnswerDetailResponse> answers = interviewServiceClient.getInterviewList(payload.interviewId());
-//
-//       aiFeedbackClient.generateSummaryFeedback(answers, payload);
-//
-//        // 저장: interview_id UNIQUE
-//        summaryRepository.upsertByInterviewId(
-//                payload.interviewId(),
-//                result.summaryText(),
-//                result.totalScore(),
-//                result.strengths(),
-//                result.improvements(),
-//                result.provider(),
-//                result.model(),
-//                result.promptVersion(),
-//                result.temperature(),
-//                result.generatedAt()
-//        );
-//    }
+    private void handleInterviewCompleted(InterviewLifecycleEvent event) {
+        InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
+
+        // 인터뷰 전체 답변 목록 조회
+        //피드백 생성
+        InterviewSummaryFeedback interviewSummaryFeedback = summaryFeedbackTxService.ensurePending(payload.interviewId());
+        if(interviewSummaryFeedback.successChk()) {
+            return;
+        }
+        List<InterviewAnswerDetailResponse> answers = interviewServiceClient.getInterviewList(payload.interviewId());
+        GeneratedSummaryFeedbackCommand generateSummaryFeedbackCommand = GeneratedSummaryFeedbackMapper.from(payload, answers);
+        GeneratedSummaryFeedback generatedSummaryFeedback = aiFeedbackClient.generateSummaryFeedback(generateSummaryFeedbackCommand);
+
+        // 저장: interview_id
+        summaryFeedbackTxService.markSucceeded(interviewSummaryFeedback.getInterviewId(), generatedSummaryFeedback);
+
+    }
+
 }

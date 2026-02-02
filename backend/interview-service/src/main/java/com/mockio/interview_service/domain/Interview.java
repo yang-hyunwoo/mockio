@@ -177,7 +177,8 @@ public class Interview extends BaseTimeEntity {
 
 
     public void complete() {
-        if (this.status != InterviewStatus.ACTIVE) {
+        if (status == InterviewStatus.ENDED) return; // 멱등
+        if (status != InterviewStatus.ACTIVE) {
             throw new CustomApiException(INTERNAL_SERVER_ERROR.value(), CommonErrorEnum.ILLEGALSTATE, "Interview can be completed only from IN_PROGRESS status.");
         }
         this.status = InterviewStatus.ENDED;

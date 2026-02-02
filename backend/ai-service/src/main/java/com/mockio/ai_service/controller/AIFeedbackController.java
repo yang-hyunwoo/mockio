@@ -1,9 +1,7 @@
 package com.mockio.ai_service.controller;
 
 
-import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
-import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
+import com.mockio.common_ai_contractor.generator.feedback.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,10 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AIFeedbackController {
 
     private final FeedbackGenerator feedbackGenerator;
+    private final SummaryFeedbackGenerator summaryFeedbackGenerator;
 
     @PostMapping("/question")
     public GeneratedFeedback singleFeedback(@RequestBody GenerateFeedbackCommand command) {
         return feedbackGenerator.generate(command);
+
+    }
+
+    @PostMapping("/summary")
+    public GeneratedSummaryFeedback summaryFeedback(@RequestBody GeneratedSummaryFeedbackCommand command) {
+        return summaryFeedbackGenerator.generate(command);
 
     }
 }

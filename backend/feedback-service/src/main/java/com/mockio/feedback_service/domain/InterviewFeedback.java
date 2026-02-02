@@ -110,8 +110,10 @@ public class InterviewFeedback extends BaseTimeEntity {
     ) {
         this.feedbackText = feedbackText;
         this.score = score;
+        this.status = Status.SUCCEEDED;
         this.provider = provider;
         this.model = model;
+        this.failCount = 0;
         this.promptVersion = promptVersion;
         this.temperature = temperature;
     }

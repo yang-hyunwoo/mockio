@@ -1,6 +1,7 @@
 package com.mockio.feedback_service.domain;
 
 import com.mockio.common_jpa.domain.BaseTimeEntity;
+import com.mockio.common_spring.constant.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,12 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
 
     @Column(name = "interview_id", nullable = false)
     private Long interviewId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private Status status;
+
+    private int failCount;
 
     @Column(name = "summary_text", nullable = false, columnDefinition = "TEXT")
     private String summaryText;
@@ -51,6 +58,8 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
     private InterviewSummaryFeedback(
             Long id,
             Long interviewId,
+            Status status,
+            int failCount,
             String summaryText,
             Integer totalScore,
             String strengths,
@@ -63,6 +72,8 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
     ) {
         this.id = id;
         this.interviewId = interviewId;
+        this.status = status;
+        this.failCount = failCount;
         this.summaryText = summaryText;
         this.totalScore = totalScore;
         this.strengths = strengths;
@@ -75,30 +86,42 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
     }
 
     public static InterviewSummaryFeedback create(
-            Long interviewId,
-            String summaryText,
-            Integer totalScore,
-            String strengths,
-            String improvements,
-            String provider,
-            String model,
-            String promptVersion,
-            Double temperature,
-            OffsetDateTime generatedAt
+            Long interviewId
     ) {
         return InterviewSummaryFeedback.builder()
                 .interviewId(interviewId)
-                .summaryText(summaryText)
-                .totalScore(totalScore)
-                .strengths(strengths)
-                .improvements(improvements)
-                .provider(provider)
-                .model(model)
-                .promptVersion(promptVersion)
-                .temperature(temperature)
-                .generatedAt(generatedAt)
+                .status(Status.PENDING)
+                .failCount(0)
+                .totalScore(0)
+                .generatedAt(OffsetDateTime.now())
                 .build();
     }
+
+    public boolean successChk() {
+        return Status.SUCCEEDED == this.status;
+    }
+
+    public void succeed(String summaryText,
+                        Integer totalScore,
+                        String strengths,
+                        String improvements,
+                        String provider,
+                        String model,
+                        String promptVersion,
+                        Double temperature
+    ) {
+        this.summaryText = summaryText;
+        this.totalScore = totalScore;
+        this.strengths = strengths;
+        this.improvements = improvements;
+        this.provider = provider;
+        this.model = model;
+        this.promptVersion = promptVersion;
+        this.temperature = temperature;
+        this.failCount = 0;
+        this.status = Status.SUCCEEDED;
+    }
+
 
     @Override
     public boolean equals(Object o) {

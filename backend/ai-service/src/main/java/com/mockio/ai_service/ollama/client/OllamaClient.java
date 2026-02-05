@@ -1,5 +1,18 @@
 package com.mockio.ai_service.ollama.client;
 
+/**
+ * Ollama Chat Completions API 호출을 담당하는 클라이언트 컴포넌트.
+ *
+ * <p>지정된 모델과 프롬프트를 기반으로 Chat Completion 요청을 생성하고,
+ * Ollama 응답을 도메인에서 사용 가능한 문자열 형태로 변환한다.</p>
+ *
+ * <p>HTTP 오류 응답은 Ollama 상태 코드에 따라 AIErrorEnum으로 매핑되며,
+ * CustomApiException으로 변환되어 상위 계층에서 일관되게 처리된다.</p>
+ *
+ * <p>네트워크 지연 및 외부 API 장애에 대비해 타임아웃을 적용하며,
+ * 응답 구조가 비정상적인 경우 내부 오류로 처리한다.</p>
+ */
+
 import com.mockio.ai_service.constant.AIErrorEnum;
 import com.mockio.ai_service.ollama.dto.request.OllamaChatRequest;
 import com.mockio.ai_service.ollama.dto.response.OllamaChatResponse;
@@ -29,7 +42,7 @@ public class OllamaClient implements AIChatClient {
 
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(15);
 
-    private final WebClient webClient;
+    private final WebClient ollamaWebClient;
 
     @Override
     public String chat(String model, String prompt,String commandText,Double temperature) {
@@ -45,7 +58,7 @@ public class OllamaClient implements AIChatClient {
                 temperature
         );
 
-        OllamaChatResponse res = webClient.post()
+        OllamaChatResponse res = ollamaWebClient.post()
                 .uri("/v1/chat/completions")
                 .bodyValue(req)
                 .exchangeToMono(this::handleResponse)

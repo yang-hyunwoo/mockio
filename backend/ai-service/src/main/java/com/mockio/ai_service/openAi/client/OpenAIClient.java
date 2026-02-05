@@ -42,7 +42,7 @@ public class OpenAIClient implements AIChatClient {
 
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(15);
 
-    private final WebClient webClient;
+    private final WebClient openAiWebClient;
 
     @Override
     public String chat(String model, String prompt,String commandText,Double temperature) {
@@ -58,7 +58,7 @@ public class OpenAIClient implements AIChatClient {
                 temperature
         );
 
-        OpenAIChatResponse res = webClient.post()
+        OpenAIChatResponse res = openAiWebClient.post()
                 .uri("/v1/chat/completions")
                 .bodyValue(req)
                 .exchangeToMono(this::handleResponse)

@@ -31,7 +31,7 @@ import java.util.List;
 public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
     private final OllamaClient client;
-    private final String model = "ollama";
+    private final String model = "llama3.1:8b";
 
 
     /**

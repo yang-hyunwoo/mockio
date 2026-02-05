@@ -23,7 +23,9 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.7
     container_name: keycloak-local
-    command: ["start-dev"]
+    command:
+      - start-dev
+      - --features=account:v3,account-api:v1
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
@@ -31,6 +33,7 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/${KEYCLOAK_DB_NAME}
       KC_DB_USERNAME: ${DB_USER}
       KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_FEATURES: "account:v3,account-api:v1"
     ports:
       - "8084:8080"
     volumes:
@@ -66,3 +69,15 @@ services:
       # KRaft 클러스터 ID (고정 문자열; 새로 만들어도 됨)
       CLUSTER_ID: "4L6g3nShT-eMCtK--X86sw"
     restart: always
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama-local
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: always
+
+volumes:
+  ollama:

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_403;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_403;
 
 @Component
 @RequiredArgsConstructor

@@ -8,7 +8,7 @@ package com.mockio.user_service.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.user_service.Mapper.UserProfileMapper;
 import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.UserStatus;
@@ -26,9 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_012;
-import static com.mockio.common_spring.constant.CommonErrorEnum.ILLEGALSTATE;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 

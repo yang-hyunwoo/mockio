@@ -13,7 +13,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_401;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_401;
 
 public class CusstomAccessDeniedHandler implements AccessDeniedHandler {
 

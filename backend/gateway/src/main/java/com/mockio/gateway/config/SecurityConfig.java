@@ -37,7 +37,11 @@ public class SecurityConfig {
                                 "/api/notification/v1/public/**",
                                 "/api/chat/v1/public/**",
                                 "/api/ai/v1/public/**",
-                                "/api/auth/v1/public/**").permitAll()
+                                "/api/auth/v1/public/**",
+                                "/api/feedback/v1/public/**",
+                                "/api/noti/v1/public/**",
+                                "/api/inquiry/v1/public/**",
+                                "/api/faq/v1/public/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .exceptionHandling(ex -> ex

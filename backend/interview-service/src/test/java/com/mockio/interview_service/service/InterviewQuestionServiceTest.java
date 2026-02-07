@@ -3,7 +3,7 @@ package com.mockio.interview_service.service;
 import com.mockio.common_ai_contractor.constant.*;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.PostgresDataJpaTest;
 import com.mockio.interview_service.constant.QuestionGenerationStatus;
 import com.mockio.interview_service.domain.Interview;

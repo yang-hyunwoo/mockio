@@ -1,7 +1,7 @@
 package com.mockio.common_spring.util.crypto;
 
 
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.*;
+import static com.mockio.common_core.constant.CommonErrorEnum.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component

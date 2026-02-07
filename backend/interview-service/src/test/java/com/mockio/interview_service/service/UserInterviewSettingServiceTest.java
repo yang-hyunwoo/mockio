@@ -1,6 +1,6 @@
 package com.mockio.interview_service.service;
 
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.UserInterviewSettingMapper;
 import com.mockio.interview_service.domain.UserInterviewSetting;
 import com.mockio.interview_service.dto.request.EnsureInterviewSettingRequest;
@@ -17,7 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_012;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 

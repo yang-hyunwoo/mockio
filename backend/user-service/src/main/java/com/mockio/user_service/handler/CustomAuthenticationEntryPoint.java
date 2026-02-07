@@ -20,7 +20,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.*;
+import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

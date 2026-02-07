@@ -1,22 +1,20 @@
-package com.mockio.common_spring.exception;
+package com.mockio.common_core.exception;
 
 import com.mockio.common_core.error.ErrorCode;
-import com.mockio.common_spring.util.response.ValidationErrorResponse;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
 @Getter
 public class CustomApiFieldListException extends RuntimeException {
 
-    private final HttpStatus status;
+    private final int status;
 
     private final ErrorCode errorEnum;
 
     private final List<ValidationErrorResponse> errors;
 
-    public CustomApiFieldListException(HttpStatus status,
+    public CustomApiFieldListException(int status,
                                        String message,
                                        ErrorCode errorEnum,
                                        List<ValidationErrorResponse> errors

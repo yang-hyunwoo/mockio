@@ -13,7 +13,7 @@ package com.mockio.user_service.kafka.config;
  * 3. Consumer 무한 재시도 및 메시지 적체 방지
  */
 
-import com.mockio.common_spring.exception.NonRetryableEventException;
+import com.mockio.common_core.exception.NonRetryableEventException;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

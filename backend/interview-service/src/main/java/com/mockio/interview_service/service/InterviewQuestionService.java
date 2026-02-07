@@ -2,7 +2,7 @@ package com.mockio.interview_service.service;
 
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
@@ -22,7 +22,7 @@ import java.util.List;
 
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 import static com.mockio.common_ai_contractor.constant.InterviewStatus.*;
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_012;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static java.time.OffsetDateTime.now;
 
 @Service

@@ -2,8 +2,8 @@ package com.mockio.interview_service.domain;
 
 import com.mockio.common_ai_contractor.constant.*;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
-import com.mockio.common_spring.constant.CommonErrorEnum;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.constant.CommonErrorEnum;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.constant.QuestionGenerationStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

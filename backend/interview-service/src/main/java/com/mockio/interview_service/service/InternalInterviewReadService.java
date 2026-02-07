@@ -1,17 +1,13 @@
 package com.mockio.interview_service.service;
 
-import com.mockio.common_spring.exception.CustomApiException;
-import com.mockio.interview_service.domain.Interview;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.domain.InterviewAnswer;
-import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.interview_service.repository.InterviewAnswerRepository;
-import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;

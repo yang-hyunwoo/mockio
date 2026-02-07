@@ -1,6 +1,5 @@
 package com.mockio.user_service.dto.request;
 
-import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.user_service.constant.ProfileVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 

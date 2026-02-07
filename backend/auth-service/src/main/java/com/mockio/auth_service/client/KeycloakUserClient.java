@@ -12,7 +12,7 @@ package com.mockio.auth_service.client;
 
 import com.mockio.auth_service.dto.request.UserUpdateRequest;
 import com.mockio.auth_service.dto.response.TokenResponse;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -22,7 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ILLEGALSTATE;
+import static com.mockio.common_core.constant.CommonErrorEnum.ILLEGALSTATE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.MediaType.*;
 

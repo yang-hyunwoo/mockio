@@ -67,11 +67,11 @@ public class Response<T> {
      * @param field
      * @return
      */
-    public static ResponseEntity<Response<ValidationErrorResponse>> validationError(int httpStatus, String message,ErrorCode errorCode , String field) {
-        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), new ValidationErrorResponse(field, message), OffsetDateTime.now()));
+    public static ResponseEntity<Response<com.mockio.common_core.exception.ValidationErrorResponse>> validationError(int httpStatus, String message, ErrorCode errorCode , String field) {
+        return ResponseEntity.status(httpStatus).body(new Response<>(ERROR_CODE, httpStatus, message, errorCode.getCode(), errorCode.getMessage(), new com.mockio.common_core.exception.ValidationErrorResponse(field, message), OffsetDateTime.now()));
     }
 
-    public static ResponseEntity<Response<List<ValidationErrorResponse>>> validationErrorList(int httpStatus, String message, ErrorCode errorCode, List<ValidationErrorResponse> errors) {
+    public static ResponseEntity<Response<List<com.mockio.common_core.exception.ValidationErrorResponse>>> validationErrorList(int httpStatus, String message, ErrorCode errorCode, List<com.mockio.common_core.exception.ValidationErrorResponse> errors) {
         return ResponseEntity.status(httpStatus).body(
                 new Response<>(
                         ERROR_CODE,

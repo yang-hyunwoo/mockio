@@ -21,3 +21,20 @@ spring:
           uri: http://localhost:9082
           predicates:
             - Path=/api/interview/v1/**
+        - id: feedback-service
+          uri: http://localhost:9083
+          predicates:
+            - Path=/api/feedback/v1/**
+        - id: noti-service
+          uri: http://localhost:9084
+          predicates:
+            - Path=/api/noti/v1/**
+        - id: inquiry-service
+          uri: http://localhost:9085
+          predicates:
+            - Path=/api/inquiry/v1/**
+        - id: faq-service
+          uri: http://localhost:9086
+          predicates:
+            - Path=/api/faq/v1/**
+

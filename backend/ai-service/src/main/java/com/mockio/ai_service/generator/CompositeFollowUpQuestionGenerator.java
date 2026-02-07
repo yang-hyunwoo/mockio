@@ -9,7 +9,7 @@ import com.mockio.ai_service.openAi.generator.OpenAIFollowUpQuestionGenerator;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;

@@ -1,9 +1,9 @@
 package com.mockio.common_spring.annotation.annotationValidator;
 
-import com.mockio.common_spring.constant.CommonErrorEnum;
-import com.mockio.common_spring.exception.CustomApiFieldException;
-import com.mockio.common_spring.exception.CustomApiFieldListException;
-import com.mockio.common_spring.util.response.ValidationErrorResponse;
+import com.mockio.common_core.constant.CommonErrorEnum;
+import com.mockio.common_core.exception.CustomApiFieldException;
+import com.mockio.common_core.exception.CustomApiFieldListException;
+import com.mockio.common_core.exception.ValidationErrorResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.*;
+import static com.mockio.common_core.constant.CommonErrorEnum.*;
 import static org.springframework.http.HttpStatus.*;
 
 

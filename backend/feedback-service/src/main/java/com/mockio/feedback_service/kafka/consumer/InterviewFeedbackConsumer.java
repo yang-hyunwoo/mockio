@@ -2,7 +2,7 @@ package com.mockio.feedback_service.kafka.consumer;
 
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
-import com.mockio.common_spring.exception.NonRetryableEventException;
+import com.mockio.common_core.exception.NonRetryableEventException;
 import com.mockio.feedback_service.config.AiFeedbackClient;
 import com.mockio.feedback_service.config.InterviewServiceClient;
 import com.mockio.feedback_service.domain.InterviewFeedback;
@@ -17,14 +17,10 @@ import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.feedback_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.feedback_service.kafka.support.InterviewEventParser;
-import com.mockio.feedback_service.repository.InterviewFeedbackRepository;
-import com.mockio.feedback_service.repository.SummaryFeedbackRepository;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

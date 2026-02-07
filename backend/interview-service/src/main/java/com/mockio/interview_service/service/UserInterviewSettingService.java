@@ -6,7 +6,7 @@ package com.mockio.interview_service.service;
  *  면접 설정 관련 서비스를 제공합니다.
  */
 
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.UserInterviewSettingMapper;
 import com.mockio.interview_service.domain.UserInterviewSetting;
 import com.mockio.interview_service.dto.request.EnsureInterviewSettingRequest;
@@ -19,7 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ERR_012;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service

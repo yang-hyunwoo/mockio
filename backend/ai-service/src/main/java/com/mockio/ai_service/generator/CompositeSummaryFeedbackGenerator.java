@@ -1,12 +1,10 @@
 package com.mockio.ai_service.generator;
 
 import com.mockio.ai_service.constant.AIErrorEnum;
-import com.mockio.ai_service.ollama.generator.OllamaInterviewQuestionGenerator;
 import com.mockio.ai_service.ollama.generator.OllamaSummaryFeedbackGenerator;
-import com.mockio.ai_service.openAi.generator.OpenAIFeedbackGenerator;
 import com.mockio.ai_service.openAi.generator.OpenAISummaryFeedbackGenerator;
 import com.mockio.common_ai_contractor.generator.feedback.*;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;

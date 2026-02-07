@@ -11,7 +11,7 @@ import org.springframework.security.web.server.authorization.ServerAccessDeniedH
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.*;
+import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
 @Component
 @RequiredArgsConstructor

@@ -2,7 +2,7 @@ package com.mockio.feedback_service.config;
 
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ILLEGALSTATE;
+import static com.mockio.common_core.constant.CommonErrorEnum.ILLEGALSTATE;
 
 @Service
 @RequiredArgsConstructor

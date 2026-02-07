@@ -1,8 +1,7 @@
-package com.mockio.common_spring.exception;
+package com.mockio.common_core.exception;
 
 import com.mockio.common_core.error.ErrorCode;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 public class CustomApiFieldException extends RuntimeException{

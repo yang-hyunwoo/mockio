@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
 import com.mockio.interview_service.constant.QuestionType;
 import com.mockio.interview_service.domain.Interview;

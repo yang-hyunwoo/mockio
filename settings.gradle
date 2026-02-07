@@ -38,6 +38,15 @@ project(":feedback-service").projectDir = file("backend/feedback-service")
 include "notification-service"
 project(":notification-service").projectDir = file("backend/notification-service")
 
+include "noti-service"
+project(":noti-service").projectDir = file("backend/noti-service")
+
+include "inquiry-service"
+project(":inquiry-service").projectDir = file("backend/inquiry-service")
+
+include "faq-service"
+project(":faq-service").projectDir = file("backend/faq-service")
+
 
 include "common-core"
 project(":common-core").projectDir = file("backend/common-core")

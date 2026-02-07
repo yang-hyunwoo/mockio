@@ -1,4 +1,4 @@
-package com.mockio.common_spring.constant;
+package com.mockio.common_core.constant;
 
 import com.mockio.common_core.error.ErrorCode;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,7 @@ import static org.springframework.http.HttpStatus.*;
 @AllArgsConstructor
 @Getter
 public enum CommonErrorEnum implements ErrorCode {
+    ERR_000(BAD_REQUEST.value(),"BAD_REQUEST", "잘못된 요청 입니다."),
     ERR_001(BAD_REQUEST.value(), "NOT_BLANK", "공백일 수 없습니다."),
     ERR_002(BAD_REQUEST.value(),"NOT_VALIDATION", "유효성 검사에 실패했습니다."),
     ERR_003(CONTINUE.value(), "DB_DUPLICATION", "DB에 중복된 값이 있습니다."),

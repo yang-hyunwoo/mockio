@@ -1,7 +1,7 @@
 package com.mockio.user_service.kafka.consumer;
 
-import com.mockio.common_spring.exception.NonRetryableEventException;
-import com.mockio.common_spring.exception.TransientBusinessException;
+import com.mockio.common_core.exception.NonRetryableEventException;
+import com.mockio.common_core.exception.TransientBusinessException;
 import com.mockio.user_service.kafka.domain.ProcessedEvent;
 import com.mockio.user_service.dto.UserLifecycleEvent;
 import com.mockio.user_service.kafka.repository.ProcessedEventRepository;

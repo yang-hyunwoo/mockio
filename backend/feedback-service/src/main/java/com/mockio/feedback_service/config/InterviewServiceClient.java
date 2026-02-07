@@ -1,8 +1,7 @@
 package com.mockio.feedback_service.config;
 
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import org.springframework.beans.factory.annotation.Value;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.ILLEGALSTATE;
+import static com.mockio.common_core.constant.CommonErrorEnum.ILLEGALSTATE;
 
 @Service
 public class InterviewServiceClient {

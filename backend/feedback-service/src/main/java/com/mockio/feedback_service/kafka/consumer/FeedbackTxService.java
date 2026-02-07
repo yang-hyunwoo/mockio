@@ -1,6 +1,6 @@
 package com.mockio.feedback_service.kafka.consumer;
 
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.feedback_service.domain.InterviewFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.feedback_service.repository.InterviewFeedbackRepository;

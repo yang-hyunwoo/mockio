@@ -1,6 +1,6 @@
 package com.mockio.user_service.service;
 
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.ProfileVisibility;
 import com.mockio.user_service.domain.UserProfile;

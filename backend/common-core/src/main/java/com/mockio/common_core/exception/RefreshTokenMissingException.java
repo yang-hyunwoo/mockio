@@ -1,4 +1,4 @@
-package com.mockio.common_spring.exception;
+package com.mockio.common_core.exception;
 
 public class RefreshTokenMissingException extends RuntimeException {
   public RefreshTokenMissingException(String message) {

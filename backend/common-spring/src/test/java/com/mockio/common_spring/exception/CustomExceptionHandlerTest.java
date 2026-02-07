@@ -1,6 +1,7 @@
 package com.mockio.common_spring.exception;
 
-import com.mockio.common_spring.constant.CommonErrorEnum;
+import com.mockio.common_core.exception.RefreshTokenMissingException;
+import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_spring.util.MessageUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -96,7 +97,7 @@ class ExceptionTestController {
 
     @GetMapping("/ex/custom")
     public void custom() {
-        throw new CustomApiException(
+        throw new com.mockio.common_core.exception.CustomApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 CommonErrorEnum.ERR_002,
                 "커스텀 에러"

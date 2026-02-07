@@ -1,4 +1,4 @@
-package com.mockio.common_spring.util.response;
+package com.mockio.common_core.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

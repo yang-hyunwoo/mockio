@@ -1,8 +1,9 @@
 package com.mockio.common_spring.exception;
 
+import com.mockio.common_core.exception.*;
 import com.mockio.common_spring.util.MessageUtil;
+import com.mockio.common_core.exception.ValidationErrorResponse;
 import com.mockio.common_spring.util.response.Response;
-import com.mockio.common_spring.util.response.ValidationErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
-import static com.mockio.common_spring.constant.CommonErrorEnum.*;
+import static com.mockio.common_core.constant.CommonErrorEnum.*;
 import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
@@ -56,7 +57,7 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Response<ValidationErrorResponse>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-       log.error("DataIntegrityViolationException: {}" , e.getMessage());
+        log.error("DataIntegrityViolationException: {}" , e.getMessage());
         return Response.error(BAD_REQUEST.value(), messageUtil.getMessage("error.not.data.type.ok"), ERR_018, null);
     }
 
@@ -68,7 +69,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler(CustomApiFieldListException.class)
     public ResponseEntity<Response<List<ValidationErrorResponse>>> handleCustomApiFieldListException(CustomApiFieldListException e) {
         log.error("CustomApiFieldListException: {}", e.getMessage());
-        return Response.validationErrorList(e.getStatus().value(), e.getMessage(), e.getErrorEnum(), e.getErrors());
+        return Response.validationErrorList(e.getStatus(), e.getMessage(), e.getErrorEnum(), e.getErrors());
     }
 
     /**

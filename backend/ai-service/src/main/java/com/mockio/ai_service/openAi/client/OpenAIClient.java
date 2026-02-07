@@ -17,7 +17,7 @@ import com.mockio.ai_service.constant.AIErrorEnum;
 import com.mockio.ai_service.openAi.dto.request.OpenAIChatRequest;
 import com.mockio.ai_service.openAi.dto.response.OpenAIChatResponse;
 import com.mockio.ai_service.util.AIChatClient;
-import com.mockio.common_spring.exception.CustomApiException;
+import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

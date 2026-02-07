@@ -45,6 +45,9 @@ public class InterviewAnswer extends BaseTimeEntity {
     @Column(name="followup_reason" , nullable = false)
     private String followupReason;
 
+    @Column(name = "idempotency_key", length = 64)
+    private String idempotencyKey;
+
     private OffsetDateTime followupAt;
 
     @Builder
@@ -90,6 +93,11 @@ public class InterviewAnswer extends BaseTimeEntity {
         this.followupReason = followupReason;
         this.followupAt = OffsetDateTime.now();
 
+    }
+
+    public void updateAnswer(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+        this.current = true;
     }
 
     @Override

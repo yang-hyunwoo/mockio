@@ -23,6 +23,7 @@ import com.mockio.interview_service.repository.InterviewRepository;
 import com.mockio.interview_service.util.followup.FollowUpDecider;
 import com.mockio.interview_service.util.followup.FollowUpDecision;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -48,13 +49,27 @@ public class InterviewAnswerService {
         Interview interview = findInterview(userId, interviewAnswerRequest.interviewId());
 
         //인터뷰 질문 존재 여부 확인
-        InterviewQuestion interviewQuestion = interviewQuestionRepository.findByIdAndInterviewId(interviewAnswerRequest.questionId(), interviewAnswerRequest.interviewId())
+        InterviewQuestion interviewQuestion = interviewQuestionRepository
+                .findByIdAndInterviewId(interviewAnswerRequest.questionId(), interviewAnswerRequest.interviewId())
                 .orElseThrow(() -> new CustomApiException(
                         INTERVIEW_NOT_FOUND.getHttpStatus(),
                         INTERVIEW_NOT_FOUND,
                         INTERVIEW_NOT_FOUND.getMessage()
                 ));
 
+        if (interviewAnswerRequest.idempotencyKey() == null || interviewAnswerRequest.idempotencyKey().isBlank()) {
+            throw new CustomApiException(IDEMPOTENCY_KEY_NOT_FOUND.getHttpStatus(),
+                    IDEMPOTENCY_KEY_NOT_FOUND,
+                    IDEMPOTENCY_KEY_NOT_FOUND.getMessage());
+        }
+
+        // 1) 같은 요청이면 기존 row 반환 (멱등)
+        var existing = interviewAnswerRepository
+                .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey());
+
+        if (existing.isPresent()) {
+            return rebuildResponse(interview, interviewQuestion, existing.get(), interviewAnswerRequest);
+        }
         // 2) attempt 계산
         int nextAttempt = interviewAnswerRepository.findMaxAttemptByQuestionId(interviewAnswerRequest.questionId()).orElse(0) + 1;
 
@@ -64,8 +79,22 @@ public class InterviewAnswerService {
                 interviewAnswerRequest.answerText(),
                 interviewAnswerRequest.answerDurationSeconds()
         );
+        answer.updateAnswer(interviewAnswerRequest.idempotencyKey());
 
-        interviewAnswerRepository.save(answer);
+        try {
+            interviewAnswerRepository.unsetCurrentByQuestionId(interviewAnswerRequest.questionId());
+
+            interviewAnswerRepository.save(answer);
+
+        } catch (DataIntegrityViolationException e) {
+            // 5) 동시성/재시도 등으로 누군가 먼저 저장했을 수 있음 -> 다시 조회해서 반환
+            var saved = interviewAnswerRepository
+                    .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey())
+                    .orElseThrow(() -> e);
+
+            return rebuildResponse(interview, interviewQuestion, saved, interviewAnswerRequest);
+        }
+
 
         FollowUpDecision decision = followUpDecider.decide(interviewQuestion, interviewAnswerRequest, interview);
 
@@ -175,4 +204,22 @@ public class InterviewAnswerService {
         return followUpCount * 100 < totalCount * 60;
     }
 
+    private InterviewQuestionReadResponse rebuildResponse(
+            Interview interview,
+            InterviewQuestion interviewQuestion,
+            InterviewAnswer existingAnswer,
+            InterviewAnswerRequest req
+    ) {
+        // 1) 다음 질문이 있는지 조회
+        return interviewQuestionRepository
+                .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(
+                        interview.getId(),
+                        interviewQuestion.getSeq()
+                )
+                .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
+                .orElseGet(() -> {
+                    // 이미 완료된 인터뷰라면 그냥 빈 응답
+                    return InterviewQuestionMapper.fromList(List.of());
+                });
+    }
 }

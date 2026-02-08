@@ -1,16 +1,14 @@
 package com.mockio.noti_service.service;
 
-import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_jpa.dto.PageDto;
 import com.mockio.noti_service.Mapper.NoticeMapper;
 import com.mockio.noti_service.domain.NoticeBoard;
-import com.mockio.noti_service.dto.NoticeDetailResDto;
-import com.mockio.noti_service.dto.NoticePageResDto;
+import com.mockio.noti_service.dto.response.NoticeDetailResDto;
+import com.mockio.noti_service.dto.response.NoticePageResDto;
 import com.mockio.noti_service.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

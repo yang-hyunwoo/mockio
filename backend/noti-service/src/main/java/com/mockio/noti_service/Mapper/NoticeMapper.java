@@ -1,8 +1,8 @@
 package com.mockio.noti_service.Mapper;
 
 import com.mockio.noti_service.domain.NoticeBoard;
-import com.mockio.noti_service.dto.NoticeDetailResDto;
-import com.mockio.noti_service.dto.NoticePageResDto;
+import com.mockio.noti_service.dto.response.NoticeDetailResDto;
+import com.mockio.noti_service.dto.response.NoticePageResDto;
 
 public class NoticeMapper {
 

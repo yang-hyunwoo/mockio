@@ -63,7 +63,7 @@ public class SequentialValidator {
             }
         }
         if (!errorList.isEmpty()) {
-            throw new CustomApiFieldListException(BAD_REQUEST, "유효성 검사 실패", ERR_002, errorList);
+            throw new CustomApiFieldListException(ERR_002.getHttpStatus(), "유효성 검사 실패", ERR_002, errorList);
         }
     }
 

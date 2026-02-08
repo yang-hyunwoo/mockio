@@ -17,6 +17,9 @@ public class NoticeDetailResDto {
     @Schema(description = "공지사항 제목" ,example = "출석은 어떻게")
     private String title;
 
+    @Schema(description = "공지사항 요약" ,example = "요약입니다.")
+    private String summary;
+
     @Schema(description = "공지사항 내용" ,example = "출석은 어떻게")
     private String content;
 

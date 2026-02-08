@@ -116,4 +116,21 @@ public class NoticeBoard extends BaseEntity {
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "NoticeBoard{" +
+                "id=" + id +
+                ", userId='" + userId + '\'' +
+                ", title='" + title + '\'' +
+                ", summary='" + summary + '\'' +
+                ", content=" + content +
+                ", noticeType=" + noticeType +
+                ", noticePinSort=" + noticePinSort +
+                ", sort=" + sort +
+                ", visible=" + visible +
+                ", deleted=" + deleted +
+                ", deletedAt=" + deletedAt +
+                '}';
+    }
 }

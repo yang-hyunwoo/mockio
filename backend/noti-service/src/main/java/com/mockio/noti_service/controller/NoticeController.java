@@ -3,8 +3,8 @@ package com.mockio.noti_service.controller;
 import com.mockio.common_spring.util.response.Response;
 import com.mockio.common_jpa.dto.PageDto;
 import com.mockio.common_spring.util.MessageUtil;
-import com.mockio.noti_service.dto.NoticeDetailResDto;
-import com.mockio.noti_service.dto.NoticePageResDto;
+import com.mockio.noti_service.dto.response.NoticeDetailResDto;
+import com.mockio.noti_service.dto.response.NoticePageResDto;
 import com.mockio.noti_service.service.NoticeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,16 +41,16 @@ public class NoticeController {
     @Operation(summary = "메인 공지 사항 조회", description = "메인 공지 사항 조회")
     @GetMapping("/notice/detail")
     public ResponseEntity<Response<NoticeDetailResDto>> mainNoticeDetail() {
-        return Response.ok(messageUtil.getMessage("notice.list.read.ok"),
+        return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.mainNoticeDetail());
     }
-    
+
     @Operation(summary = "공지 사항 상세", description = "공지 사항 상세")
     @GetMapping("/notice/detail/{noticeId}")
     public ResponseEntity<Response<NoticeDetailResDto>> noticeDetail(
             @PathVariable Long noticeId
     ) {
-        return Response.ok(messageUtil.getMessage("notice.detail.read.ok"),
+        return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.noticeDetail(noticeId));
     }
 

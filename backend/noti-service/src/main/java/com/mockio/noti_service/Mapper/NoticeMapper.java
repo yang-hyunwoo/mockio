@@ -23,6 +23,7 @@ public class NoticeMapper {
         return NoticeDetailResDto.builder()
                 .id(noticeBoard.getId())
                 .title(noticeBoard.getTitle())
+                .summary(noticeBoard.getSummary())
                 .content(noticeBoard.getContent().getValue())
                 .noticeType(noticeBoard.getNoticeType())
                 .createdAt(noticeBoard.getCreatedAt())

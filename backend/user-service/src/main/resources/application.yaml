@@ -28,3 +28,5 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  config:
+    import: classpath:application-kafka.yaml

@@ -60,6 +60,9 @@ project(":common-jpa").projectDir = file("backend/common-jpa")
 include "common-security"
 project(":common-security").projectDir = file("backend/common-security")
 
+include "common-kafka"
+project(":common-kafka").projectDir = file("backend/common-kafka")
+
 include "common-ai-contractor"
 project(":common-ai-contractor").projectDir = file("backend/common-ai-contractor")
 

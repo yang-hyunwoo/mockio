@@ -41,6 +41,7 @@ dependencies {
 	implementation project(':common-spring')
 	implementation project(':common-jpa')
 	implementation project(':common-security')
+	implementation project(':common-kafka')
 
 	//p6spy
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
@@ -71,9 +72,7 @@ dependencies {
 	testImplementation "org.testcontainers:postgresql"
 	testImplementation "org.springframework.boot:spring-boot-testcontainers"
 
-	//kafka
-	implementation "org.springframework.kafka:spring-kafka"
-	testImplementation "org.springframework.kafka:spring-kafka-test"
+
 
 	//actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'

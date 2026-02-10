@@ -9,6 +9,7 @@ import com.mockio.user_service.kafka.support.UserLifecycleEventParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,14 @@ public class UserLifecycleConsumer {
 
     @KafkaListener(topics = "user.lifecycle", groupId = "user-service")
     @Transactional
-    public void onMessage(String messageJson) {
+    public void onMessage(String messageJson, Acknowledgment ack) {
 
         UserLifecycleEvent event;
         try {
             event = parser.parse(messageJson);
         } catch (Exception e) {
             //파싱 불가 → 재시도 의미 없음
+            ack.acknowledge();
             throw new NonRetryableEventException("Invalid message", e);
         }
 
@@ -37,16 +39,23 @@ public class UserLifecycleConsumer {
 
         } catch (DataIntegrityViolationException e) {
             // 이미 처리됨 → 정상 종료(ACK)
+            ack.acknowledge();
             return;
         }
 
         try {
             handleBusiness(event);
+            ack.acknowledge();
         } catch (TransientBusinessException e) {
             //재시도 필요
             throw e;
+        }  catch (NonRetryableEventException e) {
+            ack.acknowledge();
+            throw e;
+
         } catch (Exception e) {
             //재시도 의미 없음
+
             throw new NonRetryableEventException("Business error", e);
         }
     }

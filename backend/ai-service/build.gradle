@@ -40,6 +40,7 @@ dependencies {
 
 	implementation project(':common-spring')
 	implementation project(':common-ai-contractor')
+	implementation project(':common-kafka')
 
 	implementation "io.github.resilience4j:resilience4j-spring-boot3"
 
@@ -48,9 +49,7 @@ dependencies {
 
 	testImplementation platform("org.testcontainers:testcontainers-bom:1.20.3")
 
-	//kafka
-	implementation "org.springframework.kafka:spring-kafka"
-	testImplementation "org.springframework.kafka:spring-kafka-test"
+
 
 	//actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'

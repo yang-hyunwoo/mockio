@@ -1,0 +1,19 @@
+plugins {
+	id 'java-library'
+}
+
+java {
+	toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+dependencies {
+	// lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	api 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation project(':common-core')
+	//kafka
+	api "org.springframework.kafka:spring-kafka"
+	testImplementation "org.springframework.kafka:spring-kafka-test"
+}
+

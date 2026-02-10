@@ -55,6 +55,7 @@ dependencies {
 	implementation project(':common-core')
 	implementation project(':common-spring')
 	implementation project(':common-jpa')
+	implementation project(':common-kafka')
 
 	//querydsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -74,10 +75,6 @@ dependencies {
 	implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.0.2'
 
 	implementation "org.apache.httpcomponents.client5:httpclient5"
-
-	//kafka
-	implementation "org.springframework.kafka:spring-kafka"
-	testImplementation "org.springframework.kafka:spring-kafka-test"
 
 	testImplementation "org.testcontainers:junit-jupiter"
 	testImplementation "org.testcontainers:postgresql"

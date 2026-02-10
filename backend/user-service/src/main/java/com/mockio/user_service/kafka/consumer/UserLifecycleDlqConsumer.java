@@ -3,6 +3,7 @@ package com.mockio.user_service.kafka.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class UserLifecycleDlqConsumer {
 
     @KafkaListener(topics = "user.lifecycle.DLQ", groupId = "user-service-dlq")
-    public void onDlq(String message) {
+    public void onDlq(String message, Acknowledgment ack) {
         // 최소: 에러 로그
         log.error("DLQ received: {}", message);
 

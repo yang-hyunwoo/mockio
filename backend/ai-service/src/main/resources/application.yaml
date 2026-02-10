@@ -16,3 +16,5 @@ spring:
     active: local
   application:
     name: ai-service
+  config:
+    import: classpath:application-kafka.yaml

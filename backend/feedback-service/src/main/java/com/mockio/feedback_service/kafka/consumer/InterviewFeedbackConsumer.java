@@ -20,6 +20,7 @@ import com.mockio.feedback_service.kafka.support.InterviewEventParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,13 +38,14 @@ public class InterviewFeedbackConsumer {
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
 
     @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
-    public void onMessage(String messageJson) {
+    public void onMessage(String messageJson, Acknowledgment ack) {
         InterviewLifecycleEvent event;
 
         try {
             event = parser.parse(messageJson);
         } catch (Exception e) {
             //파싱 불가 → 재시도 의미 없음
+            ack.acknowledge();
             throw new NonRetryableEventException("Invalid message", e);
         }
 
@@ -52,13 +54,29 @@ public class InterviewFeedbackConsumer {
 
         } catch (DataIntegrityViolationException e) {
             // 이미 처리됨 → 정상 종료(ACK)
+            ack.acknowledge();
             return;
         }
 
-        switch (event.eventType()) {
-            case "InterviewAnswerSubmitted" -> handleAnswerSubmitted(event);
-            case "InterviewCompleted"       -> handleInterviewCompleted(event);
-            default -> throw new NonRetryableEventException("Unknown eventType=" + event.eventType());
+        try {
+            switch (event.eventType()) {
+                case "InterviewAnswerSubmitted" -> handleAnswerSubmitted(event);
+                case "InterviewCompleted"       -> handleInterviewCompleted(event);
+                default -> throw new NonRetryableEventException(
+                        "Unknown eventType=" + event.eventType()
+                );
+            }
+
+            ack.acknowledge();
+
+        } catch (NonRetryableEventException e) {
+            // 재시도 의미 없음 → ACK + DLQ
+            ack.acknowledge();
+            throw e;
+
+        } catch (Exception e) {
+            // 재시도 가능 → ACK 안 함 → Retry → DLQ
+            throw e;
         }
     }
 
@@ -88,7 +106,6 @@ public class InterviewFeedbackConsumer {
 
     }
 
-    //TODO 진행중
     private void handleInterviewCompleted(InterviewLifecycleEvent event) {
         InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
 

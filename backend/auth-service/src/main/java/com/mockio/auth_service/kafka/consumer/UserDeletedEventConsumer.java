@@ -18,6 +18,7 @@ import com.mockio.auth_service.kafka.OutboxAuthEnqueueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,24 +40,43 @@ public class UserDeletedEventConsumer {
      * @param message Kafka 메시지(JSON 문자열)
      */
     @KafkaListener(topics = "user.lifecycle", groupId = "auth-service")
-    public void onMessage(String message) {
-        UserLifecycleEvent event = parse(message);
+    public void onMessage(String message, Acknowledgment ack) {
+        UserLifecycleEvent event;
 
+        try {
+            event = parse(message);
+        } catch (Exception e) {
+            // 파싱 불가 → 재시도 의미 없음 (ACK 후 종료 또는 DLQ 정책)
+            ack.acknowledge();
+            throw new com.mockio.common_core.exception.NonRetryableEventException("Invalid message", e);
+        }
+
+        // 관심 없는 이벤트는 소비 완료 처리
         if (!"USER_DELETED".equals(event.eventType())) {
+            ack.acknowledge();
             return;
         }
 
-        String keycloakId = event.payload().get("keycloakId").asText();
-        EnqueueResult result = enqueueService.enqueueKeycloakDisable(
-                event.eventId(),
-                keycloakId,
-                "USER_DELETED"
-        );
+        try {
+            String keycloakId = event.payload().get("keycloakId").asText();
 
-        switch (result) {
-            case ENQUEUED -> log.info("Outbox enqueued: eventId={}, keycloakId={}", event.eventId(), keycloakId);
-            case ALREADY_ENQUEUED -> log.debug("Outbox already enqueued (idempotent): eventId={}, keycloakId={}",
-                    event.eventId(), keycloakId);
+            EnqueueResult result = enqueueService.enqueueKeycloakDisable(
+                    event.eventId(),
+                    keycloakId,
+                    "USER_DELETED"
+            );
+
+            switch (result) {
+                case ENQUEUED -> log.info("Outbox enqueued: eventId={}, keycloakId={}", event.eventId(), keycloakId);
+                case ALREADY_ENQUEUED -> log.debug("Outbox already enqueued (idempotent): eventId={}, keycloakId={}",
+                        event.eventId(), keycloakId);
+            }
+
+            // ✅ Outbox enqueue 성공(또는 이미 처리됨) → ACK
+            ack.acknowledge();
+
+        } catch (Exception e) {
+            throw e;
         }
     }
 

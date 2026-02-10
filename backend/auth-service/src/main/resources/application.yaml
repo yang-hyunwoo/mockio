@@ -20,3 +20,5 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
+  config:
+    import: classpath:application-kafka.yaml

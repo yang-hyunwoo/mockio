@@ -13,6 +13,7 @@ package com.mockio.ai_service.ollama.generator;
 
 import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.ai_service.ollama.client.OllamaClient;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
@@ -34,6 +35,11 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     private final String model = "llama3.1:8b";
 
 
+    @Override
+    public AiEngine engine() {
+        return AiEngine.OLLAMA;
+    }
+
     /**
      * 인터뷰 질문 생성 요청을 처리한다.
      *
@@ -45,7 +51,7 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
      * @return 생성된 인터뷰 질문 목록
      */
     @Override
-    @CircuitBreaker(name = "ollamaChat", fallbackMethod = "fallbackGenerate")
+    @CircuitBreaker(name = "ollamaChat")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
         String commandText =  "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
         Double temperature = 0.7;
@@ -86,26 +92,5 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
         }
 
        return new GeneratedQuestion(result);
-    }
-
-
-
-    private GeneratedQuestion fallbackGenerate(GenerateQuestionCommand command, Throwable ex) {
-        log.warn("Ollama generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
-                command.track(), command.questionCount(), command.difficulty(), ex.toString());
-        List<GeneratedQuestion.Item> fallback = new ArrayList<>();
-        int n = command.questionCount();
-        List<String> base = FallbackQuestionRegistry.get(command.track(), command.difficulty());
-
-        for (int i = 0; i < Math.min(n, base.size()); i++) {
-            fallback.add(new GeneratedQuestion.Item(((i + 1) * 10),
-                    base.get(i),
-                    "FALLBACK",
-                    "N/A",
-                    "v1",
-                    0.0));
-        }
-
-        return new GeneratedQuestion(fallback);
     }
 }

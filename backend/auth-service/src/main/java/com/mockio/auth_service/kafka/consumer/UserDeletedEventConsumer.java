@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.auth_service.constant.EnqueueResult;
 import com.mockio.auth_service.kafka.dto.UserLifecycleEvent;
 import com.mockio.auth_service.kafka.OutboxAuthEnqueueService;
+import com.mockio.common_core.exception.NonRetryableEventException;
+import com.mockio.common_core.exception.TransientBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -76,7 +78,7 @@ public class UserDeletedEventConsumer {
             ack.acknowledge();
 
         } catch (Exception e) {
-            throw e;
+            throw new NonRetryableEventException("Business error", e);
         }
     }
 

@@ -45,7 +45,6 @@ public class InterviewFeedbackConsumer {
             event = parser.parse(messageJson);
         } catch (Exception e) {
             //파싱 불가 → 재시도 의미 없음
-            ack.acknowledge();
             throw new NonRetryableEventException("Invalid message", e);
         }
 
@@ -69,14 +68,9 @@ public class InterviewFeedbackConsumer {
 
             ack.acknowledge();
 
-        } catch (NonRetryableEventException e) {
-            // 재시도 의미 없음 → ACK + DLQ
-            ack.acknowledge();
-            throw e;
-
         } catch (Exception e) {
             // 재시도 가능 → ACK 안 함 → Retry → DLQ
-            throw e;
+            throw new NonRetryableEventException("Business error", e);
         }
     }
 

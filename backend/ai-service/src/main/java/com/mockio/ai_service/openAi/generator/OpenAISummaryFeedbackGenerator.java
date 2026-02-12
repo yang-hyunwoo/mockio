@@ -2,7 +2,8 @@ package com.mockio.ai_service.openAi.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.ai_service.openAi.client.OpenAIClient;
+import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.*;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +15,21 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OpenAISummaryFeedbackGenerator implements SummaryFeedbackGenerator {
 
-    private final OpenAIClient client;
+    private final SpringAiOpenAIClient client;
     private final ObjectMapper objectMapper;
 
     private static final String MODEL = "gpt-4o-mini";
     private static final String PROVIDER = "OPENAI";
     private static final String PROMPT_VERSION = "v1";
 
+
     @Override
-    @CircuitBreaker(name = "openaiSummaryChat", fallbackMethod = "fallbackGenerate")
+    public AiEngine engine() {
+        return AiEngine.OPENAI;
+    }
+
+    @Override
+    @CircuitBreaker(name = "openaiSummaryChat")
     public GeneratedSummaryFeedback generate(GeneratedSummaryFeedbackCommand command) {
         Double temperature = 0.2;
 
@@ -149,23 +156,6 @@ public class OpenAISummaryFeedbackGenerator implements SummaryFeedbackGenerator 
         return s == null ? "" : s;
     }
 
-    @SuppressWarnings("unused")
-    private GeneratedSummaryFeedback fallbackGenerate(GeneratedSummaryFeedbackCommand command, Throwable ex) {
-        log.warn("OpenAI summary fallback triggered. interviewId={}, cause={}",
-                command.interviewId(), ex.toString());
-
-        return new GeneratedSummaryFeedback(
-                command.interviewId(),
-                "외부 AI 서버 오류로 요약 피드백을 생성하지 못했습니다.",
-                0,
-                null,
-                null,
-                "FALLBACK",
-                "N/A",
-                PROMPT_VERSION,
-                0.0
-        );
-    }
 
     private record ParsedSummary(
             String summaryText,

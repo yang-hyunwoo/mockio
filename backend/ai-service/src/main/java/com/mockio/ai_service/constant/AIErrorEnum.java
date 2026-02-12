@@ -20,6 +20,7 @@ public enum AIErrorEnum implements ErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "AI_BAD_REQUEST", "AI 요청 형식이 올바르지 않습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED.value(), "AI_UNAUTHORIZED", "AI 인증에 실패했습니다."),
     RATE_LIMIT(HttpStatus.TOO_MANY_REQUESTS.value(), "AI_RATE_LIMIT", "AI 요청이 너무 많아 잠시 후 다시 시도해 주세요."),
+    TEMPORARY_ERROR(HttpStatus.TEMPORARY_REDIRECT.value(),"TEMPORARY_ERROR","AI TEMPORARY_ERROR")
     ;
 
     private final int httpStatus;

@@ -12,49 +12,109 @@ package com.mockio.ai_service.generator;
  */
 
 import com.mockio.ai_service.constant.AIErrorEnum;
-import com.mockio.ai_service.generator.move.FakeInterviewQuestionGenerator;
-import com.mockio.ai_service.ollama.generator.OllamaInterviewQuestionGenerator;
-import com.mockio.ai_service.openAi.generator.OpenAIInterviewQuestionGenerator;
+import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @Primary
 @RequiredArgsConstructor
+@Slf4j
 public class CompositeInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
-    private final OpenAIInterviewQuestionGenerator openAi;
-    private final OllamaInterviewQuestionGenerator ollama;
-    private final FakeInterviewQuestionGenerator fake;
+    private final List<InterviewQuestionGenerator> generators;
 
     @Value("${ai.generator}")
     private String mode;
 
     @Override
+    public AiEngine engine() {
+        return null;
+    }
+
+    @Override
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
-        if ("ollama".equalsIgnoreCase(mode)) {
-            return ollama.generate(command);
+        List<InterviewQuestionGenerator> chain = buildChain(mode);
+
+        RuntimeException last = null;
+        for (InterviewQuestionGenerator g : chain) {
+            try {
+                return g.generate(command);
+            } catch (RuntimeException ex) {
+                last = ex;
+                if (!isFallbackable(ex)) {
+                    throw ex;
+                }
+            }
         }
-        if ("fake".equalsIgnoreCase(mode)) {
-            return fake.generate(command);
+        return fallbackGenerate(command, last);
+    }
+
+    private List<InterviewQuestionGenerator> buildChain(String mode) {
+        //  openai -> ollama -> fake
+        //     ollama -> openai -> fake
+        AiEngine primary = parse(mode);
+
+        InterviewQuestionGenerator openai = find(AiEngine.OPENAI);
+        InterviewQuestionGenerator ollama = find(AiEngine.OLLAMA);
+        InterviewQuestionGenerator fake = find(AiEngine.FAKE);
+
+        return switch (primary) {
+            case OLLAMA -> List.of(ollama, openai, fake);
+            case FAKE -> List.of(fake);
+            default -> List.of(openai, ollama, fake);
+        };
+    }
+
+    private InterviewQuestionGenerator find(AiEngine engine) {
+        return generators.stream()
+                .filter(g -> g.engine() == engine)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
+    }
+
+    private AiEngine parse(String mode) {
+        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
+        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        return AiEngine.OPENAI;
+    }
+
+    private boolean isFallbackable(Throwable ex) {
+
+        if (ex instanceof CustomApiException cae) {
+            return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
+                    || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
+        }
+        return true;
+    }
+
+    private GeneratedQuestion fallbackGenerate(GenerateQuestionCommand command, Throwable ex) {
+        log.warn("ai generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
+                command.track(), command.questionCount(), command.difficulty(), ex.toString());
+        List<GeneratedQuestion.Item> fallback = new ArrayList<>();
+        int n = command.questionCount();
+        List<String> base = FallbackQuestionRegistry.get(command.track(), command.difficulty());
+
+        for (int i = 0; i < Math.min(n, base.size()); i++) {
+            fallback.add(new GeneratedQuestion.Item(((i + 1) * 10),
+                    base.get(i),
+                    "FALLBACK",
+                    "N/A",
+                    "v1",
+                    0.0));
         }
 
-        // 기본: openai 시도 -> 실패 시 폴백
-        try {
-            return openAi.generate(command);
-        } catch (CustomApiException e) {
-             if (e.getErrorEnum() == AIErrorEnum.RATE_LIMIT) {
-                //TODO : 요청 많을 경우는 어떻게 처리 할지?..
-             }
-            return ollama.generate(command);
-        } catch (Exception e) {
-            return ollama.generate(command);
-        }
+        return new GeneratedQuestion(fallback);
     }
 }

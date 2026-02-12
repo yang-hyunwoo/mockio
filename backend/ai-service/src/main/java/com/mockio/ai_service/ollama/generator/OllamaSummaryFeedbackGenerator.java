@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
 import com.mockio.ai_service.openAi.client.OpenAIClient;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
 import com.mockio.common_ai_contractor.generator.feedback.SummaryFeedbackGenerator;
@@ -25,7 +26,12 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
     private static final String PROMPT_VERSION = "v1";
 
     @Override
-    @CircuitBreaker(name = "ollamaSummaryChat", fallbackMethod = "fallbackGenerate")
+    public AiEngine engine() {
+        return AiEngine.OLLAMA;
+    }
+
+    @Override
+    @CircuitBreaker(name = "ollamaSummaryChat")
     public GeneratedSummaryFeedback generate(GeneratedSummaryFeedbackCommand command) {
         Double temperature = 0.2;
 
@@ -150,24 +156,6 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
 
     private String nullToEmpty(String s) {
         return s == null ? "" : s;
-    }
-
-    @SuppressWarnings("unused")
-    private GeneratedSummaryFeedback fallbackGenerate(GeneratedSummaryFeedbackCommand command, Throwable ex) {
-        log.warn("Ollama summary fallback triggered. interviewId={}, cause={}",
-                command.interviewId(), ex.toString());
-
-        return new GeneratedSummaryFeedback(
-                command.interviewId(),
-                "외부 AI 서버 오류로 요약 피드백을 생성하지 못했습니다.",
-                0,
-                null,
-                null,
-                "FALLBACK",
-                "N/A",
-                PROMPT_VERSION,
-                0.0
-        );
     }
 
     private record ParsedSummary(

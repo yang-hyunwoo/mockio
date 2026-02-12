@@ -11,8 +11,8 @@ package com.mockio.ai_service.openAi.generator;
  * 최종 질문 목록으로 가공된다.</p>
  */
 
-import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
-import com.mockio.ai_service.openAi.client.OpenAIClient;
+import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
@@ -30,9 +30,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
-    private final OpenAIClient client;
+    private final SpringAiOpenAIClient client;
     private final String MODEL = "gpt-4o-mini";
 
+
+    @Override
+    public AiEngine engine() {
+        return AiEngine.OPENAI;
+    }
 
     /**
      * 인터뷰 질문 생성 요청을 처리한다.
@@ -45,7 +50,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
      * @return 생성된 인터뷰 질문 목록
      */
     @Override
-    @CircuitBreaker(name = "openaiChat", fallbackMethod = "fallbackGenerate")
+    @CircuitBreaker(name = "openaiChat")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
 
         String commandText =  "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
@@ -88,24 +93,4 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
        return new GeneratedQuestion(result);
     }
 
-
-    @SuppressWarnings("unused")
-    private GeneratedQuestion fallbackGenerate(GenerateQuestionCommand command, Throwable ex) {
-        log.warn("OpenAI generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
-                command.track(), command.questionCount(), command.difficulty(), ex.toString());
-        List<GeneratedQuestion.Item> fallback = new ArrayList<>();
-        int n = command.questionCount();
-        List<String> base = FallbackQuestionRegistry.get(command.track(), command.difficulty());
-
-        for (int i = 0; i < Math.min(n, base.size()); i++) {
-            fallback.add(new GeneratedQuestion.Item(((i + 1) * 10),
-                    base.get(i),
-                    "FALLBACK",
-                    "N/A",
-                    "v1",
-                    0.0));
-        }
-
-        return new GeneratedQuestion(fallback);
-    }
 }

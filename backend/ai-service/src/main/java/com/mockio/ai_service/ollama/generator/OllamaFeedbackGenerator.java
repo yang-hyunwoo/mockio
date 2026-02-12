@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
 import com.mockio.ai_service.openAi.client.OpenAIClient;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
@@ -24,7 +25,12 @@ public class OllamaFeedbackGenerator implements FeedbackGenerator {
 
 
     @Override
-    @CircuitBreaker(name = "ollamaFeedbackChat", fallbackMethod = "fallbackGenerate")
+    public AiEngine engine() {
+        return AiEngine.OLLAMA;
+    }
+
+    @Override
+    @CircuitBreaker(name = "ollamaFeedbackChat")
     public GeneratedFeedback generate(GenerateFeedbackCommand command) {
         Double temperature = 0.3;
 
@@ -116,19 +122,4 @@ public class OllamaFeedbackGenerator implements FeedbackGenerator {
         return s.length() > 500 ? s.substring(0, 500) + "...(truncated)" : s;
     }
 
-    @SuppressWarnings("unused")
-    private GeneratedFeedback fallbackGenerate(GenerateFeedbackCommand command, Throwable ex) {
-        log.warn("OpenAI feedback fallback triggered. track={}, difficulty={}, cause={}",
-                command.track(), command.difficulty(), ex.toString());
-
-        // 프로젝트 정책에 맞게 최소 fallback 구성
-        return new GeneratedFeedback(
-                "외부 AI 서버 오류로 피드백을 생성하지 못했습니다.",
-                0,
-                "FALLBACK",
-                "N/A",
-                "v1",
-                0.0
-        );
-    }
 }

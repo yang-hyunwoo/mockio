@@ -6,6 +6,7 @@ import com.mockio.user_service.kafka.domain.ProcessedEvent;
 import com.mockio.user_service.dto.UserLifecycleEvent;
 import com.mockio.user_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.user_service.kafka.support.UserLifecycleEventParser;
+import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserLifecycleConsumer {
 
+    private final UserProfileRepository userProfileRepository;
     private final ProcessedEventRepository processedEventRepository;
     private final UserLifecycleEventParser parser;
     private static final String CONSUMER_NAME = "user-service.user-lifecycle";
@@ -30,13 +32,11 @@ public class UserLifecycleConsumer {
             event = parser.parse(messageJson);
         } catch (Exception e) {
             //파싱 불가 → 재시도 의미 없음
-            ack.acknowledge();
             throw new NonRetryableEventException("Invalid message", e);
         }
 
         try {
             processedEventRepository.save(ProcessedEvent.of(event.eventId(), CONSUMER_NAME));
-
         } catch (DataIntegrityViolationException e) {
             // 이미 처리됨 → 정상 종료(ACK)
             ack.acknowledge();
@@ -46,16 +46,8 @@ public class UserLifecycleConsumer {
         try {
             handleBusiness(event);
             ack.acknowledge();
-        } catch (TransientBusinessException e) {
-            //재시도 필요
-            throw e;
-        }  catch (NonRetryableEventException e) {
-            ack.acknowledge();
-            throw e;
-
         } catch (Exception e) {
             //재시도 의미 없음
-
             throw new NonRetryableEventException("Business error", e);
         }
     }

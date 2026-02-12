@@ -14,7 +14,9 @@ package com.mockio.ai_service.openAi.generator;
  * FollowUpQuestionGenerator 전략 구현체로 사용된다.</p>
  */
 
-import com.mockio.ai_service.openAi.client.OpenAIClient;
+
+import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
@@ -33,7 +35,12 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
     private static final String MODEL = "gpt-4o-mini";
     private static final String PROMPT_VERSION = "followup-v1";
 
-    private final OpenAIClient client;
+    private final SpringAiOpenAIClient client;
+
+    @Override
+    public AiEngine engine() {
+        return AiEngine.OPENAI;
+    }
 
     /**
      * 최근 인터뷰 문답을 기반으로 후속 질문을 생성한다.
@@ -49,7 +56,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
      * @return 생성된 후속 질문 결과
      */
     @Override
-    @CircuitBreaker(name = "openaiFollowUpChat", fallbackMethod = "fallbackFollow")
+    @CircuitBreaker(name = "openaiFollowUpChat")
     public FollowUpQuestion generate(FollowUpQuestionCommand command) {
 
         var qa = command.recentQa();
@@ -110,14 +117,6 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
             q = q + "?";
         }
         return q;
-    }
-
-    @SuppressWarnings("unused")
-    private FollowUpQuestion fallbackFollow(FollowUpQuestionCommand command, Throwable t) {
-        String q = "방금 답변에서 핵심 근거를 한 문장으로 요약하고, 그 근거가 깨질 수 있는 반례를 하나 들어보세요.";
-        return new FollowUpQuestion(new FollowUpQuestion.Item(
-                q, "FALLBACK", "N/A", "v1", 0.0
-        ));
     }
 
 }

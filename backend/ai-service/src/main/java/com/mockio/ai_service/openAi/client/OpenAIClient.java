@@ -66,8 +66,8 @@ public class OpenAIClient implements AIChatClient {
                 .block(REQUEST_TIMEOUT);
 
         if (res == null || res.choices() == null || res.choices().isEmpty()
-                || res.choices().get(0).message() == null
-                || res.choices().get(0).message().content() == null) {
+                || res.choices().getFirst().message() == null
+                || res.choices().getFirst().message().content() == null) {
             throw new CustomApiException(
                     INTERNAL_SERVER_ERROR.value(),
                     ILLEGALSTATE,
@@ -75,7 +75,7 @@ public class OpenAIClient implements AIChatClient {
             );
         }
 
-        return res.choices().get(0).message().content();
+        return res.choices().getFirst().message().content();
     }
 
     private Mono<OpenAIChatResponse> handleResponse(ClientResponse response) {

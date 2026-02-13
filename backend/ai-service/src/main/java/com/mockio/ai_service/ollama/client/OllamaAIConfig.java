@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class OllamaAIConfig {
 
     @Bean
-    WebClient ollamaWebClient(@Value("${openai.api-key}") String apiKey) {
+    WebClient ollamaWebClient() {
         return WebClient.builder()
                 .baseUrl("http://localhost:11434")
                 .defaultHeader("Content-Type", "application/json")

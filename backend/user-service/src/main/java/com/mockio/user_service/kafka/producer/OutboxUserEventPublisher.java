@@ -24,8 +24,7 @@ public class OutboxUserEventPublisher {
             for (Long id : ids) {
                 worker.publishOne(lockerId, id);
             }
-
         });
-
     }
+
 }

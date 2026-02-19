@@ -16,6 +16,4 @@ public record UserInterviewSettingReadResponse(
     EnumResponse interviewMode,
     @Schema(description = "면접_답변_시간", example = "90")
     Integer answerTimeSeconds
-) {
-
-}
+) {}

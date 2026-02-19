@@ -13,4 +13,5 @@ public class FaqMapper {
                 .faqType(faqBoard.getFaqType())
                 .build();
     }
+
 }

@@ -66,4 +66,5 @@ public class KoreanEnglishValidator implements ConstraintValidator<KoreanEnglish
     private String stripBraces(String key) {
         return key.replaceAll("[{}]", "");
     }
+
 }

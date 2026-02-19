@@ -16,7 +16,6 @@ import com.mockio.auth_service.constant.EnqueueResult;
 import com.mockio.auth_service.kafka.dto.UserLifecycleEvent;
 import com.mockio.auth_service.kafka.OutboxAuthEnqueueService;
 import com.mockio.common_core.exception.NonRetryableEventException;
-import com.mockio.common_core.exception.TransientBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -29,9 +28,7 @@ import org.springframework.stereotype.Component;
 public class UserDeletedEventConsumer {
 
     private final OutboxAuthEnqueueService enqueueService;
-
     private final ObjectMapper objectMapper;
-
 
     /**
      * Kafka로부터 사용자 라이프사이클 이벤트 메시지를 수신한다.
@@ -74,7 +71,7 @@ public class UserDeletedEventConsumer {
                         event.eventId(), keycloakId);
             }
 
-            // ✅ Outbox enqueue 성공(또는 이미 처리됨) → ACK
+            // Outbox enqueue 성공(또는 이미 처리됨) → ACK
             ack.acknowledge();
 
         } catch (Exception e) {

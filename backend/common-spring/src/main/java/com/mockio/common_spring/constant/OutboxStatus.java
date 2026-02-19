@@ -1,6 +1,5 @@
 package com.mockio.common_spring.constant;
 
-import com.mockio.common_core.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,4 +14,5 @@ public enum OutboxStatus  {
     DEAD("실패");
 
     private final String label;
+
 }

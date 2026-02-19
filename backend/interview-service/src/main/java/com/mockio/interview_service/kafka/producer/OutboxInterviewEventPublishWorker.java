@@ -38,7 +38,6 @@ public class OutboxInterviewEventPublishWorker {
         for (OutboxInterviewEvent e : events) {
             e.markProcessing(lockerId);
         }
-
         return events.stream()
                 .map(OutboxInterviewEvent::getId)
                 .toList();
@@ -93,4 +92,5 @@ public class OutboxInterviewEventPublishWorker {
         long pid = ProcessHandle.current().pid();
         return host + "-" + pid;
     }
+
 }

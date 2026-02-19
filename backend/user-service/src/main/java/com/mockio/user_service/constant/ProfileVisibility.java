@@ -15,4 +15,5 @@ public enum ProfileVisibility {
     ;
 
     private final String label;
+
 }

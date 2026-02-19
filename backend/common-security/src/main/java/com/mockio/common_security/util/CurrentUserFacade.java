@@ -55,4 +55,5 @@ public class CurrentUserFacade<T> {
             super(message);
         }
     }
+
 }

@@ -66,7 +66,6 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
         if (faqReqDto.getQuestion() != null && !faqReqDto.getQuestion().isBlank()) {
             builder.and(f.question.value.containsIgnoreCase(faqReqDto.getQuestion()));
         }
-
     }
 
 }

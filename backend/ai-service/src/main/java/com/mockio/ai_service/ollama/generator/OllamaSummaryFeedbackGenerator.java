@@ -3,7 +3,6 @@ package com.mockio.ai_service.ollama.generator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
-import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;

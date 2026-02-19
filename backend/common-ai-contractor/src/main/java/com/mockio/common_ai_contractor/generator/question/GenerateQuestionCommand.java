@@ -12,5 +12,4 @@ public record GenerateQuestionCommand(
         InterviewMode interviewMode,
         Integer answerTimeSeconds,
         int questionCount
-) {
-}
+) {}

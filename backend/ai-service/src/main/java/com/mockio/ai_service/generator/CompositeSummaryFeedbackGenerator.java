@@ -77,7 +77,6 @@ public class CompositeSummaryFeedbackGenerator implements SummaryFeedbackGenerat
     }
 
     private boolean isFallbackable(Throwable ex) {
-
         if (ex instanceof CustomApiException cae) {
             return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
                     || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
@@ -101,4 +100,5 @@ public class CompositeSummaryFeedbackGenerator implements SummaryFeedbackGenerat
                 0.0
         );
     }
+
 }

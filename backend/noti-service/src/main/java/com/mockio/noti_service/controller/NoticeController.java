@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoticeController {
 
     private final NoticeService noticeService;
-
     private final MessageUtil messageUtil;
 
     @Operation(summary = "공지 사항 조회", description = "공지 사항 조회")

@@ -32,7 +32,4 @@ public class InquiryListResDto {
     @Schema(description = "qna유형" , example = "SERVICE")
     private InquiryType qnaType;
 
-
-
-
 }

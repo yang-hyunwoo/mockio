@@ -38,4 +38,5 @@ public record OllamaChatResponse(
                 String content
         ) {}
     }
+
 }

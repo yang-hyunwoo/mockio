@@ -16,9 +16,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.web.AuthenticationEntryPoint;
-
 import java.io.IOException;
-
 import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -96,4 +94,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private static String safeLower(String s) {
         return s == null ? "" : s.toLowerCase();
     }
+
 }

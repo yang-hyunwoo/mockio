@@ -111,4 +111,5 @@ public class InterviewAnswer extends BaseTimeEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

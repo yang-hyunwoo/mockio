@@ -21,5 +21,6 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
 
     int countByInterviewIdAndType(Long interviewId , QuestionType type);
 
+    boolean existsByInterviewIdAndParentQuestionIdAndType(Long interviewId, Long parentQuestionId, QuestionType type);
 
 }

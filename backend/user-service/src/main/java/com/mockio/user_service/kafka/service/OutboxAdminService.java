@@ -27,7 +27,7 @@ public class OutboxAdminService {
             int updated = repo.resetForRetry(e.getId(), OutboxStatus.PENDING, 0, OffsetDateTime.now());
             count += updated;
         }
-
         return count;
     }
+
 }

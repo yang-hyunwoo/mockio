@@ -26,4 +26,5 @@ public class PasswordValidator implements ConstraintValidator<Password, String> 
         }
         return true;
     }
+
 }

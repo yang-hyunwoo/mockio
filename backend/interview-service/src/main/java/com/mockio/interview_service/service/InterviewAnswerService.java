@@ -2,6 +2,8 @@ package com.mockio.interview_service.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
+import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_core.exception.CustomApiException;
@@ -20,6 +22,8 @@ import com.mockio.interview_service.kafka.repository.OutboxInterviewEventReposit
 import com.mockio.interview_service.repository.InterviewAnswerRepository;
 import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
+import com.mockio.interview_service.util.DeepDiveGate;
 import com.mockio.interview_service.util.followup.FollowUpDecider;
 import com.mockio.interview_service.util.followup.FollowUpDecision;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +45,7 @@ public class InterviewAnswerService {
     private final AIServiceClient aiServiceClient;
     private final OutboxInterviewEventRepository outboxInterviewEventRepository;
     private final ObjectMapper objectMapper;
+    private final DeepDiveGate deepDiveGate;
 
     @Transactional
     public InterviewQuestionReadResponse interviewAnswerSave(String userId, InterviewAnswerRequest interviewAnswerRequest) {
@@ -68,7 +73,7 @@ public class InterviewAnswerService {
                 .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey());
 
         if (existing.isPresent()) {
-            return rebuildResponse(interview, interviewQuestion, existing.get(), interviewAnswerRequest);
+            return rebuildResponse(interview, interviewQuestion);
         }
         // 2) attempt 계산
         int nextAttempt = interviewAnswerRepository.findMaxAttemptByQuestionId(interviewAnswerRequest.questionId()).orElse(0) + 1;
@@ -92,9 +97,8 @@ public class InterviewAnswerService {
                     .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey())
                     .orElseThrow(() -> e);
 
-            return rebuildResponse(interview, interviewQuestion, saved, interviewAnswerRequest);
+            return rebuildResponse(interview, interviewQuestion);
         }
-
 
         FollowUpDecision decision = followUpDecider.decide(interviewQuestion, interviewAnswerRequest, interview);
 
@@ -121,12 +125,17 @@ public class InterviewAnswerService {
                 )
         );
 
+        boolean canAsk = canAskFollowUp(questionCount, followUpCount);
+        boolean isBase = interviewQuestion.getType() == QuestionType.BASE;
+        boolean isDeepDive = interviewQuestion.getType() == QuestionType.DEEP_DIVE;
+        boolean wantsFollowUp = decision.askFollowUp();
         /**
-         * 꼬리 질문 유효성 검사에 걸렸다면
-         * ai서비스에서 꼬리 질문을 추가 후 꼬리 질문 리턴
-         * 그렇지 않다면 다음 seq 리턴
+         * 1) 룰로 바로 꼬리질문(일반)
+         * 2) 룰 통과 시: Gate 통과하면 deepdive 판정 → 필요하면 딥다이브 꼬리질문
+         * 3) 둘 다 아니면 다음 질문/완료
          */
-        if (decision.askFollowUp() && canAskFollowUp(questionCount,followUpCount)) {
+        if (canAsk && wantsFollowUp) {
+
             FollowUpQuestionCommand followUpQuestionCommand = new FollowUpQuestionCommand(
                     interview.getTrack(),
                     interview.getDifficulty(),
@@ -140,12 +149,14 @@ public class InterviewAnswerService {
 
             FollowUpQuestion followUpQuestion = aiServiceClient.generateFollowQuestions(followUpQuestionCommand);
             FollowUpQuestion.Item q = followUpQuestion.questions();
+            int nextSeq = isDeepDive ? (interviewQuestion.getSeq() + 1) : (interviewQuestion.getSeq() + 5);
+            int nextDepth = interviewQuestion.getDepth() + 1;
 
             InterviewQuestion saveFollowQuestion = InterviewQuestion.createFollowUp(
                     interview,
-                    (interviewQuestion.getSeq() + 5),
+                    nextSeq,
                     interviewQuestion.getId(),
-                    interviewQuestion.getDepth(),
+                    nextDepth,
                     interviewQuestion.getId(),
                     null,
                     q.questionText(),
@@ -158,37 +169,93 @@ public class InterviewAnswerService {
             interviewQuestionRepository.save(saveFollowQuestion);
             answer.followupUpdate(decision.reason());
             return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion));
-
-        } else {
-            return interviewQuestionRepository
-                    .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq())
-                    .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
-                    .orElseGet(() -> {
-                        interview.complete();
-
-                        InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
-                                interview.getId(),
-                                interview.getTrack().name(),
-                                interview.getDifficulty().name(),
-                                interview.getFeedbackStyle().name()
-                        );
-
-                        //outbox 피드백 저장
-                        JsonNode completedPayloadJsonNode = objectMapper.valueToTree(completedPayload);
-
-                        outboxInterviewEventRepository.save(
-                                OutboxInterviewEvent.createNew(
-                                        "FEEDBACK",
-                                        interview.getId(),
-                                        "InterviewCompleted",
-                                        completedPayloadJsonNode
-                                )
-                        );
-
-                        return InterviewQuestionMapper.fromList(List.of());
-                    });
         }
 
+        // 룰에서 skip이어도, Gate 통과하면 deepdive 판정
+        boolean deepDiveCandidate = canAsk
+                && isBase
+                && !wantsFollowUp
+                && deepDiveGate.shouldCallAiForDeepDive(interview, interviewAnswerRequest);
+
+        if (deepDiveCandidate) {
+            boolean alreadyDeepDived = interviewQuestionRepository
+                    .existsByInterviewIdAndParentQuestionIdAndType(
+                            interview.getId(),
+                            interviewQuestion.getId(),
+                            QuestionType.DEEP_DIVE
+                    );
+            if (!alreadyDeepDived) {
+                DeepDiveCommand deepDiveCommand = new DeepDiveCommand(
+                        interview.getTrack(),
+                        interview.getDifficulty(),
+                        interviewQuestion.getQuestionText(),
+                        interviewAnswerRequest.answerText()
+                );
+
+                GeneratedDeepDiveBundle result = aiServiceClient.generateDeepDiveResult(deepDiveCommand);
+                DeepDiveDecision dd = (result == null) ? null : result.decision();
+                if (dd != null && dd.shouldFollowUp()) {
+
+                    String deepDiveContext = buildDeepDiveContext(dd);
+                    FollowUpQuestion deepDiveQuestion = result.question();
+                    if (deepDiveQuestion == null || deepDiveQuestion.questions() == null) {
+
+                    } else {
+                        FollowUpQuestion.Item q = deepDiveQuestion.questions();
+
+                        int deepDiveSeq = interviewQuestion.getSeq() + 7;
+                        int deepDiveDepth = interviewQuestion.getDepth() + 2;
+
+                        InterviewQuestion saveDeepDiveQuestion = InterviewQuestion.createDeepDive(
+                                interview,
+                                deepDiveSeq,
+                                interviewQuestion.getId(),
+                                deepDiveDepth,
+                                interviewQuestion.getId(),
+                                null,
+                                q.questionText(),
+                                q.provider(),
+                                q.model(),
+                                q.promptVersion(),
+                                q.temperature()
+                        );
+
+                        interviewQuestionRepository.save(saveDeepDiveQuestion);
+                        answer.followupUpdate(deepDiveContext);
+                        return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion));
+                    }
+
+                }
+            }
+        }
+
+        // 여기로 오면 꼬리질문 없이 다음 질문/완료
+        return interviewQuestionRepository
+                .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq())
+                .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
+                .orElseGet(() -> {
+                    interview.complete();
+
+                    InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
+                            interview.getId(),
+                            interview.getTrack().name(),
+                            interview.getDifficulty().name(),
+                            interview.getFeedbackStyle().name()
+                    );
+
+                    JsonNode completedPayloadJsonNode = objectMapper.valueToTree(completedPayload);
+
+                    outboxInterviewEventRepository.save(
+                            OutboxInterviewEvent.createNew(
+                                    "FEEDBACK",
+                                    interview.getId(),
+                                    "InterviewCompleted",
+                                    completedPayloadJsonNode
+                            )
+                    );
+
+                    return InterviewQuestionMapper.fromList(List.of());
+                });
     }
 
     private Interview findInterview(String userId, Long interviewId) {
@@ -206,9 +273,7 @@ public class InterviewAnswerService {
 
     private InterviewQuestionReadResponse rebuildResponse(
             Interview interview,
-            InterviewQuestion interviewQuestion,
-            InterviewAnswer existingAnswer,
-            InterviewAnswerRequest req
+            InterviewQuestion interviewQuestion
     ) {
         // 1) 다음 질문이 있는지 조회
         return interviewQuestionRepository
@@ -222,4 +287,20 @@ public class InterviewAnswerService {
                     return InterviewQuestionMapper.fromList(List.of());
                 });
     }
+
+    private String buildDeepDiveContext(DeepDiveDecision dd) {
+        String focus = (dd.focus() == null || dd.focus().isEmpty()) ? "" : String.join(",", dd.focus());
+        String gaps = (dd.gaps() == null || dd.gaps().isEmpty()) ? "" : String.join(" / ", dd.gaps());
+
+        int depth = dd.depth();
+        if (depth < 1) depth = 1;
+        if (depth > 3) depth = 3;
+
+        return "DEEPDIVE"
+                + " depth=" + depth
+                + " focus=" + focus
+                + " gaps=" + gaps
+                + " reason=" + (dd.reason() == null ? "" : dd.reason());
+    }
+
 }

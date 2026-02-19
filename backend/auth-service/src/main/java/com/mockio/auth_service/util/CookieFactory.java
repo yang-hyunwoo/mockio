@@ -78,4 +78,5 @@ public class CookieFactory {
     public String refreshCookieName() {
         return refreshName;
     }
+
 }

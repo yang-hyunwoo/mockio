@@ -44,14 +44,14 @@ public interface OutboxAuthEventRepository extends JpaRepository<OutboxAuthEvent
      * @return 락이 획득된 Outbox 이벤트 목록
      */
     @Query(value = """
-    SELECT *
-    FROM outbox_auth_events
-    WHERE status IN ('NEW','PENDING','FAILED') 
-      AND next_attempt_at <= now()
-    ORDER BY next_attempt_at ASC, created_at ASC
-    LIMIT :limit
-    FOR UPDATE SKIP LOCKED
-    """, nativeQuery = true)
+            SELECT *
+            FROM outbox_auth_events
+            WHERE status IN ('NEW','PENDING','FAILED') 
+              AND next_attempt_at <= now()
+            ORDER BY next_attempt_at ASC, created_at ASC
+            LIMIT :limit
+            FOR UPDATE SKIP LOCKED
+            """, nativeQuery = true)
     List<OutboxAuthEvent> lockTopDue(@Param("limit") int limit);
 
     /**
@@ -144,4 +144,5 @@ public interface OutboxAuthEventRepository extends JpaRepository<OutboxAuthEvent
      * @return 존재하면 true
      */
     boolean existsByIdempotencyKey(String IdempotencyKey);
+
 }

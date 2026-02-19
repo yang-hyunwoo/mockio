@@ -51,5 +51,6 @@ public class PhoneNumberValidator implements ConstraintValidator<PhoneNumber, St
         String message = messageSource.getMessage(key, null, Locale.getDefault());
         context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
     }
+
 }
 

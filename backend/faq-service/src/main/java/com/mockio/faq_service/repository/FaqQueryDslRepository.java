@@ -14,7 +14,6 @@ public interface FaqQueryDslRepository {
      * @param faqReqDto 검색 조건
      * @return faq 목록 페이지 객체
      */
-    Page<FaqBoard> findFaqListPage(Pageable pageable,
-                                   FaqReqDto faqReqDto);
+    Page<FaqBoard> findFaqListPage(Pageable pageable,FaqReqDto faqReqDto);
 
 }

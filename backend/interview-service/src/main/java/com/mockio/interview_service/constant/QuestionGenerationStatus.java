@@ -13,4 +13,5 @@ public enum QuestionGenerationStatus {
     ;
 
     private final String label;
+
 }

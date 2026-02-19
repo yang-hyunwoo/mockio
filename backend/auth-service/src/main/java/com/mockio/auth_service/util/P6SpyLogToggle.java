@@ -60,4 +60,5 @@ public final class P6SpyLogToggle {
             P6SPY.setLevel(prev);
         }
     }
+
 }

@@ -25,4 +25,5 @@ public class EnumValidator implements ConstraintValidator<EnumValidation, String
     public boolean isValid(String value, ConstraintValidatorContext context) {
         return value != null && acceptedValues.contains(value) && !value.isBlank();
     }
+
 }

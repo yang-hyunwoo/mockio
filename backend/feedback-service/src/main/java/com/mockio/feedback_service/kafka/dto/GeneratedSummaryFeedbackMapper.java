@@ -29,4 +29,5 @@ public class GeneratedSummaryFeedbackMapper {
                 items
         );
     }
+
 }

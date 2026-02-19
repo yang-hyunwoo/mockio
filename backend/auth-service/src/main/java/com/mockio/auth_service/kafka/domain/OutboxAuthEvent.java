@@ -138,4 +138,5 @@ public class OutboxAuthEvent extends BaseTimeEntity {
         if (s == null) return null;
         return s.length() <= max ? s : s.substring(0, max);
     }
+
 }

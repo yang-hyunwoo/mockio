@@ -55,8 +55,6 @@ public class InterviewQuestionService {
                     return interviewRepository.save(interview);
                 });
         return returnInterview.getId();
-
-
     }
 
     @Transactional
@@ -124,4 +122,5 @@ public class InterviewQuestionService {
             throw new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(), INTERVIEW_FORBIDDEN, INTERVIEW_FORBIDDEN.getMessage());
         }
     }
+
 }

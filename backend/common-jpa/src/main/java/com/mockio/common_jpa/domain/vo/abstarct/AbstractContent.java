@@ -1,6 +1,5 @@
 package com.mockio.common_jpa.domain.vo.abstarct;
 
-import com.mockio.common_core.error.ErrorCode;
 import com.mockio.common_core.exception.CustomApiException;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -31,4 +30,5 @@ public abstract class AbstractContent {
     public String toString() {
         return value;
     }
+
 }

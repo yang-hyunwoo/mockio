@@ -24,10 +24,10 @@ public class InquiryMapper {
                 .id(inquiryBoard.getId())
                 .questionTitle(inquiryBoard.getQuestionTitle())
                 .questionContent(inquiryBoard.getQuestionContent().getValue())
-                .answer(inquiryBoard.getAnswerContent().getValue() != null ? inquiryBoard.getAnswerContent().getValue()  : null)
+                .answer(inquiryBoard.getAnswerContent().getValue() != null ? inquiryBoard.getAnswerContent().getValue() : null)
                 .createdAt(inquiryBoard.getCreatedAt())
                 .answerAt(inquiryBoard.getAnswerAt())
-                .qnaType(inquiryBoard.getQnaType())
+                .qnaType(inquiryBoard.getInquiryType())
                 .build();
     }
 

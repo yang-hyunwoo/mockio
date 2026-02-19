@@ -13,6 +13,4 @@ import java.util.Optional;
 @EnableJpaAuditing(dateTimeProviderRef = "offSetDateTimeProvider")
 @ConditionalOnProperty(name = "jpa.auditing.enabled", havingValue = "true", matchIfMissing = true)
 public class JpaAuditingConfig {
-
-
 }

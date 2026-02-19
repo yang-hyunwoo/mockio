@@ -15,4 +15,5 @@ public enum InterviewMode {
     ;
 
     private final String label;
+
 }

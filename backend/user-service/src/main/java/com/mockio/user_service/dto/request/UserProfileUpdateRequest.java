@@ -12,7 +12,4 @@ public record UserProfileUpdateRequest(
         String bio,
         @Schema(description = "유저_프로필_공개여부", example = "PUBLIC")
         ProfileVisibility visibility
-
-) {
-
-}
+) {}

@@ -9,9 +9,7 @@ import java.util.List;
 public class CustomApiFieldListException extends RuntimeException {
 
     private final int status;
-
     private final ErrorCode errorEnum;
-
     private final List<ValidationErrorResponse> errors;
 
     public CustomApiFieldListException(int status,

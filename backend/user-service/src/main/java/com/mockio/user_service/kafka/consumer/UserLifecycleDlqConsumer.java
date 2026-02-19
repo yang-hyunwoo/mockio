@@ -18,4 +18,5 @@ public class UserLifecycleDlqConsumer {
 
         // 확장: Slack/Email, 혹은 dead-letter 테이블 저장
     }
+
 }

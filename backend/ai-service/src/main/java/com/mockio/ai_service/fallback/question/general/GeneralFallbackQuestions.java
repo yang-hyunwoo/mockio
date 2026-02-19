@@ -54,4 +54,5 @@ public final class GeneralFallbackQuestions {
 
         return Map.copyOf(map);
     }
+
 }

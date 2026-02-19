@@ -78,7 +78,6 @@ public class KeycloakUserClient {
         if (resp == null || resp.accessToken() == null || resp.accessToken().isBlank()) {
             throw new CustomApiException(INTERNAL_SERVER_ERROR.value(),ILLEGALSTATE,"Failed to get Keycloak admin access token.");
         }
-
         return resp.accessToken();
     }
 

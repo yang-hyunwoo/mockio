@@ -11,4 +11,5 @@ public record FallbackKey(InterviewTrack track, InterviewDifficulty difficulty) 
                 difficulty != null ? difficulty : InterviewDifficulty.EASY
         );
     }
+
 }

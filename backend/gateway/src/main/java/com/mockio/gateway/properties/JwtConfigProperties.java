@@ -16,4 +16,5 @@ public class JwtConfigProperties {
     public void setIssuerUri(String issuerUri) {
         this.issuerUri = issuerUri;
     }
+
 }

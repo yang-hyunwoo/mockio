@@ -174,8 +174,6 @@ public class Interview extends BaseTimeEntity {
         this.questionGenError = error;
     }
 
-
-
     public void complete() {
         if (status == InterviewStatus.ENDED) return; // 멱등
         if (status != InterviewStatus.ACTIVE) {
@@ -204,4 +202,5 @@ public class Interview extends BaseTimeEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

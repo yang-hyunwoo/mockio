@@ -14,11 +14,10 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     Optional<Interview> findActiveByUserIdAndStatus(String userId, InterviewStatus status);
 
-    Optional<Interview> findActiveByIdAndStatus(Long id, InterviewStatus status);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Interview i where i.id = :id and i.userId = :userId")
     Optional<Interview> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") String userId);
 
     Optional<Interview> findByIdAndUserId(Long id, String userId);
+
 }

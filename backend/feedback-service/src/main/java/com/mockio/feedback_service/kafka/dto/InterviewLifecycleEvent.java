@@ -12,5 +12,4 @@ public record InterviewLifecycleEvent(
         String eventType,
         JsonNode payload,
         OffsetDateTime occurredAt
-) {
-}
+) {}

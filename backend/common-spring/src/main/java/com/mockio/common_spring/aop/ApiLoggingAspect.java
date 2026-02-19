@@ -1,4 +1,5 @@
 package com.mockio.common_spring.aop;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -135,4 +136,5 @@ public class ApiLoggingAspect {
     }
 
     record LogContext(String httpMethod, String uri, String classMethod) {}
+
 }

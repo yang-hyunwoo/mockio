@@ -27,4 +27,5 @@ public enum InterviewErrorCode implements ErrorCode {
     private final int httpStatus;
     private final String code;
     private final String message;
+
 }

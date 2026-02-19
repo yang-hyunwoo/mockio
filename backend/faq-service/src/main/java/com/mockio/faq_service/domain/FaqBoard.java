@@ -87,8 +87,7 @@ public class FaqBoard extends BaseEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof FaqBoard)) return false;
-        FaqBoard that = (FaqBoard) o;
+        if (!(o instanceof FaqBoard that)) return false;
         return id != null && id.equals(that.id);
     }
 
@@ -96,4 +95,5 @@ public class FaqBoard extends BaseEntity {
     public int hashCode() {
             return getClass().hashCode();
     }
+
 }

@@ -2,7 +2,6 @@ package com.mockio.gateway.config;
 
 import com.mockio.gateway.handler.GatewayAccessDeniedHandler;
 import com.mockio.gateway.handler.GatewayAuthenticationEntryPoint;
-import com.mockio.gateway.handler.GatewaySecurityHandlers;
 import com.mockio.gateway.properties.JwtConfigProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -56,4 +55,5 @@ public class SecurityConfig {
         // Keycloak의 issuer, jwk-set-uri 사용
         return JwtDecoders.fromIssuerLocation(jwtConfigProperties.getIssuerUri());
     }
+
 }

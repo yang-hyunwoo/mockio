@@ -146,6 +146,38 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .build();
     }
 
+    /** 심화 질문 생성 */
+    public static InterviewQuestion createDeepDive(
+            Interview interview,
+            int seq,
+            Long parentQuestionId,
+            int parentDepth,
+            Long triggerAnswerId,
+            String idempotencyKey,
+            String questionText,
+            String provider,
+            String model,
+            String promptVersion,
+            Double temperature
+    ) {
+        return InterviewQuestion.builder()
+                .interview(interview)
+                .seq(seq)
+                .parentQuestionId(parentQuestionId)
+                .depth(parentDepth)
+                .triggerAnswerId(triggerAnswerId)
+                .idempotencyKey(idempotencyKey)
+                .questionText(questionText)
+                .provider(provider)
+                .model(model)
+                .promptVersion(promptVersion)
+                .temperature(temperature)
+                .status(QuestionStatus.READY)
+                .type(QuestionType.DEEP_DIVE)
+                .generatedAt(OffsetDateTime.now())
+                .build();
+    }
+
     /** 꼬리(후속) 질문 생성 */
     public static InterviewQuestion createFollowUp(
             Interview interview,
@@ -164,7 +196,7 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .interview(interview)
                 .seq(seq)
                 .parentQuestionId(parentQuestionId)
-                .depth(parentDepth + 1)
+                .depth(parentDepth)
                 .triggerAnswerId(triggerAnswerId)
                 .idempotencyKey(idempotencyKey)
                 .questionText(questionText)
@@ -207,4 +239,5 @@ public class InterviewQuestion extends BaseTimeEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

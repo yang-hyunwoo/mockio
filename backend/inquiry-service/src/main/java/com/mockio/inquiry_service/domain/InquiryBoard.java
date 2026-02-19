@@ -109,4 +109,5 @@ public class InquiryBoard extends BaseEntity {
                 ", answerAt=" + answerAt +
                 '}';
     }
+
 }

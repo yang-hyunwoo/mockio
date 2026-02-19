@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 @Configuration
 public class SwaggerConfig {
+
     @Bean
     public GroupedOpenApi userApi() {
         return GroupedOpenApi.builder()
@@ -30,4 +31,5 @@ public class SwaggerConfig {
                 .pathsToMatch("/api/admin/**")
                 .build();
     }
+
 }

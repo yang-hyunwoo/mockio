@@ -1,5 +1,6 @@
 package com.mockio.common_kafka.config;
 
+import com.mockio.common_core.exception.NonRetryableEventException;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -37,4 +38,5 @@ public class KafkaErrorHandlerConfig {
         handler.addNotRetryableExceptions(NonRetryableEventException.class);
         return handler;
     }
+
 }

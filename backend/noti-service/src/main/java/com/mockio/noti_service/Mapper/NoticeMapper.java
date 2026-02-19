@@ -15,7 +15,6 @@ public class NoticeMapper {
                 .build();
     }
 
-
     public static NoticeDetailResDto from(NoticeBoard noticeBoard,
                                           Long prevId,
                                           Long nextId
@@ -31,4 +30,5 @@ public class NoticeMapper {
                 .nextId(nextId)
                 .build();
     }
+
 }

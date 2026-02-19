@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthRefreshController {
 
     private final RefreshService refreshService;
-
     private final CookieFactory cookieFactory;
 
     /**

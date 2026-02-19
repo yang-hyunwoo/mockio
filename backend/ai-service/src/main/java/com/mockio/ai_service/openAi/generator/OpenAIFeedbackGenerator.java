@@ -2,7 +2,6 @@ package com.mockio.ai_service.openAi.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
@@ -18,11 +17,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OpenAIFeedbackGenerator implements FeedbackGenerator {
 
-
     private final SpringAiOpenAIClient client;
     private final String MODEL = "gpt-4o-mini";
     private final ObjectMapper objectMapper;
-
 
     @Override
     public AiEngine engine() {
@@ -121,6 +118,5 @@ public class OpenAIFeedbackGenerator implements FeedbackGenerator {
         if (s == null) return "";
         return s.length() > 500 ? s.substring(0, 500) + "...(truncated)" : s;
     }
-
 
 }

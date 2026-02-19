@@ -37,4 +37,5 @@ public class ProcessedEvent {
     public static ProcessedEvent of(UUID eventId, String consumerName) {
         return new ProcessedEvent(eventId, consumerName);
     }
+
 }

@@ -133,8 +133,7 @@ public class OutboxUserEvent extends BaseTimeEntity {
         if (OutboxStatus.PROCESSING != this.status) return false;
         if (this.lockedBy == null || !this.lockedBy.equals(lockerId)) return false;
         if (this.lockedAt == null) return false;
-        if (this.nextAttemptAt != null && this.nextAttemptAt.isAfter(now)) return false;
-        return true;
+        return this.nextAttemptAt == null || !this.nextAttemptAt.isAfter(now);
     }
 
     public void markProcessing(String lockerId) {
@@ -185,4 +184,5 @@ public class OutboxUserEvent extends BaseTimeEntity {
     }
 
     private static final EnumSet<OutboxStatus> CAN_MARK_PROCESSING = EnumSet.of(OutboxStatus.NEW, OutboxStatus.FAILED);
+
 }

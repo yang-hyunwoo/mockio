@@ -31,9 +31,9 @@ public enum CommonErrorEnum implements ErrorCode {
     DECRYPTION_FAILED(400, "BAD_REQUEST", "복호화에 실패했습니다."),
     ILLEGALSTATE(500, "ILLEAGAL_STATE", "500에러."),
     ;
+
     private final int httpStatus;
     private final String code;
     private final String message;
-
 
 }

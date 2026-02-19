@@ -22,4 +22,5 @@ public class OutboxAlertJob {
             log.error("Outbox DEAD events detected. count={}", dead);
         }
     }
+
 }

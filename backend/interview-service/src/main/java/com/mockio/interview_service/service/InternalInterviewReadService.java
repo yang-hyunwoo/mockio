@@ -33,15 +33,12 @@ public class InternalInterviewReadService {
                     interviewAnswer.getAnswerText(),
                     interviewAnswer.getAnswerDurationSeconds()
             );
-
             return interviewAnswerDetailResponse;
     }
-
 
     @Transactional(readOnly = true)
     public List<InterviewAnswerDetailResponse> getInterviewList(Long interviewId) {
         return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
     }
-
 
 }

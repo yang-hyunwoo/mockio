@@ -50,7 +50,6 @@ public class InterviewFeedbackConsumer {
 
         try {
             processedEventRepository.save(ProcessedEvent.of(event.eventId(), CONSUMER_NAME));
-
         } catch (DataIntegrityViolationException e) {
             // 이미 처리됨 → 정상 종료(ACK)
             ack.acknowledge();
@@ -65,9 +64,7 @@ public class InterviewFeedbackConsumer {
                         "Unknown eventType=" + event.eventType()
                 );
             }
-
             ack.acknowledge();
-
         } catch (Exception e) {
             // 재시도 가능 → ACK 안 함 → Retry → DLQ
             throw new NonRetryableEventException("Business error", e);
@@ -97,7 +94,6 @@ public class InterviewFeedbackConsumer {
                 )
         );
         feedbackTxService.markSucceeded(interviewFeedback.getAnswerId(), result);
-
     }
 
     private void handleInterviewCompleted(InterviewLifecycleEvent event) {
@@ -115,7 +111,6 @@ public class InterviewFeedbackConsumer {
 
         // 저장: interview_id
         summaryFeedbackTxService.markSucceeded(interviewSummaryFeedback.getInterviewId(), generatedSummaryFeedback);
-
     }
 
 }

@@ -6,7 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum NoticePinSort {
-
     NORMAL("기본"),
     IMPORTANT("중요") ,
     ;

@@ -11,7 +11,6 @@ public enum AiEngine {
     FAKE("fake"),
     ;
 
-
     private final String label;
 
 }

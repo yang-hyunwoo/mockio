@@ -22,7 +22,6 @@ public class OpenAISummaryFeedbackGenerator implements SummaryFeedbackGenerator 
     private static final String PROVIDER = "OPENAI";
     private static final String PROMPT_VERSION = "v1";
 
-
     @Override
     public AiEngine engine() {
         return AiEngine.OPENAI;
@@ -163,4 +162,5 @@ public class OpenAISummaryFeedbackGenerator implements SummaryFeedbackGenerator 
             String strengths,
             String improvements
     ) {}
+
 }

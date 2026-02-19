@@ -23,7 +23,4 @@ public class NoticePageResDto {
     @Schema(description = "등록일" ,example = "yyyy-mm-dd:HH:24MM:SSS")
     private OffsetDateTime createdAt;
 
-
-
-
 }

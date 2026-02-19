@@ -30,4 +30,5 @@ public class OutboxMetricsConfig {
                     .register(registry);
         };
     }
+
 }

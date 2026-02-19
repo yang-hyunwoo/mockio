@@ -7,9 +7,7 @@ import lombok.Getter;
 public class CustomApiFieldException extends RuntimeException{
 
     private final int httpStatus;
-
     private final String field;
-
     private final ErrorCode errorEnum;
 
     public CustomApiFieldException(int status,

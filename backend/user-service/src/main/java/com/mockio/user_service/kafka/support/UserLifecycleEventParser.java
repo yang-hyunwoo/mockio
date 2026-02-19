@@ -18,4 +18,5 @@ public class UserLifecycleEventParser {
             throw new IllegalArgumentException("Invalid event message", e);
         }
     }
+
 }

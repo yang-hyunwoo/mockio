@@ -16,4 +16,5 @@ public enum InterviewDifficulty {
     ;
 
     private final String label;
+
 }

@@ -1,6 +1,5 @@
 package com.mockio.common_ai_contractor.generator.feedback;
 
-import java.util.List;
 
 public record GeneratedSummaryFeedback(
         Long interviewId,

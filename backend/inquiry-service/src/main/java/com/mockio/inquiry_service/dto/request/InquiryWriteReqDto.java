@@ -2,10 +2,8 @@ package com.mockio.inquiry_service.dto.request;
 
 import com.mockio.common_core.annotation.EnumValidation;
 import com.mockio.common_core.annotation.Sanitize;
-import com.mockio.common_core.annotation.otherValidator.ValidationGroups;
 import com.mockio.common_core.annotation.otherValidator.ValidationMode;
 import com.mockio.common_core.constant.ValidationType;
-import com.mockio.common_jpa.domain.vo.Content;
 import com.mockio.inquiry_service.constant.InquiryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -38,8 +36,6 @@ public class InquiryWriteReqDto {
     @NotBlank(message = "{inquiry.content}",groups = Step3.class)
     @Sanitize(groups = Step3.class)
     private String questionContent;
-
-
 
     @Override
     public String toString() {

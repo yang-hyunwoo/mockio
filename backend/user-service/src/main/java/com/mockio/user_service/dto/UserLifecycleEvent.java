@@ -12,5 +12,4 @@ public record UserLifecycleEvent(
         String eventType,
         JsonNode payload,
         OffsetDateTime occurredAt
-) {
-}
+) {}

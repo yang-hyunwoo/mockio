@@ -74,7 +74,6 @@ public class OllamaClient implements AIChatClient {
                     ILLEGALSTATE.getMessage()
             );
         }
-
         return res.choices().getFirst().message().content();
     }
 

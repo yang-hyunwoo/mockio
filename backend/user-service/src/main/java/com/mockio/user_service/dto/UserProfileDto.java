@@ -21,6 +21,4 @@ public record UserProfileDto(
         String nickname,
         @Schema(description = "유저_휴대폰번호", example = "01012345678")
         String phoneNumber
-) {
-
-}
+) {}

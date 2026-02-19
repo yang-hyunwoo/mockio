@@ -30,7 +30,6 @@ public class InterviewServiceClient {
         this.internalToken = internalToken;
     }
 
-
     /**
      * 질문별 피드백
      * @param answerId
@@ -83,12 +82,11 @@ public class InterviewServiceClient {
                 .block();
     }
 
-
-
     private boolean isRetryable(Throwable t) {
         // 네트워크/타임아웃/일시적 장애만 재시도
         return t instanceof TimeoutException
                 || t instanceof IOException
                 || t instanceof WebClientRequestException;
     }
+
 }

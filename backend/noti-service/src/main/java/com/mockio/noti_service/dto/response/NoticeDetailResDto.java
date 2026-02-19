@@ -35,5 +35,4 @@ public class NoticeDetailResDto {
     @Schema(description = "공지사항 다음글 ID",example = "1")
     private Long nextId;
 
-
 }

@@ -3,7 +3,6 @@ package com.mockio.ai_service.ollama.generator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
-import com.mockio.ai_service.openAi.client.OpenAIClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OllamaFeedbackGenerator implements FeedbackGenerator {
-
 
     private final OllamaClient client;
     private final String MODEL = "llama3.1:8b";

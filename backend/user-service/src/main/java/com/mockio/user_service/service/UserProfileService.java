@@ -101,7 +101,6 @@ public class UserProfileService {
                 return givenName;
             }
         }
-
         return name;
     }
 
@@ -138,6 +137,5 @@ public class UserProfileService {
         return userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
     }
-
 
 }

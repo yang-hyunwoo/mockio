@@ -11,7 +11,6 @@ package com.mockio.ai_service.ollama.generator;
  * 최종 질문 목록으로 가공된다.</p>
  */
 
-import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.ai_service.ollama.client.OllamaClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
@@ -93,4 +92,5 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
 
        return new GeneratedQuestion(result);
     }
+
 }

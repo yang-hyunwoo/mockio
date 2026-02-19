@@ -31,4 +31,5 @@ public class CurrentUserArgumentResolver<T> implements HandlerMethodArgumentReso
         boolean required = annotation == null || annotation.required();
         return currentUserFacade.getCurrentUser(required);
     }
+
 }

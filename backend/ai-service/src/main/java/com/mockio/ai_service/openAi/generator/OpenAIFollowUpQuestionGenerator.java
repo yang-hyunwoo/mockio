@@ -33,8 +33,6 @@ import java.util.Arrays;
 public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerator {
 
     private static final String MODEL = "gpt-4o-mini";
-    private static final String PROMPT_VERSION = "followup-v1";
-
     private final SpringAiOpenAIClient client;
 
     @Override
@@ -109,7 +107,6 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                 normalized, "OPENAI", MODEL, "v1", temperature
         ));
     }
-
 
     private String normalizeQuestionLine(String line) {
         String q = line.trim();

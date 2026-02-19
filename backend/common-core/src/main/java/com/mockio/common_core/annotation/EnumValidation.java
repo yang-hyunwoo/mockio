@@ -17,7 +17,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = EnumValidator.class)
 public @interface EnumValidation {
-
     Class<? extends Enum<?>> enumClass();
     String message() default "올바른 값이 아닙니다.";
     Class<?>[] groups() default { };

@@ -28,4 +28,5 @@ public class UserInterviewSettingMapper {
                 userInterviewSetting.getAnswerTimeSeconds()
         );
     }
+
 }

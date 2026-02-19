@@ -129,4 +129,5 @@ public class InterviewFeedback extends BaseTimeEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

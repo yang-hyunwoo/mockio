@@ -6,7 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum NoticeType {
-
     EVENT("이벤트"),
     NOTICE("공지") ,
     INSPECTION("점검") ,

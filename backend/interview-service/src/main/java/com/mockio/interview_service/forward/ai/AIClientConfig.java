@@ -25,4 +25,5 @@ public class AIClientConfig {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
+
 }

@@ -19,12 +19,11 @@ public class AIFeedbackController {
     @PostMapping("/question")
     public GeneratedFeedback singleFeedback(@RequestBody GenerateFeedbackCommand command) {
         return feedbackGenerator.generate(command);
-
     }
 
     @PostMapping("/summary")
     public GeneratedSummaryFeedback summaryFeedback(@RequestBody GeneratedSummaryFeedbackCommand command) {
         return summaryFeedbackGenerator.generate(command);
-
     }
+
 }

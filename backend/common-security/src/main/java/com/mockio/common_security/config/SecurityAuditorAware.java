@@ -26,7 +26,7 @@ public class SecurityAuditorAware implements AuditorAware<Long> {
             Long userId = jwt.getClaim("userId");
             return Optional.ofNullable(userId);
         }
-
         return Optional.empty();
     }
+
 }

@@ -54,4 +54,5 @@ public final class DesignFallbackQuestions {
 
         return Map.copyOf(map);
     }
+
 }

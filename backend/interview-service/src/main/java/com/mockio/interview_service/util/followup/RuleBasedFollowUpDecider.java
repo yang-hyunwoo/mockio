@@ -19,15 +19,16 @@ public class RuleBasedFollowUpDecider implements FollowUpDecider {
         String text = req.answerText() == null ? "" : req.answerText().trim();
 
         if (text.length() < MIN_LEN) {
-            return FollowUpDecision.ask("답변이 짧음");
+            return FollowUpDecision.askNormal("답변이 짧음");
         }
 
         for (String kw : BANNED) {
             if (text.contains(kw)) {
-                return FollowUpDecision.ask("모른다는 단어가 포함:" + kw);
+                return FollowUpDecision.askNormal("모른다는 단어가 포함:" + kw);
             }
         }
 
         return FollowUpDecision.skip("RULE_PASS");
     }
+
 }

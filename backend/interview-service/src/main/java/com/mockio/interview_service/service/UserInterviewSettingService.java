@@ -40,7 +40,6 @@ public class UserInterviewSettingService {
             // 이미 존재 → ensure 관점에서는 정상
             // no-op
         }
-
     }
 
     /**
@@ -51,7 +50,6 @@ public class UserInterviewSettingService {
     public UserInterviewSettingReadResponse getPreference(String keycloakId) {
         UserInterviewSetting byUserId = findByUserId(keycloakId);
         return UserInterviewSettingMapper.from(byUserId);
-
     }
 
     /**
@@ -69,9 +67,7 @@ public class UserInterviewSettingService {
                 userRequest.answerTimeSeconds(),
                 userRequest.interviewQuestionCount()
         );
-
     }
-
 
     /**
      * 면접 질문 테이블 조회
@@ -81,7 +77,6 @@ public class UserInterviewSettingService {
     private UserInterviewSetting findByUserId(String keycloakId) {
        return userInterviewSettingRepository.findByUserId(keycloakId)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
-
     }
 
 }

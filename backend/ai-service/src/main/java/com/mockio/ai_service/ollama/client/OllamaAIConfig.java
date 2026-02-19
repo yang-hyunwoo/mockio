@@ -10,7 +10,6 @@ package com.mockio.ai_service.ollama.client;
  * 소스 코드에는 직접 포함되지 않는다.</p>
  */
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -25,4 +24,5 @@ public class OllamaAIConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
 }

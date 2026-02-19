@@ -1,6 +1,5 @@
 package com.mockio.common_jpa.domain.vo.abstarct;
 
-import ch.qos.logback.core.util.StringUtil;
 import com.mockio.common_core.exception.CustomApiException;
 import com.querydsl.core.util.StringUtils;
 import jakarta.persistence.Column;

@@ -1,6 +1,8 @@
 package com.mockio.interview_service.forward.ai;
 
 import com.mockio.common_ai_contractor.constant.InterviewErrorCode;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
+import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
@@ -63,4 +65,25 @@ public class AIServiceClient {
                         .maxBackoff(Duration.ofSeconds(2)))
                 .block();
     }
+
+    public GeneratedDeepDiveBundle generateDeepDiveResult(DeepDiveCommand req) {
+        return aiWebClient.post()
+                .uri("/api/ai/v1/questions/deepdive/validate-and-generate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).map(msg ->
+                                new CustomApiException(
+                                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                        InterviewErrorCode.AI_SERVICE_FAILED,
+                                        msg)))
+                .bodyToMono(GeneratedDeepDiveBundle.class)
+                .timeout(Duration.ofSeconds(25))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(2)))
+                .block();
+    }
+
 }

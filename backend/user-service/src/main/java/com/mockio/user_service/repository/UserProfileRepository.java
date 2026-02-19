@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 
-
     /**
      * keycloakId로 유저 프로필 조회 합니다.
      *
@@ -25,4 +24,5 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     Optional<UserProfile> findByKeycloakId(String keycloakId);
 
     boolean existsByNickname(String nickname);
+
 }

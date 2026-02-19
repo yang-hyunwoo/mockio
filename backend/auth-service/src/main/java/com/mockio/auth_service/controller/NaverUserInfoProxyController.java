@@ -54,7 +54,6 @@ public class NaverUserInfoProxyController {
                 .map(this::flattenResponse);
     }
 
-
     /**
      * 네이버 UserInfo API 응답을 평탄화한다.
      *
@@ -91,7 +90,6 @@ public class NaverUserInfoProxyController {
         result.put("email",     response.get("email"));
         result.put("name",      response.get("name"));
         result.put("nickname",  response.get("nickname"));
-
         return result;
     }
 

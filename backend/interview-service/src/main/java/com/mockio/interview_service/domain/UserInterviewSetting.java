@@ -159,8 +159,6 @@ public class UserInterviewSetting extends BaseTimeEntity {
         this.interviewQuestionCount = interviewQuestionCount;
     }
 
-
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -185,4 +183,5 @@ public class UserInterviewSetting extends BaseTimeEntity {
                 ", answerTimeSeconds=" + answerTimeSeconds +
                 '}';
     }
+
 }

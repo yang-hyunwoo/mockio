@@ -33,7 +33,6 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     private final SpringAiOpenAIClient client;
     private final String MODEL = "gpt-4o-mini";
 
-
     @Override
     public AiEngine engine() {
         return AiEngine.OPENAI;
@@ -89,7 +88,6 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                     "v1",
                     temperature));
         }
-
        return new GeneratedQuestion(result);
     }
 

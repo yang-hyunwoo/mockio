@@ -12,4 +12,5 @@ public enum InquiryType {
     ;
 
     private final String label;
+
 }

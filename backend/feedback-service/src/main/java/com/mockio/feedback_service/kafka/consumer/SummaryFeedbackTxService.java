@@ -27,7 +27,6 @@ public class SummaryFeedbackTxService {
             return summaryFeedbackRepository.findByInterviewId(interviewId)
                     .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
         }
-
     }
 
     @Transactional(propagation = REQUIRES_NEW)
@@ -48,7 +47,6 @@ public class SummaryFeedbackTxService {
                 result.promptVersion(),
                 result.temperature()
         );
-
     }
 
 }

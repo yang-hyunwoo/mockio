@@ -18,7 +18,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Aes256Util {
 
     public static String alg = "AES/CBC/PKCS5Padding";
-
     private final EncryptProperties encryptProperties;
 
     /**

@@ -38,7 +38,7 @@ public class InternalTokenFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
         }
-
         filterChain.doFilter(request, response);
     }
+
 }

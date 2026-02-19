@@ -34,4 +34,5 @@ public class OutboxBackoffPolicy {
             default -> Duration.ofHours(24);
         };
     }
+
 }

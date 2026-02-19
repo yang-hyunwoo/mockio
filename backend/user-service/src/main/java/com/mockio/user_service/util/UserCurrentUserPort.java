@@ -17,4 +17,5 @@ public class UserCurrentUserPort implements CurrentUserPort<UserProfile> {
     public Optional<UserProfile> findByKeycloakId(String keycloakId) {
         return userProfileRepository.findByKeycloakId(keycloakId);
     }
+
 }

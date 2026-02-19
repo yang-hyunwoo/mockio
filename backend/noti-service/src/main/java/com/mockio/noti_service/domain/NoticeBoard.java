@@ -107,8 +107,7 @@ public class NoticeBoard extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NoticeBoard)) return false;
-        NoticeBoard that = (NoticeBoard) o;
+        if (!(o instanceof NoticeBoard that)) return false;
         return id != null && id.equals(that.id);
     }
 
@@ -133,4 +132,5 @@ public class NoticeBoard extends BaseEntity {
                 ", deletedAt=" + deletedAt +
                 '}';
     }
+
 }

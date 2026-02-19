@@ -38,7 +38,6 @@ public class TraceIdFilter extends OncePerRequestFilter {
         } finally {
             MDC.remove(TRACE_ID_KEY);
         }
-
     }
 
 }

@@ -70,10 +70,10 @@ public class AiFeedbackClient {
                 .block();
     }
 
-
     private boolean isRetryable(Throwable t) {
         return t instanceof TimeoutException
                 || t instanceof IOException
                 || t instanceof WebClientRequestException;
     }
+
 }

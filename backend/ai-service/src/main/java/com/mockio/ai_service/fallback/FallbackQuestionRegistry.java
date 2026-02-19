@@ -38,7 +38,6 @@ public final class FallbackQuestionRegistry {
         map.put(InterviewTrack.HR, HrFallbackQuestions.byDifficulty());
         map.put(InterviewTrack.GENERAL, GeneralFallbackQuestions.byDifficulty());
 
-
         STORE = Map.copyOf(map);
     }
 
@@ -66,8 +65,9 @@ public final class FallbackQuestionRegistry {
         if (picked != null && !picked.isEmpty()) return picked;
 
         // 최후의 안전장치
-        Map<InterviewDifficulty, List<String>> general =
-                STORE.getOrDefault(InterviewTrack.GENERAL, Map.of());
+        Map<InterviewDifficulty, List<String>> general = STORE.getOrDefault(InterviewTrack.GENERAL, Map.of());
+
         return general.getOrDefault(InterviewDifficulty.MEDIUM, List.of());
     }
+
 }

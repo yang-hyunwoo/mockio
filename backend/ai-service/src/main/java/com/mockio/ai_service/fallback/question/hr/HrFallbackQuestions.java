@@ -54,4 +54,5 @@ public final class HrFallbackQuestions {
 
         return Map.copyOf(map);
     }
+
 }

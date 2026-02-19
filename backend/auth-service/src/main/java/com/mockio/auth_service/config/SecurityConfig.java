@@ -98,4 +98,5 @@ public class SecurityConfig {
         String remoteAddr = request.getRemoteAddr();
         return new AuthorizationDecision(KEYCLOAK_IP.equals(remoteAddr));
     }
+
 }

@@ -47,7 +47,6 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
             }
         }
         return fallbackGenerate(command, last);
-
     }
 
     private List<FollowUpQuestionGenerator> buildChain(String mode) {
@@ -80,7 +79,6 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
     }
 
     private boolean isFallbackable(Throwable ex) {
-
         if (ex instanceof CustomApiException cae) {
             return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
                     || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
@@ -94,6 +92,7 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
                 q, "FALLBACK", "N/A", "v1", 0.0
         ));
     }
+
 }
 
 

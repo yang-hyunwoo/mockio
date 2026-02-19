@@ -75,4 +75,5 @@ public class NumericValidator implements ConstraintValidator<Numeric,String> {
     private String stripBraces(String key) {
         return key.replaceAll("[{}]", "");
     }
+
 }

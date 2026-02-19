@@ -10,6 +10,5 @@ public record FollowUpQuestion(
             String model,
             String promptVersion,
             Double temperature
-    ) {
-    }
+    ) {}
 }

@@ -17,7 +17,6 @@ import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
 public class CusstomAccessDeniedHandler implements AccessDeniedHandler {
 
-
     @Override
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
@@ -33,4 +32,5 @@ public class CusstomAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.getWriter().println(responseBody);
     }
+
 }

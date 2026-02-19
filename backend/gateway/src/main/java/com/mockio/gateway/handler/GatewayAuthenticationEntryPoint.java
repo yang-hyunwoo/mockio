@@ -19,7 +19,6 @@ public class GatewayAuthenticationEntryPoint  implements ServerAuthenticationEnt
 
     private final GatewaySecurityErrorWriter writer;
 
-
     @Override
     public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException ex) {
         var errorEnum = classify(ex); // ERR_TOKEN_*

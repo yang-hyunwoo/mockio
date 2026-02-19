@@ -91,7 +91,6 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
     }
 
     private boolean isFallbackable(Throwable ex) {
-
         if (ex instanceof CustomApiException cae) {
             return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
                     || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
@@ -114,7 +113,7 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
                     "v1",
                     0.0));
         }
-
         return new GeneratedQuestion(fallback);
     }
+
 }

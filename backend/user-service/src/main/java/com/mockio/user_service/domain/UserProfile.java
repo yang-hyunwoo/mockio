@@ -14,11 +14,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.util.Optional.*;
 
@@ -194,5 +192,6 @@ public class UserProfile extends BaseTimeEntity {
                 ", lastLoginAt=" + lastLoginAt +
                 '}';
     }
+
 }
 

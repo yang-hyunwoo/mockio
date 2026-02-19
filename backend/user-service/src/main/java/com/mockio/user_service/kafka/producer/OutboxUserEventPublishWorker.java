@@ -94,5 +94,4 @@ public class OutboxUserEventPublishWorker {
         return host + "-" + pid;
     }
 
-
 }

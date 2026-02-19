@@ -15,6 +15,6 @@ public enum InterviewFeedbackStyle {
     FRIENDLY("친근")
     ;
 
-
     private final String label;
+
 }

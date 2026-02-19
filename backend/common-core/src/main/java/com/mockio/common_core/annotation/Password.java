@@ -15,7 +15,6 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = PasswordValidator.class)
 @Documented
 public @interface Password {
-
     String message() default "{password.pattern}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

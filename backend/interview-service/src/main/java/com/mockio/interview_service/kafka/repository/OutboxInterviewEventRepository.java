@@ -19,4 +19,5 @@ public interface OutboxInterviewEventRepository extends JpaRepository<OutboxInte
     FOR UPDATE SKIP LOCKED
     """, nativeQuery = true)
     List<OutboxInterviewEvent> lockTopDue(@Param("limit") int limit);
+
 }

@@ -54,4 +54,5 @@ public final class SalesFallbackQuestions {
 
         return Map.copyOf(map);
     }
+
 }

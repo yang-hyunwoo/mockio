@@ -13,4 +13,5 @@ public class WebArgumentResolverConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new CurrentSubjectArgumentResolver());
     }
+
 }

@@ -15,7 +15,6 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = EmailValidator.class)
 @Documented
 public @interface Email {
-    
     String message() default "{email.pattern}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

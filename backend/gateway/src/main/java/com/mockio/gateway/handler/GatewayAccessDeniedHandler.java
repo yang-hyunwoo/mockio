@@ -21,4 +21,5 @@ public class GatewayAccessDeniedHandler implements ServerAccessDeniedHandler {
     public Mono<Void> handle(ServerWebExchange exchange, org.springframework.security.access.AccessDeniedException ex) {
         return writer.write(exchange, HttpStatus.FORBIDDEN, ERR_403.getMessage(), ERR_403);
     }
+
 }

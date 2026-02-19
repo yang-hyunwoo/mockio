@@ -105,7 +105,6 @@ public class CustomExceptionHandler {
         return Response.error(INTERNAL_SERVER_ERROR.value(), messageUtil.getMessage("error.server.ok"), ERR_500, null);
     }
 
-
     /**
      * refresh_token 쿠키가 없는 경우: 401
      */
@@ -127,4 +126,5 @@ public class CustomExceptionHandler {
         log.error("404 리소스 없음", ex);
         return Response.error(NOT_FOUND.value(), messageUtil.getMessage("error.not.fount.ok"), ERR_404,null);
     }
+
 }

@@ -56,12 +56,11 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
             }
         }
         return fallbackGenerate(command, last);
-
     }
 
     private List<FeedbackGenerator> buildChain(String mode) {
         //  openai -> ollama -> fake
-        //     ollama -> openai -> fake
+        //  ollama -> openai -> fake
         AiEngine primary = parse(mode);
 
         FeedbackGenerator openai = find(AiEngine.OPENAI);
@@ -89,7 +88,6 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
     }
 
     private boolean isFallbackable(Throwable ex) {
-
         if (ex instanceof CustomApiException cae) {
             return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
                     || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
@@ -111,4 +109,5 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
                 0.0
         );
     }
+
 }

@@ -21,7 +21,4 @@ public class FaqResDto {
     @Schema(description = "FAQ 유형", example = "ALL")
     private FaqType faqType;
 
-
-
-
 }

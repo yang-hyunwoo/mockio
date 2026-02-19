@@ -122,7 +122,6 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
         this.status = Status.SUCCEEDED;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -134,4 +133,5 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
 }

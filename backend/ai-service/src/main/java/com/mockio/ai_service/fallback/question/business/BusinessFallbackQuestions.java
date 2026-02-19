@@ -55,4 +55,5 @@ public final class BusinessFallbackQuestions {
 
         return Map.copyOf(map);
     }
+
 }

@@ -57,4 +57,5 @@ public class NoticeService {
                 .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
         return NoticeMapper.from(noticeBoard, null, null);
     }
+
 }

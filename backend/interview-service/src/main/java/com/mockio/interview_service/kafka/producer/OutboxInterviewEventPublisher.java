@@ -25,6 +25,6 @@ public class OutboxInterviewEventPublisher {
                 worker.publishOne(lockerId, id);
             }
         });
-
     }
+
 }

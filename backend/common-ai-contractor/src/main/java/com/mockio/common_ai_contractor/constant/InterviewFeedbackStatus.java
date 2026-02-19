@@ -14,4 +14,5 @@ public enum InterviewFeedbackStatus {
     ;
 
     private final String label;
+
 }

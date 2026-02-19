@@ -1,12 +1,10 @@
 package com.mockio.user_service.kafka.consumer;
 
 import com.mockio.common_core.exception.NonRetryableEventException;
-import com.mockio.common_core.exception.TransientBusinessException;
 import com.mockio.user_service.kafka.domain.ProcessedEvent;
 import com.mockio.user_service.dto.UserLifecycleEvent;
 import com.mockio.user_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.user_service.kafka.support.UserLifecycleEventParser;
-import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserLifecycleConsumer {
 
-    private final UserProfileRepository userProfileRepository;
     private final ProcessedEventRepository processedEventRepository;
     private final UserLifecycleEventParser parser;
     private static final String CONSUMER_NAME = "user-service.user-lifecycle";
@@ -65,4 +62,5 @@ public class UserLifecycleConsumer {
 
     private void handleUserSuspended(UserLifecycleEvent event) {
     }
+
 }

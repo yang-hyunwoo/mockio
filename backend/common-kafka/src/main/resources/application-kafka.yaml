@@ -2,7 +2,7 @@ spring:
   kafka:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer  # 메시지 key를 문자열로 직렬화
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # DTO(Object)를 JSON으로 직렬화해서 전송
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       properties:
         acks: all
         enable.idempotence: true  #멱등 프로듀서 활성화 (중복 전송 방지)

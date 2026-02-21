@@ -17,7 +17,7 @@ public class KafkaProducerConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProducerFactory<String, Object> producerFactory(
+    public ProducerFactory<String, String> producerFactory(
             KafkaProperties kafkaProperties
     ) {
         Map<String, Object> props = new HashMap<>();
@@ -31,7 +31,7 @@ public class KafkaProducerConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 

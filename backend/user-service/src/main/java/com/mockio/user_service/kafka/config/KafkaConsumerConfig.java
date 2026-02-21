@@ -31,7 +31,7 @@ public class KafkaConsumerConfig {
      * @return
      */
     @Bean
-    public DeadLetterPublishingRecoverer dlqRecoverer(KafkaTemplate<Object, Object> kafkaTemplate) {
+    public DeadLetterPublishingRecoverer dlqRecoverer(KafkaTemplate<String, String> kafkaTemplate) {
         return new DeadLetterPublishingRecoverer(kafkaTemplate,
                 (record, ex) -> new TopicPartition(
                         record.topic() + ".DLQ",

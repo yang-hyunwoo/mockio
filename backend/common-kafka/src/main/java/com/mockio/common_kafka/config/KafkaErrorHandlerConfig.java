@@ -15,7 +15,7 @@ import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 @RequiredArgsConstructor
 public class KafkaErrorHandlerConfig {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Bean
     @ConditionalOnMissingBean

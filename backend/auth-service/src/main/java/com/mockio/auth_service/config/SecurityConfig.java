@@ -62,7 +62,8 @@ public class SecurityConfig {
                 .securityMatcher(
                         "/api/auth/v1/refresh",
                         "/api/auth/v1/logout",
-                        "/api/auth/v1/logout/all"
+                        "/api/auth/v1/logout/all",
+                        "/api/auth/v1/public/**"
                 )
                 .csrf(csrf -> csrf.disable()) // 쿠키를 쓰더라도 refresh/logout는 보통 CSRF 미사용(대신 SameSite/Origin 정책으로 방어)
                 .authorizeHttpRequests(auth -> auth

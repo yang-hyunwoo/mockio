@@ -94,6 +94,9 @@ dependencies {
 
 	implementation "io.hypersistence:hypersistence-utils-hibernate-63:3.7.2"
 
+//	redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 }
 
 tasks.named('test') {

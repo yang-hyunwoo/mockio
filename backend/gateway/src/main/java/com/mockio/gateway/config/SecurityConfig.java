@@ -23,14 +23,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(ex -> ex
-                        .pathMatchers(
-                                "/health",
-                                "/actuator/health",
-                                "/actuator/health/**"
-                        ).permitAll()
+                        .pathMatchers("/health", "/actuator/health/**","/.well-known/jwks.json").permitAll()
                         .pathMatchers("/api/users/v1/public/**",
                                 "/api/user-interview/v1/public/**",
                                 "/api/notification/v1/public/**",
@@ -42,11 +37,11 @@ public class SecurityConfig {
                                 "/api/inquiry/v1/public/**",
                                 "/api/faq/v1/public/**").permitAll()
                         .anyExchange().authenticated()
+                        .anyExchange().permitAll()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(gatewayAuthenticationEntryPoint) //인증 실패
                         .accessDeniedHandler(gatewayAccessDeniedHandler))          //인가 실패
-                .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt)
                 .build();
     }
 

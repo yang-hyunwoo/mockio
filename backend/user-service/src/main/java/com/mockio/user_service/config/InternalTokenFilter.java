@@ -1,4 +1,4 @@
-package com.mockio.interview_service.config;
+package com.mockio.user_service.config;
 
 
 import jakarta.servlet.FilterChain;
@@ -22,13 +22,14 @@ public class InternalTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/interview/v1/internal/");
+        return !request.getRequestURI().startsWith("/api/users/v1/internal/");
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
     ) throws ServletException, IOException {
 
         String token = request.getHeader("X-Internal-Token");

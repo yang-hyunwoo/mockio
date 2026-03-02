@@ -78,6 +78,10 @@ public class Interview extends BaseTimeEntity {
 
     private int count;
 
+    private Integer totalCount;
+
+    private Integer answeredQuestions;
+
     @Column(name = "started_at")
     private OffsetDateTime startedAt;
 
@@ -118,6 +122,8 @@ public class Interview extends BaseTimeEntity {
         this.status = status;
         this.feedbackStatus = feedbackStatus;
         this.count = count;
+        this.totalCount = count;
+        this.answeredQuestions = 0;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
 
@@ -167,6 +173,8 @@ public class Interview extends BaseTimeEntity {
         this.questionGenStatus = QuestionGenerationStatus.DONE;
         this.questionGenEndedAt = now();
     }
+
+
 
     public void markGenerateFailed(String error) {
         this.questionGenStatus = QuestionGenerationStatus.FAILED;

@@ -1,7 +1,11 @@
 package com.mockio.auth_service.controller;
 
+import com.mockio.auth_service.client.UserProfileClient;
 import com.mockio.auth_service.dto.AuthSession;
+import com.mockio.auth_service.dto.request.ProfileSyncRequest;
+import com.mockio.auth_service.dto.response.SessionValidateResponse;
 import com.mockio.auth_service.util.AuthSessionStore;
+import com.mockio.auth_service.util.JwtClaimUtil;
 import com.mockio.auth_service.util.PkceStore;
 import com.mockio.auth_service.util.PkceUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,10 +36,10 @@ import java.util.UUID;
 public class AuthLoginController {
 
     private final RestClient restClient = RestClient.create();
-
     private final PkceStore pkceStore;
-
     private final AuthSessionStore authSessionStore;
+    private final UserProfileClient userProfileClient;
+    private final JwtClaimUtil jwtClaimUtil;
 
     @Value("${keycloak.issuer}")
     private String issuer;
@@ -83,8 +87,7 @@ public class AuthLoginController {
     @GetMapping("/callback")
     public void callback(@RequestParam String code,
                          @RequestParam String state,
-                         HttpServletResponse response,
-                         HttpServletRequest request) throws Exception {
+                         HttpServletResponse response) throws Exception {
 
         String codeVerifier = pkceStore.consumeVerifier(state);
 
@@ -127,7 +130,7 @@ public class AuthLoginController {
 
         //  Redis 저장 (TTL은 정책으로: 예 7일 또는 refresh 만료에 맞춰)
         AuthSession session = new AuthSession(refreshToken, accessToken, accessExpiresAt);
-        authSessionStore.save(sessionId, session, Duration.ofDays(7));
+        authSessionStore.save(sessionId, session, Duration.ofDays(1));
 
         //  브라우저에 세션 쿠키 (HttpOnly)
         ResponseCookie cookie = ResponseCookie.from("MOCKIO_SESSION", sessionId)
@@ -135,11 +138,17 @@ public class AuthLoginController {
                 .secure(false)      // 로컬 http면 false, 운영 https면 true
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(Duration.ofDays(7))
+                .maxAge(Duration.ofDays(1))
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
+        SessionValidateResponse sessionValidateResponse = jwtClaimUtil.verifyAndExtract(accessToken);
+        userProfileClient.syncProfile(new ProfileSyncRequest(
+                sessionValidateResponse.userId(),
+                sessionValidateResponse.provider(),
+                sessionValidateResponse.username(),
+                sessionValidateResponse.email()
+        ));
         // 4) 프론트로 redirect
         response.sendRedirect("http://localhost:3000/");
     }

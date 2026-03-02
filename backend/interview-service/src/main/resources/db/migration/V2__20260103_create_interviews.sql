@@ -16,6 +16,8 @@ CREATE TABLE interviews (
     feedback_status VARCHAR(30) NOT NULL,
     end_reason VARCHAR(30) NULL,
     count INT NOT NULL,
+    total_count INTEGER NOT NULL,
+    answered_questions INTEGER DEFAULT 0,
     started_at TIMESTAMPTZ NULL,
     ended_at TIMESTAMPTZ NULL,
 

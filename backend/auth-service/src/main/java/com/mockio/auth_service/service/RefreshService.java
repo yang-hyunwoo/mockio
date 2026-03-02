@@ -9,6 +9,7 @@ package com.mockio.auth_service.service;
  */
 
 import com.mockio.auth_service.client.KeycloakTokenClient;
+import com.mockio.auth_service.dto.AuthSession;
 import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,8 @@ public class RefreshService {
      * @param refreshToken 사용자 Refresh Token
      * @return Keycloak에서 발급된 토큰 응답
      */
-    public KeycloakTokenResponse refreshBy(String refreshToken) {
-        return keycloakTokenClient.refresh(refreshToken);
+    public AuthSession refreshBy(String sessionId , AuthSession s) {
+        return keycloakTokenClient.refresh(sessionId, s);
     }
 
 }

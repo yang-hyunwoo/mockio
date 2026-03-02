@@ -1,7 +1,10 @@
 package com.mockio.gateway.util;
 
-import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.time.Instant;
 import java.util.Date;
@@ -20,27 +24,33 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternalJwtIssuer {
 
-    private final RSAKey rsaKey;
+    private final KeyPair keyPair;
 
     public String issue(String userId, List<String> roles) {
-
-        RSAPrivateKey privateKey = null;
         try {
-            privateKey = rsaKey.toRSAPrivateKey();
-        } catch (JOSEException e) {
-            throw new RuntimeException(e);
+            JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyPair.getPrivate());
+
+            JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                    .subject(userId)
+                    .issuer("mockio-gateway")
+                    .claim("roles", roles)
+                    .issueTime(new Date())
+                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                    .build();
+
+            JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
+                    .keyID("mockio-internal")
+                    .type(JOSEObjectType.JWT)
+                    .build();
+
+            SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+            signedJWT.sign(signer);
+
+            return signedJWT.serialize();
+
+        } catch (Exception e) {
+            throw new RuntimeException("JWT 생성 실패", e);
         }
-
-        Instant now = Instant.now();
-
-        return Jwts.builder()
-                .setSubject(userId)
-                .claim("roles", roles)
-                .setIssuer("mockio-gateway")
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plusSeconds(600)))
-                .signWith(privateKey, SignatureAlgorithm.RS256)
-                .setHeaderParam("kid", rsaKey.getKeyID())
-                .compact();
     }
+
 }

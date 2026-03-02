@@ -11,23 +11,31 @@ package com.mockio.auth_service.controller;
  * 새 Refresh Token을 쿠키로 다시 설정한다.</p>
  */
 
+import com.mockio.auth_service.dto.AuthSession;
 import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
 import com.mockio.auth_service.dto.response.RefreshResponse;
+import com.mockio.auth_service.dto.response.SessionValidateResponse;
 import com.mockio.auth_service.service.RefreshService;
+import com.mockio.auth_service.util.AuthSessionStore;
 import com.mockio.auth_service.util.CookieFactory;
+import com.mockio.auth_service.util.JwtClaimUtil;
 import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.RefreshTokenMissingException;
+import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
 import com.mockio.common_spring.util.response.ResponseBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +45,9 @@ public class AuthRefreshController {
 
     private final RefreshService refreshService;
     private final CookieFactory cookieFactory;
+    private final AuthSessionStore authSessionStore;
+    private final JwtClaimUtil jwtClaimUtil;
+    private final MessageUtil messageUtil;
 
     /**
      * Refresh Token을 이용해 새로운 Access Token을 발급한다.
@@ -54,35 +65,15 @@ public class AuthRefreshController {
      * @throws RefreshTokenMissingException Refresh Token 쿠키가 존재하지 않는 경우
      */
     @PostMapping("/refresh")
-    public ResponseEntity<Response<RefreshResponse>> refresh(HttpServletRequest request) {
-        String refreshToken = extractCookie(request, cookieFactory.refreshCookieName());
+    public ResponseEntity<Response<SessionValidateResponse>> refresh(@CookieValue(name = "MOCKIO_SESSION", required = false) String sessionId) {
 
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new RefreshTokenMissingException(CommonErrorEnum.ERR_REFRESH_TOKEN_MISSING.getMessage());
-        }
+        AuthSession s = authSessionStore.find(sessionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid session"));
 
-        KeycloakTokenResponse kc = refreshService.refreshBy(refreshToken);
 
-        // Keycloak이 refresh_token을 다시 내려주는 경우(회전/갱신) 쿠키 갱신
-        HttpHeaders headers = new HttpHeaders();
-        if (kc.refreshToken() != null && !kc.refreshToken().isBlank() && kc.refreshExpiresIn() != null) {
-            ResponseCookie cookie = cookieFactory.refreshCookie(kc.refreshToken(), kc.refreshExpiresIn());
-            if (cookie != null) {
-                headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
-            } else {
-                log.error("Refresh cookie creation returned null");
-            }
-        }
-
-        // Access는 바디로 반환(프론트가 메모리에 보관 후 Authorization 헤더로 사용)
-        Response<RefreshResponse> body =
-                ResponseBuilder.buildSuccess(
-                        "ACCESS_TOKEN_REFRESHED",
-                        new RefreshResponse(kc.accessToken(), kc.expiresIn())
-                );
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(body);
+        s = refreshService.refreshBy(sessionId, s);
+        return Response.ok(messageUtil.getMessage("response.read"),
+                jwtClaimUtil.verifyAndExtract(s.accessToken()));
     }
 
     /**

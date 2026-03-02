@@ -90,7 +90,7 @@ public class InterviewAnswerService {
             interviewAnswerRepository.unsetCurrentByQuestionId(interviewAnswerRequest.questionId());
 
             interviewAnswerRepository.save(answer);
-
+            interviewRepository.incrementAnswered(interview.getId());
         } catch (DataIntegrityViolationException e) {
             // 5) 동시성/재시도 등으로 누군가 먼저 저장했을 수 있음 -> 다시 조회해서 반환
             var saved = interviewAnswerRepository
@@ -167,6 +167,7 @@ public class InterviewAnswerService {
             );
 
             interviewQuestionRepository.save(saveFollowQuestion);
+            interviewRepository.incrementTotalCount(interview.getId());
             answer.followupUpdate(decision.reason());
             return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion));
         }
@@ -222,6 +223,7 @@ public class InterviewAnswerService {
 
                         interviewQuestionRepository.save(saveDeepDiveQuestion);
                         answer.followupUpdate(deepDiveContext);
+                        interviewRepository.incrementTotalCount(interview.getId());
                         return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion));
                     }
 
@@ -230,6 +232,7 @@ public class InterviewAnswerService {
         }
 
         // 여기로 오면 꼬리질문 없이 다음 질문/완료
+
         return interviewQuestionRepository
                 .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq())
                 .map(q -> InterviewQuestionMapper.fromList(List.of(q)))

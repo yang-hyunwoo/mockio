@@ -12,20 +12,27 @@ package com.mockio.auth_service.client;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.auth_service.dto.AuthSession;
 import com.mockio.auth_service.dto.response.KeycloakErrorResponse;
 import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
+import com.mockio.auth_service.util.AuthSessionStore;
 import com.mockio.common_core.exception.KeycloakUnavailableException;
 import com.mockio.common_core.exception.RefreshTokenInvalidException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 
 
 @Component
@@ -35,6 +42,8 @@ public class KeycloakTokenClient {
     private final RestClient restClient;
 
     private final ObjectMapper objectMapper;
+
+    private final AuthSessionStore authSessionStore;
 
     @Value("${keycloak.base-url}")
     private String baseUrl;
@@ -65,20 +74,20 @@ public class KeycloakTokenClient {
      * @throws KeycloakUnavailableException Keycloak 시스템 장애 또는 회로 차단 상태
      */
     @CircuitBreaker(name = "keycloakRefresh", fallbackMethod = "refreshFallback")
-    public KeycloakTokenResponse refresh(String refreshToken) {
+    public AuthSession refresh(String sessionId, AuthSession s) {
         String tokenUrl = baseUrl + "/realms/" + realm + "/protocol/openid-connect/token";
 
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "refresh_token");
         form.add("client_id", clientId);
-        form.add("refresh_token", refreshToken);
+        form.add("refresh_token", s.refreshToken());
 
         if (clientSecret != null && !clientSecret.isBlank()) {
             form.add("client_secret", clientSecret);
         }
-
+        KeycloakTokenResponse tr;
         try {
-            return restClient.post()
+            tr = restClient.post()
                     .uri(tokenUrl)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body(form)
@@ -88,7 +97,7 @@ public class KeycloakTokenClient {
                                 String raw = readBodySafely(res.getBody());
                                 KeycloakErrorResponse err = tryParseError(raw);
 
-                                boolean invalidGrant = raw.contains("\"invalid_grant\"")||
+                                boolean invalidGrant = raw.contains("\"invalid_grant\"") ||
                                         (err != null && "invalid_grant".equals(err.error()));
 
                                 if (invalidGrant) {
@@ -107,9 +116,26 @@ public class KeycloakTokenClient {
                     .body(KeycloakTokenResponse.class);
 
         } catch (ResourceAccessException ex) {
+            authSessionStore.delete(sessionId);
             // 타임아웃/네트워크 계열 (requestFactory timeout 포함) → CB 실패로 집계
             throw new KeycloakUnavailableException("Keycloak refresh failed: network/timeout", ex);
         }
+        if (tr == null || tr.accessToken() == null || tr.expiresIn() == null) {
+            authSessionStore.delete(sessionId);
+            throw new KeycloakUnavailableException("Keycloak session expired:");
+        }
+
+        String newAccess = tr.accessToken();
+        String newRefresh = (tr.refreshToken() != null && !tr.refreshToken().isBlank())
+                ? tr.refreshToken()
+                : s.refreshToken();
+
+        long newExp = Instant.now().plusSeconds(tr.expiresIn()).getEpochSecond();
+
+        AuthSession updated = new AuthSession(newRefresh, newAccess, newExp);
+        authSessionStore.save(sessionId, updated, Duration.ofDays(1));
+
+        return updated;
     }
 
     protected KeycloakTokenResponse refreshFallback(String refreshToken, Throwable t) {

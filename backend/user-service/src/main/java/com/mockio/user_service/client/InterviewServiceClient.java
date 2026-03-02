@@ -13,19 +13,21 @@ import org.springframework.web.client.RestClient;
 public class InterviewServiceClient {
 
     private final RestClient restClient;
+    private final String internalToken;
 
     public InterviewServiceClient(
             @Value("${services.interview.base-url}") String baseUrl,
-            RestClient.Builder builder
+            RestClient.Builder builder,
+            @Value("${internal.auth.token}") String internalToken
     ) {
         this.restClient = builder.baseUrl(baseUrl).build();
+        this.internalToken = internalToken;
     }
 
     public EnsureInterviewSettingResponse ensureInterviewSetting(String keycloakId) {
-        String token = currentBearerToken();
         return restClient.post()
-                .uri("/api/interview/v1/interview-setting/ensure")
-                .header("Authorization", "Bearer " + token)
+                .uri("/api/interview/v1/internal/interview-setting/ensure")
+                .header("X-Internal-Token",internalToken)
                 .body(new EnsureInterviewSettingRequest(keycloakId))
                 .retrieve()
                 .body(EnsureInterviewSettingResponse.class);

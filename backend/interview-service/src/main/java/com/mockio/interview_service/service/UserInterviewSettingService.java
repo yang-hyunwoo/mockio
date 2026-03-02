@@ -34,12 +34,18 @@ public class UserInterviewSettingService {
      * 초기 면접 설정 저장
      */
     public void ensureInterviewSettingSave(EnsureInterviewSettingRequest request) {
-        try {
-            userInterviewSettingRepository.save(UserInterviewSetting.createUserInterviewPreference(request.keycloakId()));
-        } catch (DataIntegrityViolationException e) {
-            // 이미 존재 → ensure 관점에서는 정상
-            // no-op
-        }
+        UserInterviewSetting setting =
+                UserInterviewSetting.createUserInterviewPreference(request.keycloakId());
+
+        userInterviewSettingRepository.insertIfAbsent(
+                setting.getUserId(),
+                setting.getTrack().name(),
+                setting.getDifficulty().name(),
+                setting.getFeedbackStyle().name(),
+                setting.getInterviewMode().name(),
+                setting.getAnswerTimeSeconds(),
+                setting.getInterviewQuestionCount()
+        );
     }
 
     /**

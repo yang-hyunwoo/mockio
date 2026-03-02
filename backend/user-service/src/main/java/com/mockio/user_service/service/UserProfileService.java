@@ -14,6 +14,7 @@ import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.UserStatus;
 import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.UserDeletedEvent;
+import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
@@ -47,15 +48,16 @@ public class UserProfileService {
      * 최초 사용자 로그인 시 userProfile 등록
      * @param jwt
      */
-    public UserProfileResponse loadOrCreateFromToken(Jwt jwt) {
-        String keycloakId = jwt.getSubject();
-        String email = jwt.getClaimAsString("email");
+    public UserProfileResponse loadOrCreateFromToken(ProfileSyncRequest profileSyncRequest) {
+        String keycloakId = profileSyncRequest.userId();
+        String email = profileSyncRequest.email();
 
-        String fullName = resolveFullName(jwt);
+        String fullName = resolveFullName(profileSyncRequest);
 
         UserProfile userProfile = userRepository.findByKeycloakId(keycloakId)
                 .map(existing -> {
                     existing.updateLastLoginAt();
+                    interviewServiceClient.ensureInterviewSetting(keycloakId);
                     return existing;
                 })
                 .orElseGet(() -> createNewProfile(keycloakId, email, fullName));
@@ -89,14 +91,14 @@ public class UserProfileService {
 
     }
 
-    private String resolveFullName(Jwt jwt) {
-        String provider = jwt.getClaimAsString("provider");
+    private String resolveFullName(ProfileSyncRequest profileSyncRequest) {
+        String provider = profileSyncRequest.provider();
 
         // 기본: name
-        String name = jwt.getClaimAsString("name");
+        String name = profileSyncRequest.name();
 
         if (NAVER_NAME.equals(provider)) {
-            String givenName = jwt.getClaimAsString("given_name");
+            String givenName = profileSyncRequest.givenName();
             if (givenName != null && !givenName.isBlank()) {
                 return givenName;
             }

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/noti/v1/public")
 @RequiredArgsConstructor
@@ -33,8 +35,16 @@ public class NoticeController {
     public ResponseEntity<Response<PageDto<NoticePageResDto>>> noticeList(
             @PageableDefault(size = 10, page = 0) Pageable pageable
     ) {
-        return Response.ok(messageUtil.getMessage("notice.list.read.ok"),
+        return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.noticeList(pageable));
+    }
+
+    @Operation(summary = "중요 공지 사항 조회", description = "공지 사항 조회")
+    @GetMapping("/notice/pinned/list")
+    public ResponseEntity<Response<List<NoticePageResDto>>> noticePinnedList(
+    ) {
+        return Response.ok(messageUtil.getMessage("response.read"),
+                noticeService.noticePinnedList());
     }
 
     @Operation(summary = "메인 공지 사항 조회", description = "메인 공지 사항 조회")

@@ -3,6 +3,7 @@ package com.mockio.noti_service.service;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_jpa.dto.PageDto;
 import com.mockio.noti_service.Mapper.NoticeMapper;
+import com.mockio.noti_service.constant.NoticePinSort;
 import com.mockio.noti_service.domain.NoticeBoard;
 import com.mockio.noti_service.dto.response.NoticeDetailResDto;
 import com.mockio.noti_service.dto.response.NoticePageResDto;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 
@@ -29,7 +32,16 @@ public class NoticeService {
      */
     @Transactional(readOnly = true)
     public PageDto<NoticePageResDto> noticeList(Pageable pageable) {
-        return PageDto.of(noticeRepository.findByPageNative(pageable), NoticeMapper::from);
+        return PageDto.of(noticeRepository.findByPageNative(pageable, NoticePinSort.NORMAL.name()), NoticeMapper::from);
+    }
+
+    /**
+     * 공지중요 사항 조회
+     * @return 공지사항 페이지 객체
+     */
+    @Transactional(readOnly = true)
+    public List<NoticePageResDto> noticePinnedList() {
+        return NoticeMapper.fromList(noticeRepository.findTop3Pinned(NoticePinSort.IMPORTANT.name()));
     }
 
     /**
@@ -43,8 +55,8 @@ public class NoticeService {
                 .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
         int sort = noticeBoard.getSort();
         return NoticeMapper.from(noticeBoard,
-                noticeRepository.findPrevNoticeNative(sort).orElse(null),
-                noticeRepository.findNextNoticeNative(sort).orElse(null));
+                noticeRepository.findPrevNoticeNative(sort,noticeBoard.getNoticePinSort().name()).orElse(null),
+                noticeRepository.findNextNoticeNative(sort,noticeBoard.getNoticePinSort().name()).orElse(null));
     }
 
     /**

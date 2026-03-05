@@ -101,7 +101,9 @@ public class InterviewQuestionService {
             entites.add(InterviewQuestion.createInterviewQuestion(
                     interview,
                     q.seq(),
-                    q.questionText(),
+                    q.title(),
+                    q.tags(),
+                    q.body(),
                     q.provider(),
                     q.model(),
                     q.promptVersion(),

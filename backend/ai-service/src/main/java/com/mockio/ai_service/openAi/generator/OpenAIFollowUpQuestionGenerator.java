@@ -15,17 +15,20 @@ package com.mockio.ai_service.openAi.generator;
  */
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.AiQuestion;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Component
 @ConditionalOnProperty(name="ai.generator" , havingValue = "openai")
@@ -61,59 +64,110 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         String qText = (qa == null || qa.question() == null) ? "N/A" : qa.question();
         String aText = (qa == null || qa.answer() == null) ? "" : qa.answer();
 
-        String commandText = "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
+        String commandText = """
+                당신은 %s 기술 면접관입니다.
+                반드시 JSON 객체만 출력하세요.
+                설명/번호/불릿/마크다운/코드블록 금지.
+                """.formatted(command.interviewTrack());
 
-        Double temperature = 0.7;
+
 
         String prompt = """
-        당신은 %s 기술면접관입니다.
-        아래 문답을 바탕으로, 다음에 이어질 꼬리질문 1개를 생성해 주세요.
+                아래 문답을 바탕으로 다음 꼬리질문 1개를 생성하세요.
+                
+                출력 형식(JSON):
+                {
+                  "title": "string",
+                  "body": "string",
+                  "tags": ["string","string"]
+                }
+                
+                규칙:
+                - title: 3~8단어의 짧은 주제명
+                - body: 1~2문장 이내의 꼬리질문
+                - tags: 2~4개, 짧은 기술 키워드
+                - “더 설명해보세요” 같은 일반 질문 금지
+                - JSON 외 텍스트 절대 금지
+                
+                조건:
+                - 트랙: %s
+                - 난이도: %s
+                - 꼬리질문 사유: %s
+                
+                문답:
+                Q: %s
+                A: %s
+                """.formatted(
+                                command.interviewTrack(),
+                                command.interviewDifficulty(),
+                                command.followUpReason(),
+                                qText,
+                                aText
+                        );
 
-        조건:
-        - 트랙: %s
-        - 난이도: %s
-        - 꼬리질문 사유: %s
-        - 질문은 실무 중심으로 작성
-        - 1~2문장 이내
-        - “더 설명해보세요” 같은 일반 질문 금지
-        - 번호/불릿/불필요한 설명 없이 질문 한 줄만 반환
-
-        문답:
-        Q: %s
-        A: %s
-    """.formatted(
-                command.interviewTrack(),
-                command.interviewTrack(),
-                command.interviewDifficulty(),
-                command.followUpReason(),
-                qText,
-                aText
-        );
+        Double temperature = 0.2;
         String answer = client.chat(MODEL, prompt,commandText,temperature);
 
-        String line = Arrays.stream(answer.split("\n"))
-                .map(String::trim)
-                .map(s -> s.replaceFirst("^(Q:|질문:)\\s*", "").trim())
-                .map(s -> s.replaceFirst("^\\d+\\.|^[-•]\\s*", "").trim())
-                .map(s -> s.replaceAll("^\"|\"$", "").trim())
-                .filter(s -> !s.isBlank())
-                .filter(s -> s.length() >= 10)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("follow-up question parse failed"));
+        ObjectMapper mapper = new ObjectMapper();
+        AiQuestion q;
+            try {
+                q = mapper.readValue(answer, AiQuestion.class);
+            } catch (Exception e) {
+                // 1회 리페어
+                String repairSystem = """
+                        반드시 JSON 객체만 출력하세요. 다른 텍스트 금지.
+                        스키마:
+                        {"title":"string","body":"string","tags":["string","string"]}
+                        """;
+                String repaired = client.chat(MODEL, "이전 응답을 위 스키마에 맞는 JSON으로만 변환하세요.", repairSystem, temperature);
 
-        String normalized = normalizeQuestionLine(line);
+                try {
+                    q = mapper.readValue(repaired, AiQuestion.class);
+                } catch (Exception e2) {
+                    // 폴백
+                    q = new AiQuestion(
+                            "추가 검증 질문",
+                            "방금 답변에서 가장 중요한 가정(전제)은 무엇이고, 그 전제가 깨질 때 어떤 문제가 발생하나요?",
+                            List.of("Follow-up", "Trade-off")
+                    );
+                }
+            }
 
         return new FollowUpQuestion(new FollowUpQuestion.Item(
-                normalized, "OPENAI", MODEL, "v1", temperature
+                safeTitle(q.title()),
+                normalizeBody(q.body())
+                ,sanitizeTags(q.tags()),
+                "OPENAI",
+                MODEL,
+                "v1",
+                temperature
         ));
     }
 
-    private String normalizeQuestionLine(String line) {
-        String q = line.trim();
-        if (!q.endsWith("?") && !q.endsWith("요.") && !q.endsWith(".")) {
-            q = q + "?";
-        }
+    private String normalizeBody(String body) {
+        if (body == null) return "";
+        String q = body.trim();
+        if (q.isBlank()) return q;
+        if (!q.endsWith("?") && !q.endsWith("요.") && !q.endsWith(".")) q += "?";
         return q;
+    }
+
+    private String safeTitle(String title) {
+        if (title == null) return "후속 질문";
+        String t = title.trim().replaceAll("^\"|\"$", "").trim();
+        return t.isBlank() ? "후속 질문" : (t.length() > 40 ? t.substring(0, 40) : t);
+    }
+
+    private List<String> sanitizeTags(List<String> tags) {
+        if (tags == null) return List.of();
+
+        return tags.stream()
+                .map(String::trim)
+                .filter(t -> !t.isBlank())
+                .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
+                .distinct()
+                .limit(4)
+                .toList();
     }
 
 }

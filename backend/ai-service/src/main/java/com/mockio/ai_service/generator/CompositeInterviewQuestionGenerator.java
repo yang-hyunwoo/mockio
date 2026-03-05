@@ -12,6 +12,7 @@ package com.mockio.ai_service.generator;
  */
 
 import com.mockio.ai_service.constant.AIErrorEnum;
+import com.mockio.ai_service.fallback.FallbackQuestion;
 import com.mockio.ai_service.fallback.FallbackQuestionRegistry;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
@@ -103,11 +104,14 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
                 command.track(), command.questionCount(), command.difficulty(), ex.toString());
         List<GeneratedQuestion.Item> fallback = new ArrayList<>();
         int n = command.questionCount();
-        List<String> base = FallbackQuestionRegistry.get(command.track(), command.difficulty());
+        List<FallbackQuestion> base = FallbackQuestionRegistry.get(command.track(), command.difficulty());
 
         for (int i = 0; i < Math.min(n, base.size()); i++) {
-            fallback.add(new GeneratedQuestion.Item(((i + 1) * 10),
-                    base.get(i),
+            fallback.add(new GeneratedQuestion.Item(
+                    ((i + 1) * 10),
+                    base.get(i).title(),
+                    base.get(i).body(),
+                    base.get(i).tags(),
                     "FALLBACK",
                     "N/A",
                     "v1",

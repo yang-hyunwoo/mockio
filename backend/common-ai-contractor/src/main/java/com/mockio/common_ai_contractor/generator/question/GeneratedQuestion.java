@@ -7,7 +7,9 @@ public record GeneratedQuestion(
 ) {
     public record Item(
             int seq,
-            String questionText,
+            String title,
+            String body,
+            List<String> tags,
             String provider,
             String model,
             String promptVersion,

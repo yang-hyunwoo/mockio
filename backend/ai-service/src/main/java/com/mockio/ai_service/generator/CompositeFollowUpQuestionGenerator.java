@@ -88,8 +88,15 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
 
     private FollowUpQuestion fallbackGenerate(FollowUpQuestionCommand command, Throwable t) {
         String q = "방금 답변에서 핵심 근거를 한 문장으로 요약하고, 그 근거가 깨질 수 있는 반례를 하나 들어보세요.";
+        String title = "핵심 근거";
         return new FollowUpQuestion(new FollowUpQuestion.Item(
-                q, "FALLBACK", "N/A", "v1", 0.0
+                title,
+                q,
+                List.of("근거", "반례"),
+                "FALLBACK",
+                "N/A",
+                "v1",
+                0.0
         ));
     }
 

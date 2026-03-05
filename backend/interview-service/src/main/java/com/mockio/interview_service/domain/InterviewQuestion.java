@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -29,6 +31,14 @@ public class InterviewQuestion extends BaseTimeEntity {
 
     @Column(name = "seq", nullable = false)
     private Integer seq;
+
+    @Column(name = "question_text", nullable = false, columnDefinition = "TEXT")
+    private String title;
+
+    @ElementCollection
+    @CollectionTable(name = "question_tags", joinColumns = @JoinColumn(name = "question_id"))
+    @Column(name = "tag")
+    private List<String> tags = new ArrayList<>();
 
     @Column(name = "question_text", nullable = false, columnDefinition = "TEXT")
     private String questionText;
@@ -90,6 +100,8 @@ public class InterviewQuestion extends BaseTimeEntity {
     @Builder
     private InterviewQuestion(Interview interview,
                               Integer seq,
+                              String title,
+                              List<String> tags,
                               String questionText,
                               QuestionStatus status,
                               QuestionType type,
@@ -105,6 +117,8 @@ public class InterviewQuestion extends BaseTimeEntity {
     ) {
         this.interview = interview;
         this.seq = seq;
+        this.title = title;
+        this.tags = tags;
         this.questionText = questionText;
         this.status = status;
         this.type = type;
@@ -123,6 +137,8 @@ public class InterviewQuestion extends BaseTimeEntity {
     public static InterviewQuestion createInterviewQuestion(
             Interview interview,
             int seq,
+            String title,
+            List<String> tags,
             String questionText,
             String provider,
             String model,
@@ -133,6 +149,8 @@ public class InterviewQuestion extends BaseTimeEntity {
         return InterviewQuestion.builder()
                 .interview(interview)
                 .seq(seq)
+                .title(questionText)
+                .tags(tags)
                 .questionText(questionText)
                 .status(QuestionStatus.READY)
                 .type(QuestionType.BASE)
@@ -154,6 +172,8 @@ public class InterviewQuestion extends BaseTimeEntity {
             int parentDepth,
             Long triggerAnswerId,
             String idempotencyKey,
+            String title,
+            List<String> tags,
             String questionText,
             String provider,
             String model,
@@ -167,6 +187,8 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .depth(parentDepth)
                 .triggerAnswerId(triggerAnswerId)
                 .idempotencyKey(idempotencyKey)
+                .title(title)
+                .tags(tags)
                 .questionText(questionText)
                 .provider(provider)
                 .model(model)
@@ -186,6 +208,8 @@ public class InterviewQuestion extends BaseTimeEntity {
             int parentDepth,
             Long triggerAnswerId,
             String idempotencyKey,
+            String title,
+            List<String> tags,
             String questionText,
             String provider,
             String model,
@@ -199,6 +223,8 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .depth(parentDepth)
                 .triggerAnswerId(triggerAnswerId)
                 .idempotencyKey(idempotencyKey)
+                .title(title)
+                .tags(tags)
                 .questionText(questionText)
                 .provider(provider)
                 .model(model)

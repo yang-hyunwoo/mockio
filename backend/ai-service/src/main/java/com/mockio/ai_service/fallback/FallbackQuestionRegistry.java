@@ -20,23 +20,23 @@ import java.util.Map;
 
 public final class FallbackQuestionRegistry {
 
-    private static final Map<InterviewTrack, Map<InterviewDifficulty, List<String>>> STORE;
+    private static final Map<InterviewTrack, Map<InterviewDifficulty, List<FallbackQuestion>>> STORE;
 
     static {
-        Map<InterviewTrack, Map<InterviewDifficulty, List<String>>> map =
+        Map<InterviewTrack, Map<InterviewDifficulty, List<FallbackQuestion>>> map =
                 new EnumMap<>(InterviewTrack.class);
 
-        map.put(InterviewTrack.DATA_ENGINEER, DataEngineerFallbackQuestions.byDifficulty());
         map.put(InterviewTrack.BACKEND_ENGINEER, BackEndEngineerFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.FRONTEND_ENGINEER, FrontEndEngineerFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.SERVER_ENGINEER, ServerEngineerFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.DESIGN, DesignFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.PRODUCT, ProductFallbackQuestions.byDifficulty());
         map.put(InterviewTrack.BUSINESS, BusinessFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.MARKETING, MarketingFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.SALES, SalesFallbackQuestions.byDifficulty());
-        map.put(InterviewTrack.HR, HrFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.DATA_ENGINEER, DataEngineerFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.DESIGN, DesignFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.FRONTEND_ENGINEER, FrontEndEngineerFallbackQuestions.byDifficulty());
         map.put(InterviewTrack.GENERAL, GeneralFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.HR, HrFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.MARKETING, MarketingFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.PRODUCT, ProductFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.SALES, SalesFallbackQuestions.byDifficulty());
+        map.put(InterviewTrack.SERVER_ENGINEER, ServerEngineerFallbackQuestions.byDifficulty());
 
         STORE = Map.copyOf(map);
     }
@@ -47,13 +47,13 @@ public final class FallbackQuestionRegistry {
      * downgrade 규칙:
      * 요청 난이도가 없으면 MEDIUM, 그것도 없으면 EASY, 그래도 없으면 GENERAL.MEDIUM
      */
-    public static List<String> get(InterviewTrack track, InterviewDifficulty difficulty) {
+    public static List<FallbackQuestion> get(InterviewTrack track, InterviewDifficulty difficulty) {
         InterviewDifficulty d = (difficulty == null) ? InterviewDifficulty.MEDIUM : difficulty;
 
-        Map<InterviewDifficulty, List<String>> byDifficulty =
+        Map<InterviewDifficulty, List<FallbackQuestion>> byDifficulty =
                 STORE.getOrDefault(track, STORE.getOrDefault(InterviewTrack.GENERAL, Map.of()));
 
-        List<String> picked = byDifficulty.get(d);
+        List<FallbackQuestion> picked = byDifficulty.get(d);
         if (picked != null && !picked.isEmpty()) return picked;
 
         // downgrade: HARD -> MEDIUM -> EASY
@@ -65,7 +65,7 @@ public final class FallbackQuestionRegistry {
         if (picked != null && !picked.isEmpty()) return picked;
 
         // 최후의 안전장치
-        Map<InterviewDifficulty, List<String>> general = STORE.getOrDefault(InterviewTrack.GENERAL, Map.of());
+        Map<InterviewDifficulty, List<FallbackQuestion>> general = STORE.getOrDefault(InterviewTrack.GENERAL, Map.of());
 
         return general.getOrDefault(InterviewDifficulty.MEDIUM, List.of());
     }

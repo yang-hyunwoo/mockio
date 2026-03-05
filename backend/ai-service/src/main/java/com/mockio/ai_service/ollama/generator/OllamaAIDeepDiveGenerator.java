@@ -1,4 +1,4 @@
-package com.mockio.ai_service.openAi.generator;
+package com.mockio.ai_service.ollama.generator;
 
 /**
  * OpenAI 기반 후속 질문 생성기.
@@ -16,30 +16,31 @@ package com.mockio.ai_service.openAi.generator;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.ai_service.ollama.client.OllamaClient;
 import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.deepdive.*;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveGenerator;
+import com.mockio.common_ai_contractor.generator.deepdive.GenerateDeepDiveCommand;
+import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
-import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
-import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(name="ai.generator" , havingValue = "openai")
+@ConditionalOnProperty(name="ai.generator" , havingValue = "ollama")
 @RequiredArgsConstructor
-public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
+public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
 
-    private static final String MODEL = "gpt-4o-mini";
-    private static final String PROMPT_VERSION = "followup-v1";
     private final ObjectMapper objectMapper;
+    private static final String MODEL = "llama3.1:8b";
+    private static final String PROMPT_VERSION = "followup-v1";
 
-    private final SpringAiOpenAIClient client;
+    private final OllamaClient client;
 
     @Override
     public AiEngine engine() {
@@ -61,7 +62,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
      * @return 생성된 후속 질문 결과
      */
     @Override
-    @CircuitBreaker(name = "openaiDeepDiveChat")
+    @CircuitBreaker(name = "ollamaDeepDiveChat")
     public GeneratedDeepDiveBundle generate(GenerateDeepDiveCommand command) {
 
         String qText = (command == null || command.question() == null) ? "N/A" : command.question();
@@ -73,7 +74,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                         설명/마크다운/코드블록/번호/불릿 금지.
                         스키마를 절대 깨지 마세요.
                         """.formatted(command.interviewTrack());
-
+        Double temperature = 0.2;
 
         String prompt = """
                 당신은 기술 면접 보조 시스템입니다.
@@ -118,7 +119,6 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                         qText,
                         aText
                 );
-        Double temperature = 0.2;
         String answer = client.chat(MODEL, prompt,commandText,temperature);
         DeepDiveBundleDto dto = parseOrRepair(answer, commandText);
 
@@ -141,7 +141,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                         safeTitle(dto.question().title()),
                         normalizedBody,
                         sanitizeTags(dto.question().tags()),
-                        "ollama",
+                        "OPENAI",
                         MODEL,
                         PROMPT_VERSION,
                         temperature
@@ -231,8 +231,8 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
         return s == null ? "" : s.trim();
     }
 
-    private static java.util.List<String> safeTop3(java.util.List<String> xs) {
-        if (xs == null) return java.util.List.of();
+    private static List<String> safeTop3(List<String> xs) {
+        if (xs == null) return List.of();
         return xs.stream()
                 .filter(x -> x != null && !x.trim().isEmpty())
                 .map(String::trim)
@@ -242,15 +242,15 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
 
     public record DeepDiveBundleDto(Decision decision, Question question) {
         public record Decision(boolean shouldFollowUp, int depth,
-                               java.util.List<String> focus,
-                               java.util.List<String> gaps,
+                               List<String> focus,
+                               List<String> gaps,
                                String reason) {}
 
-        public record Question(String title, String body, java.util.List<String> tags) {}
+        public record Question(String title, String body, List<String> tags) {}
 
         public static DeepDiveBundleDto fallback() {
             return new DeepDiveBundleDto(
-                    new Decision(false, 1, java.util.List.of(), java.util.List.of(), "FALLBACK"),
+                    new Decision(false, 1, List.of(), List.of(), "FALLBACK"),
                     null
             );
         }

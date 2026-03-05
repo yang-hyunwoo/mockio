@@ -30,7 +30,7 @@ public class OpenAISummaryFeedbackGenerator implements SummaryFeedbackGenerator 
     @Override
     @CircuitBreaker(name = "openaiSummaryChat")
     public GeneratedSummaryFeedback generate(GeneratedSummaryFeedbackCommand command) {
-        Double temperature = 0.2;
+
 
         String system = """
                 당신은 %s 기술면접관입니다. 난이도(%s)에 맞춰 전체 인터뷰 답변을 종합 평가하세요.
@@ -55,6 +55,7 @@ public class OpenAISummaryFeedbackGenerator implements SummaryFeedbackGenerator 
 
         String user = buildUser(command);
 
+        Double temperature = 0.7;
         String rawJson = client.chat(MODEL, user, system, temperature);
 
         // JSON 파싱 (필드 추출)

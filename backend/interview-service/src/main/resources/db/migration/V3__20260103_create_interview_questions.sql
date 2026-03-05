@@ -2,6 +2,7 @@ CREATE TABLE interview_questions (
      id BIGSERIAL PRIMARY KEY,
      interview_id BIGINT NOT NULL,
      seq INTEGER NOT NULL,
+     title TEXT NOT NULL,
      question_text TEXT NOT NULL,
      status VARCHAR(30) NOT NULL,
      type   VARCHAR(30) NOT NULL,

@@ -1,5 +1,6 @@
 package com.mockio.ai_service.generator.move;
 
+import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
@@ -10,6 +11,11 @@ import java.util.List;
 
 @Component
 public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerator {
+
+    @Override
+    public AiEngine engine() {
+        return AiEngine.FAKE;
+    }
 
     @Override
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
@@ -31,7 +37,9 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
             String text = pool.get((i - 1) % pool.size());
             result.add(new GeneratedQuestion.Item(
                     i,
-                    "[" + command.track() + "/" + command.difficulty() + "] " + text,
+                    "FAKE-제목",
+                    text,
+                    List.of("스프링","JWT"),
                     "FAKE",
                     "fake-model",
                     "v0",

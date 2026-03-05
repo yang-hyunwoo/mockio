@@ -11,8 +11,11 @@ package com.mockio.ai_service.ollama.generator;
  * 최종 질문 목록으로 가공된다.</p>
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
 import com.mockio.common_ai_contractor.constant.AiEngine;
+import com.mockio.common_ai_contractor.generator.question.AiQuestion;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
@@ -52,45 +55,77 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     @Override
     @CircuitBreaker(name = "ollamaChat")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
-        String commandText =  "당신은 기술면접관입니다. 사용자의 요청 형식(한 줄에 질문 하나, 번호/설명 금지)을 반드시 지키세요.";
-        Double temperature = 0.7;
-
+        String commandText = """
+                "당신은 %s 기술 면접관입니다.
+                 반드시 JSON 배열만 출력하세요.
+                 설명, 코드블록, 마크다운, 번호 금지.
+                """.formatted(command.track());
         String prompt = """
-            %s 면접 질문을 %d개 생성해 주세요.
+            다음 조건으로 면접 질문을 %d개 생성하세요.
+            
+            출력 형식(JSON):
+                    [
+                      {
+                        "title": "string",
+                        "body": "string",
+                        "tags": ["string","string"]
+                      }
+                    ]
+            규칙:
+                    - title은 3~8단어의 짧은 주제명
+                    - body는 실제 면접 질문 문장
+                    - tags는 2~4개, 짧은 기술 키워드
+                    - JSON 외의 텍스트는 절대 출력하지 마세요
            조건:
            - 면접 질문 분야: %s
            - 난이도: %s
            - 질문은 실무 중심으로 작성
-           - 한 줄에 질문 하나
-           - 번호나 불필요한 설명 없이 질문만 반환
         """.formatted(
-                command.track(),
                 command.questionCount(),
                 command.track(),
                 command.difficulty()
         );
-
+        Double temperature = 0.7;
         String answer = client.chat(model, prompt, commandText, temperature);
 
-        List<String> lines = Arrays.stream(answer.split("\n"))
-                .map(String::trim)
-                .map(s -> s.replaceFirst("^\\d+\\.|^[-•]\\s*", "").trim())
-                .filter(s -> !s.isBlank())
-                .filter(s -> s.length() >= 10)
-                .distinct()
-                .limit(command.questionCount())
-                .toList();
+        ObjectMapper mapper = new ObjectMapper();
+
+        List<AiQuestion> aiQuestions;
+        try {
+            aiQuestions = mapper.readValue(answer, new TypeReference<List<AiQuestion>>() {
+            });
+        } catch (Exception e) {
+            log.error("AI 응답 파싱 실패: {}", answer, e);
+            throw new RuntimeException("AI 응답 파싱 실패");
+        }
         List<GeneratedQuestion.Item> result = new ArrayList<>();
-        for (int i = 0; i < lines.size(); i++) {
-            result.add(new GeneratedQuestion.Item(((i + 1) * 10),
-                    lines.get(i).trim(),
-                    "Ollama",
-                    model,
+        for (int i = 0; i < aiQuestions.size(); i++) {
+            AiQuestion q = aiQuestions.get(i);
+
+            result.add(new GeneratedQuestion.Item(
+                    ((i + 1) * 10),
+                    q.title(),
+                    q.body(),
+                    sanitizeTags(q.tags()),
+                    "ollama",
+                    "ollama",
                     "v1",
-                    temperature));
+                    temperature
+            ));
         }
 
        return new GeneratedQuestion(result);
     }
 
+    private List<String> sanitizeTags(List<String> tags) {
+        if (tags == null) return List.of();
+
+        return tags.stream()
+                .map(String::trim)
+                .filter(t -> !t.isBlank())
+                .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
+                .distinct()
+                .limit(4)
+                .toList();
+    }
 }

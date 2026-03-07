@@ -1,13 +1,17 @@
 package com.mockio.interview_service.dto.response;
 
 import java.util.List;
+import java.util.Set;
 
 public record InterviewQuestionReadResponse(
         List<Item> questions
 ) {
     public record Item(
             Long id,
+            Long interviewId,
             Integer seq,
-            String questionText
+            String title,
+            String questionText,
+            Set<String> tags
     ) {}
 }

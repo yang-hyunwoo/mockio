@@ -27,6 +27,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Component
 @Primary
@@ -63,18 +65,22 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
     }
 
     private List<InterviewQuestionGenerator> buildChain(String mode) {
-        //  openai -> ollama -> fake
-        //     ollama -> openai -> fake
         AiEngine primary = parse(mode);
 
-        InterviewQuestionGenerator openai = find(AiEngine.OPENAI);
-        InterviewQuestionGenerator ollama = find(AiEngine.OLLAMA);
-        InterviewQuestionGenerator fake = find(AiEngine.FAKE);
+        Optional<InterviewQuestionGenerator> openai = findOptional(AiEngine.OPENAI);
+        Optional<InterviewQuestionGenerator> ollama = findOptional(AiEngine.OLLAMA);
+        Optional<InterviewQuestionGenerator> fake = findOptional(AiEngine.FAKE);
 
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> Stream.of(ollama, openai, fake)
+                    .flatMap(Optional::stream)
+                    .toList();
+            case FAKE -> Stream.of(fake)
+                    .flatMap(Optional::stream)
+                    .toList();
+            default -> Stream.of(openai, ollama, fake)
+                    .flatMap(Optional::stream)
+                    .toList();
         };
     }
 
@@ -118,6 +124,13 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
                     0.0));
         }
         return new GeneratedQuestion(fallback);
+    }
+
+    private Optional<InterviewQuestionGenerator> findOptional(AiEngine engine) {
+        return generators.stream()
+                .filter(g -> g != this)
+                .filter(g -> g.engine() == engine)
+                .findFirst();
     }
 
 }

@@ -1,9 +1,9 @@
 package com.mockio.ai_service.fallback;
 
-import java.util.List;
+import java.util.Set;
 
 public record FallbackQuestion(
         String title,
         String body,
-        List<String> tags
+        Set<String> tags
 ) {}

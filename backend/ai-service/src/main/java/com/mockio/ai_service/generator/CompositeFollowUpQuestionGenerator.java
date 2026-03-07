@@ -7,6 +7,7 @@ import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 @Component
 @Primary
@@ -50,18 +54,22 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
     }
 
     private List<FollowUpQuestionGenerator> buildChain(String mode) {
-        //  openai -> ollama -> fake
-        //     ollama -> openai -> fake
         AiEngine primary = parse(mode);
 
-        FollowUpQuestionGenerator openai = find(AiEngine.OPENAI);
-        FollowUpQuestionGenerator ollama = find(AiEngine.OLLAMA);
-        FollowUpQuestionGenerator fake = find(AiEngine.FAKE);
+        Optional<FollowUpQuestionGenerator> openai = findOptional(AiEngine.OPENAI);
+        Optional<FollowUpQuestionGenerator> ollama = findOptional(AiEngine.OLLAMA);
+        Optional<FollowUpQuestionGenerator> fake = findOptional(AiEngine.FAKE);
 
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> Stream.of(ollama, openai, fake)
+                    .flatMap(Optional::stream)
+                    .toList();
+            case FAKE -> Stream.of(fake)
+                    .flatMap(Optional::stream)
+                    .toList();
+            default -> Stream.of(openai, ollama, fake)
+                    .flatMap(Optional::stream)
+                    .toList();
         };
     }
 
@@ -92,12 +100,19 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
         return new FollowUpQuestion(new FollowUpQuestion.Item(
                 title,
                 q,
-                List.of("근거", "반례"),
+                Set.of("근거", "반례"),
                 "FALLBACK",
                 "N/A",
                 "v1",
                 0.0
         ));
+    }
+
+    private Optional<FollowUpQuestionGenerator> findOptional(AiEngine engine) {
+        return generators.stream()
+                .filter(g -> g != this)
+                .filter(g -> g.engine() == engine)
+                .findFirst();
     }
 
 }

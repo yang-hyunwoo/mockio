@@ -107,7 +107,9 @@ public class InterviewAnswerService {
         InterviewAnswerSubmittedPayload payload = new InterviewAnswerSubmittedPayload(
                 interview.getId(),
                 interviewQuestion.getId(),
+                interviewQuestion.getQuestionText(),
                 answer.getId(),
+                answer.getAnswerText(),
                 nextAttempt,
                 interview.getTrack().name(),
                 interview.getDifficulty().name(),
@@ -168,10 +170,18 @@ public class InterviewAnswerService {
                     q.temperature()
             );
 
-            interviewQuestionRepository.save(saveFollowQuestion);
-            interviewRepository.incrementTotalCount(interview.getId());
-            answer.followupUpdate(decision.reason());
-            return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion));
+            try {
+                interviewQuestionRepository.save(saveFollowQuestion);
+                interviewRepository.incrementTotalCount(interview.getId());
+                answer.followupUpdate(decision.reason());
+                return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion));
+            } catch (DataIntegrityViolationException e) {
+                InterviewQuestion existingFollowQuestion = interviewQuestionRepository
+                        .findByInterviewIdAndSeq(interview.getId(), nextSeq)
+                        .orElseThrow(() -> e);
+
+                return InterviewQuestionMapper.fromList(List.of(existingFollowQuestion));
+            }
         }
 
         // 룰에서 skip이어도, Gate 통과하면 deepdive 판정
@@ -225,10 +235,18 @@ public class InterviewAnswerService {
                                 q.temperature()
                         );
 
-                        interviewQuestionRepository.save(saveDeepDiveQuestion);
-                        answer.followupUpdate(deepDiveContext);
-                        interviewRepository.incrementTotalCount(interview.getId());
-                        return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion));
+                        try {
+                            interviewQuestionRepository.save(saveDeepDiveQuestion);
+                            answer.followupUpdate(deepDiveContext);
+                            interviewRepository.incrementTotalCount(interview.getId());
+                            return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion));
+                        } catch (DataIntegrityViolationException e) {
+                            InterviewQuestion existingDeepDiveQuestion = interviewQuestionRepository
+                                    .findByInterviewIdAndSeq(interview.getId(), deepDiveSeq)
+                                    .orElseThrow(() -> e);
+
+                            return InterviewQuestionMapper.fromList(List.of(existingDeepDiveQuestion));
+                        }
                     }
 
                 }

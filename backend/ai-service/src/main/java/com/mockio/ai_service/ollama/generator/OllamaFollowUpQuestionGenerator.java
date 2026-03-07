@@ -28,9 +28,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Component
-@ConditionalOnProperty(name="ai.generator" , havingValue = "ollama")
 @RequiredArgsConstructor
 public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerator {
 
@@ -67,6 +70,9 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
 
         String commandText = """
                 당신은 %s 기술 면접관입니다.
+                모든 질문은 반드시 한국어로 작성한다.
+                영어 문장 사용 금지
+                기술 용어만 영어 허용
                 반드시 JSON 객체만 출력하세요.
                 설명/번호/불릿/마크다운/코드블록 금지.
                 """.formatted(command.interviewTrack());
@@ -128,7 +134,7 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                 q = new AiQuestion(
                         "추가 검증 질문",
                         "방금 답변에서 가장 중요한 가정(전제)은 무엇이고, 그 전제가 깨질 때 어떤 문제가 발생하나요?",
-                        List.of("Follow-up", "Trade-off")
+                        Set.of("Follow-up", "Trade-off")
                 );
             }
         }
@@ -158,8 +164,8 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         return t.isBlank() ? "후속 질문" : (t.length() > 40 ? t.substring(0, 40) : t);
     }
 
-    private List<String> sanitizeTags(List<String> tags) {
-        if (tags == null) return List.of();
+    private Set<String> sanitizeTags(Set<String> tags) {
+        if (tags == null) return Set.of();
 
         return tags.stream()
                 .map(String::trim)
@@ -167,7 +173,7 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                 .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
                 .distinct()
                 .limit(4)
-                .toList();
+                .collect(toSet());
     }
 
 }

@@ -6,6 +6,7 @@ import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class GeneralFallbackQuestions {
 
@@ -18,52 +19,52 @@ public final class GeneralFallbackQuestions {
                 new FallbackQuestion(
                         "자기소개",
                         "본인 소개를 해 주세요.",
-                        List.of("SelfIntroduction", "Communication", "Career")
+                        Set.of("SelfIntroduction", "Communication", "Career")
                 ),
                 new FallbackQuestion(
                         "문제 해결 경험",
                         "최근에 해결했던 문제 경험을 말해 주세요.",
-                        List.of("ProblemSolving", "Experience", "Storytelling")
+                        Set.of("ProblemSolving", "Experience", "Storytelling")
                 ),
                 new FallbackQuestion(
                         "강점",
                         "본인의 강점은 무엇인가요?",
-                        List.of("Strength", "SelfAwareness", "Career")
+                        Set.of("Strength", "SelfAwareness", "Career")
                 ),
                 new FallbackQuestion(
                         "약점과 보완",
                         "본인의 약점은 무엇이며 어떻게 보완하나요?",
-                        List.of("Weakness", "Improvement", "Growth")
+                        Set.of("Weakness", "Improvement", "Growth")
                 ),
                 new FallbackQuestion(
                         "협업 가치관",
                         "협업할 때 중요하게 생각하는 것은 무엇인가요?",
-                        List.of("Collaboration", "Teamwork", "Communication")
+                        Set.of("Collaboration", "Teamwork", "Communication")
                 ),
                 new FallbackQuestion(
                         "스트레스 관리",
                         "스트레스를 관리하는 방법은 무엇인가요?",
-                        List.of("StressManagement", "Resilience", "WorkLife")
+                        Set.of("StressManagement", "Resilience", "WorkLife")
                 ),
                 new FallbackQuestion(
                         "실수와 개선",
                         "실수를 했던 경험과 개선한 방법을 말해 주세요.",
-                        List.of("Failure", "Learning", "Improvement")
+                        Set.of("Failure", "Learning", "Improvement")
                 ),
                 new FallbackQuestion(
                         "학습 방법",
                         "새로운 것을 학습하는 본인만의 방법은 무엇인가요?",
-                        List.of("Learning", "Growth", "Skill")
+                        Set.of("Learning", "Growth", "Skill")
                 ),
                 new FallbackQuestion(
                         "선호 업무 환경",
                         "원하는 업무 환경/문화는 무엇인가요?",
-                        List.of("Culture", "Environment", "Fit")
+                        Set.of("Culture", "Environment", "Fit")
                 ),
                 new FallbackQuestion(
                         "지원 동기",
                         "지원한 이유는 무엇인가요?",
-                        List.of("Motivation", "Career", "CompanyFit")
+                        Set.of("Motivation", "Career", "CompanyFit")
                 )
         ));
 
@@ -71,52 +72,52 @@ public final class GeneralFallbackQuestions {
                 new FallbackQuestion(
                         "갈등 해결 STAR",
                         "갈등 상황을 해결한 경험을 STAR 방식으로 설명해 주세요.",
-                        List.of("Conflict", "STAR", "ProblemSolving")
+                        Set.of("Conflict", "STAR", "ProblemSolving")
                 ),
                 new FallbackQuestion(
                         "우선순위 충돌",
                         "우선순위가 충돌할 때 의사결정을 어떻게 하나요?",
-                        List.of("Prioritization", "DecisionMaking", "Execution")
+                        Set.of("Prioritization", "DecisionMaking", "Execution")
                 ),
                 new FallbackQuestion(
                         "촉박한 일정",
                         "기한이 촉박한 프로젝트를 성공시킨 경험이 있나요?",
-                        List.of("Deadline", "Execution", "Result")
+                        Set.of("Deadline", "Execution", "Result")
                 ),
                 new FallbackQuestion(
                         "피드백 수용",
                         "피드백을 받았을 때 수용하고 반영한 사례를 말해 주세요.",
-                        List.of("Feedback", "Growth", "Communication")
+                        Set.of("Feedback", "Growth", "Communication")
                 ),
                 new FallbackQuestion(
                         "팀을 위한 양보",
                         "팀 성과를 위해 개인이 양보했던 경험이 있나요?",
-                        List.of("Teamwork", "Sacrifice", "Collaboration")
+                        Set.of("Teamwork", "Sacrifice", "Collaboration")
                 ),
                 new FallbackQuestion(
                         "기여 증명",
                         "성과를 측정할 수 없는 업무에서 기여를 어떻게 증명하나요?",
-                        List.of("Impact", "Measurement", "Performance")
+                        Set.of("Impact", "Measurement", "Performance")
                 ),
                 new FallbackQuestion(
                         "실패와 재발 방지",
                         "실패 경험을 통해 배운 점과 재발 방지 방법은 무엇인가요?",
-                        List.of("Failure", "Learning", "Improvement")
+                        Set.of("Failure", "Learning", "Improvement")
                 ),
                 new FallbackQuestion(
                         "리더십 경험",
                         "리더십을 발휘한 경험이 있다면 말해 주세요.",
-                        List.of("Leadership", "Influence", "Team")
+                        Set.of("Leadership", "Influence", "Team")
                 ),
                 new FallbackQuestion(
                         "품질 vs 속도",
                         "업무 품질과 속도 사이의 균형을 어떻게 맞추나요?",
-                        List.of("Quality", "Speed", "TradeOff")
+                        Set.of("Quality", "Speed", "TradeOff")
                 ),
                 new FallbackQuestion(
                         "입사 후 목표",
                         "우리 회사(또는 조직)에서 이루고 싶은 목표는 무엇인가요?",
-                        List.of("Goal", "Vision", "Career")
+                        Set.of("Goal", "Vision", "Career")
                 )
         ));
 
@@ -124,52 +125,52 @@ public final class GeneralFallbackQuestions {
                 new FallbackQuestion(
                         "불확실성 대응",
                         "불확실성이 큰 과제에서 문제를 정의하고 실행한 과정을 설명해 주세요.",
-                        List.of("Ambiguity", "Execution", "ProblemSolving")
+                        Set.of("Ambiguity", "Execution", "ProblemSolving")
                 ),
                 new FallbackQuestion(
                         "데이터 vs 직관",
                         "데이터와 직관이 충돌했을 때 어떤 기준으로 결정했나요?",
-                        List.of("DecisionMaking", "Data", "Judgment")
+                        Set.of("DecisionMaking", "Data", "Judgment")
                 ),
                 new FallbackQuestion(
                         "조직 개선 경험",
                         "조직의 비효율을 발견하고 개선했던 경험을 구체적으로 말해 주세요.",
-                        List.of("Improvement", "Process", "Leadership")
+                        Set.of("Improvement", "Process", "Leadership")
                 ),
                 new FallbackQuestion(
                         "설득 경험",
                         "이해관계자가 강하게 반대하는 상황에서 설득한 경험이 있나요?",
-                        List.of("Stakeholder", "Persuasion", "Communication")
+                        Set.of("Stakeholder", "Persuasion", "Communication")
                 ),
                 new FallbackQuestion(
                         "부진 상황 전략",
                         "성과가 부진한 상황에서 본인이 선택한 전략과 결과를 설명해 주세요.",
-                        List.of("Strategy", "Turnaround", "Result")
+                        Set.of("Strategy", "Turnaround", "Result")
                 ),
                 new FallbackQuestion(
                         "실패 가능 프로젝트",
                         "팀이 실패할 가능성이 큰 프로젝트를 맡았을 때 접근 방법은 무엇인가요?",
-                        List.of("RiskManagement", "Execution", "Leadership")
+                        Set.of("RiskManagement", "Execution", "Leadership")
                 ),
                 new FallbackQuestion(
                         "단기 vs 장기 가치",
                         "단기 성과와 장기 가치가 충돌할 때 어떤 기준으로 선택하나요?",
-                        List.of("TradeOff", "LongTerm", "DecisionMaking")
+                        Set.of("TradeOff", "LongTerm", "DecisionMaking")
                 ),
                 new FallbackQuestion(
                         "리스크 방어 사례",
                         "본인의 의사결정이 큰 손실/리스크를 막았던 사례가 있나요?",
-                        List.of("Risk", "Decision", "Impact")
+                        Set.of("Risk", "Decision", "Impact")
                 ),
                 new FallbackQuestion(
                         "윤리적 딜레마",
                         "윤리적 딜레마 상황에서 어떻게 판단하고 행동했나요?",
-                        List.of("Ethics", "DecisionMaking", "Responsibility")
+                        Set.of("Ethics", "DecisionMaking", "Responsibility")
                 ),
                 new FallbackQuestion(
                         "커리어 전략",
                         "향후 3~5년 커리어 전략과 그 근거를 설명해 주세요.",
-                        List.of("CareerPlan", "Vision", "Growth")
+                        Set.of("CareerPlan", "Vision", "Growth")
                 )
         ));
 

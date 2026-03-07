@@ -1,7 +1,7 @@
 package com.mockio.common_ai_contractor.generator.followup;
 
 
-import java.util.List;
+import java.util.Set;
 
 public record FollowUpQuestion(
         Item questions
@@ -9,7 +9,7 @@ public record FollowUpQuestion(
     public record Item(
             String title,
             String body,
-            List<String> tags,
+            Set<String> tags,
             String provider,
             String model,
             String promptVersion,

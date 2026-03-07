@@ -1,4 +1,4 @@
-package com.mockio.ai_service.generator.move;
+package com.mockio.ai_service.fake;
 
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerator {
@@ -39,7 +40,7 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
                     i,
                     "FAKE-제목",
                     text,
-                    List.of("스프링","JWT"),
+                    Set.of("스프링","JWT"),
                     "FAKE",
                     "fake-model",
                     "v0",

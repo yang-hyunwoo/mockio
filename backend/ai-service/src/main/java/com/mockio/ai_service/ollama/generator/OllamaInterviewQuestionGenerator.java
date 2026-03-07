@@ -27,6 +27,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Slf4j
 @Component
@@ -56,13 +60,17 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     @CircuitBreaker(name = "ollamaChat")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
         String commandText = """
-                "당신은 %s 기술 면접관입니다.
-                 반드시 JSON 배열만 출력하세요.
-                 설명, 코드블록, 마크다운, 번호 금지.
+                당신은 %s 기술 면접관입니다.
+                모든 질문은 반드시 한국어로 작성한다.
+                영어 문장 사용 금지
+                기술 용어만 영어 허용
+                반드시 JSON 배열만 출력하세요.
+                설명, 코드블록, 마크다운, 번호 금지.
                 """.formatted(command.track());
+
         String prompt = """
             다음 조건으로 면접 질문을 %d개 생성하세요.
-            
+                
             출력 형식(JSON):
                     [
                       {
@@ -117,8 +125,8 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
        return new GeneratedQuestion(result);
     }
 
-    private List<String> sanitizeTags(List<String> tags) {
-        if (tags == null) return List.of();
+    private Set<String> sanitizeTags(Set<String> tags) {
+        if (tags == null) return Set.of();
 
         return tags.stream()
                 .map(String::trim)
@@ -126,6 +134,6 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
                 .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
                 .distinct()
                 .limit(4)
-                .toList();
+                .collect(toSet());
     }
 }

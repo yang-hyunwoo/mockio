@@ -1,9 +1,9 @@
 package com.mockio.common_ai_contractor.generator.question;
 
-import java.util.List;
+import java.util.Set;
 
 public record AiQuestion(
         String title,
         String body,
-        List<String> tags
+        Set<String> tags
 ) {}

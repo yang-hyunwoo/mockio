@@ -18,6 +18,7 @@ import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailRespo
 import com.mockio.feedback_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.feedback_service.kafka.support.InterviewEventParser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -27,6 +28,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InterviewFeedbackConsumer {
 
     private final ProcessedEventRepository processedEventRepository;
@@ -39,6 +41,7 @@ public class InterviewFeedbackConsumer {
 
     @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
     public void onMessage(String messageJson, Acknowledgment ack) {
+        log.info("kafka message received: {}", messageJson);
         InterviewLifecycleEvent event;
 
         try {
@@ -75,7 +78,7 @@ public class InterviewFeedbackConsumer {
         InterviewAnswerSubmittedPayload payload = parser.payloadAs(event, InterviewAnswerSubmittedPayload.class);
 
         //  인터뷰 서비스에서 질문/답변 텍스트 조회
-        InterviewAnswerDetailResponse answerDetail = interviewServiceClient.getAnswerDetail(payload.answerId());
+//        InterviewAnswerDetailResponse answerDetail = interviewServiceClient.getAnswerDetail(payload.answerId());
 
         //피드백 생성
         InterviewFeedback interviewFeedback = feedbackTxService.ensurePending(payload.answerId());
@@ -86,8 +89,8 @@ public class InterviewFeedbackConsumer {
         // AI 호출
         GeneratedFeedback result = aiFeedbackClient.generateQuestionFeedback(
                 new GenerateFeedbackCommand(
-                        answerDetail.questionText(),
-                        answerDetail.answerText(),
+                        payload.questionText(),
+                        payload.answerText(),
                         payload.track(),
                         payload.difficulty(),
                         payload.feedbackStyle()

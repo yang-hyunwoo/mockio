@@ -16,8 +16,11 @@ public class InterviewQuestionMapper {
     public static Item from(InterviewQuestion question) {
         return new Item(
                 question.getId(),
+                question.getInterview().getId(),
                 question.getSeq(),
-                question.getQuestionText()
+                question.getTitle(),
+                question.getQuestionText(),
+                question.getTags()
         );
     }
 

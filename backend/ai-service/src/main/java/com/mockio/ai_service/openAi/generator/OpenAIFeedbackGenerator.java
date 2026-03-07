@@ -33,7 +33,9 @@ public class OpenAIFeedbackGenerator implements FeedbackGenerator {
 
         String system = """
                 당신은 %s 기술면접관입니다. 난이도(%s)에 맞춰 평가하세요.
-                
+                모든 질문은 반드시 한국어로 작성한다.
+                영어 문장 사용 금지
+                기술 용어만 영어 허용
                 반드시 JSON 객체만 출력하세요.
                 JSON 외의 텍스트/설명/마크다운/코드블록/번호는 절대 포함하지 마세요.
                 

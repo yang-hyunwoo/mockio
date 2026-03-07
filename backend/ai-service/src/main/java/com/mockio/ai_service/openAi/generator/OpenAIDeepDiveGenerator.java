@@ -29,6 +29,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
+import static java.util.stream.Collectors.*;
 
 @Component
 @ConditionalOnProperty(name="ai.generator" , havingValue = "openai")
@@ -69,6 +72,9 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
 
         String commandText = """
                         당신은 %s 기술 면접 보조 시스템입니다.
+                        모든 질문은 반드시 한국어로 작성한다.
+                        영어 문장 사용 금지
+                        기술 용어만 영어 허용
                         반드시 JSON만 출력하세요.
                         설명/마크다운/코드블록/번호/불릿 금지.
                         스키마를 절대 깨지 마세요.
@@ -158,8 +164,8 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
         return t.isBlank() ? "후속 질문" : (t.length() > 40 ? t.substring(0, 40) : t);
     }
 
-    private List<String> sanitizeTags(List<String> tags) {
-        if (tags == null) return List.of();
+    private Set<String> sanitizeTags(Set<String> tags) {
+        if (tags == null) return Set.of();
 
         return tags.stream()
                 .map(String::trim)
@@ -167,7 +173,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                 .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
                 .distinct()
                 .limit(4)
-                .toList();
+                .collect(toSet());
     }
 
     private DeepDiveBundleDto parseOrRepair(String raw, String system) {
@@ -246,7 +252,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                                java.util.List<String> gaps,
                                String reason) {}
 
-        public record Question(String title, String body, java.util.List<String> tags) {}
+        public record Question(String title, String body, java.util.Set<String> tags) {}
 
         public static DeepDiveBundleDto fallback() {
             return new DeepDiveBundleDto(

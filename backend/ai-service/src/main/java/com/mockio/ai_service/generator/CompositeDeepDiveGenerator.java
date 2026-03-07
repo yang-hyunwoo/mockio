@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 @Primary
@@ -114,7 +115,7 @@ public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
                         new FollowUpQuestion.Item(
                                 "외부 AI 서버 오류로 피드백을 생성하지 못했습니다.",
                                 "외부 AI 서버 오류로 피드백을 생성하지 못했습니다.",
-                                List.of(),
+                                Set.of(),
                                 "FALLBACK",
                                 "N/A",
                                 "v1",

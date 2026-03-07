@@ -1,6 +1,7 @@
 package com.mockio.common_ai_contractor.generator.question;
 
 import java.util.List;
+import java.util.Set;
 
 public record GeneratedQuestion(
        List<Item> questions
@@ -9,7 +10,7 @@ public record GeneratedQuestion(
             int seq,
             String title,
             String body,
-            List<String> tags,
+            Set<String> tags,
             String provider,
             String model,
             String promptVersion,

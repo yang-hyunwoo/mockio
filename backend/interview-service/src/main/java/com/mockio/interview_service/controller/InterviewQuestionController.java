@@ -24,6 +24,13 @@ public class InterviewQuestionController {
                 interviewQuestionService.generateInterview(userId));
     }
 
+    @PostMapping("/interviews/start-interview")
+    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject String userId) {
+        return Response.ok(messageUtil.getMessage("response.read"),
+                interviewQuestionService.startInterview(userId));
+    }
+
+
     @PostMapping("/interviews/{interviewId}/questions:generate")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> generateQuestions(
             @CurrentSubject String userId,

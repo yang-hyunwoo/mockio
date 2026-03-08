@@ -70,9 +70,9 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
 
         String commandText = """
                 당신은 %s 기술 면접관입니다.
-                모든 질문은 반드시 한국어로 작성한다.
-                영어 문장 사용 금지
-                기술 용어만 영어 허용
+                title, body, tags를 모두 한국어로 작성하세요.
+                영어 문장 사용 금지, 기술 용어만 영어 허용.
+                
                 반드시 JSON 객체만 출력하세요.
                 설명/번호/불릿/마크다운/코드블록 금지.
                 """.formatted(command.interviewTrack());
@@ -135,7 +135,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                     q = new AiQuestion(
                             "추가 검증 질문",
                             "방금 답변에서 가장 중요한 가정(전제)은 무엇이고, 그 전제가 깨질 때 어떤 문제가 발생하나요?",
-                            Set.of("Follow-up", "Trade-off")
+                            Set.of("검증", "근거")
                     );
                 }
             }

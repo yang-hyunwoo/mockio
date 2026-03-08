@@ -13,6 +13,7 @@ import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewAnswer;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.request.InterviewAnswerRequest;
+import com.mockio.interview_service.dto.response.InterviewQuestionAnswerDetailResponse;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.forward.ai.AIServiceClient;
 import com.mockio.interview_service.kafka.domain.OutboxInterviewEvent;
@@ -23,6 +24,7 @@ import com.mockio.interview_service.repository.InterviewAnswerRepository;
 import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
+import com.mockio.interview_service.repository.querydsl.InterviewAnswerQueryDslRepository;
 import com.mockio.interview_service.util.DeepDiveGate;
 import com.mockio.interview_service.util.followup.FollowUpDecider;
 import com.mockio.interview_service.util.followup.FollowUpDecision;
@@ -40,6 +42,7 @@ public class InterviewAnswerService {
 
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
+    private final InterviewAnswerQueryDslRepository interviewAnswerQueryDslRepository;
     private final InterviewRepository interviewRepository;
     private final FollowUpDecider followUpDecider;
     private final AIServiceClient aiServiceClient;
@@ -136,7 +139,7 @@ public class InterviewAnswerService {
          * 2) 룰 통과 시: Gate 통과하면 deepdive 판정 → 필요하면 딥다이브 꼬리질문
          * 3) 둘 다 아니면 다음 질문/완료
          */
-        if (canAsk && wantsFollowUp) {
+        if (canAsk && wantsFollowUp && isBase) {
 
             FollowUpQuestionCommand followUpQuestionCommand = new FollowUpQuestionCommand(
                     interview.getTrack(),
@@ -186,9 +189,8 @@ public class InterviewAnswerService {
 
         // 룰에서 skip이어도, Gate 통과하면 deepdive 판정
         boolean deepDiveCandidate = canAsk
-                && isBase
                 && !wantsFollowUp
-                && deepDiveGate.shouldCallAiForDeepDive(interview, interviewAnswerRequest);
+                && deepDiveGate.shouldCallAiForDeepDive(interview, interviewAnswerRequest,interviewQuestion.getType());
 
         if (deepDiveCandidate) {
             boolean alreadyDeepDived = interviewQuestionRepository
@@ -216,8 +218,8 @@ public class InterviewAnswerService {
                     } else {
                         FollowUpQuestion.Item q = deepDiveQuestion.questions();
 
-                        int deepDiveSeq = interviewQuestion.getSeq() + 7;
-                        int deepDiveDepth = interviewQuestion.getDepth() + 2;
+                        int deepDiveSeq = interviewQuestion.getSeq() + 1;
+                        int deepDiveDepth = interviewQuestion.getDepth() + 1;
 
                         InterviewQuestion saveDeepDiveQuestion = InterviewQuestion.createDeepDive(
                                 interview,
@@ -281,6 +283,12 @@ public class InterviewAnswerService {
 
                     return InterviewQuestionMapper.fromList(List.of());
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public InterviewQuestionAnswerDetailResponse interviewAnswerRead(String userId, Long questionId) {
+        return interviewAnswerQueryDslRepository.interviewAnswerDetail(userId, questionId)
+                .orElse(null);
     }
 
     private Interview findInterview(String userId, Long interviewId) {

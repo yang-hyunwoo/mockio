@@ -61,9 +61,8 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
         String commandText = """
                 당신은 %s 기술 면접관입니다.
-                모든 질문은 반드시 한국어로 작성한다.
-                영어 문장 사용 금지
-                기술 용어만 영어 허용
+                title, body, tags를 모두 한국어로 작성하세요.
+                영어 문장 사용 금지, 기술 용어만 영어 허용.
                 반드시 JSON 배열만 출력하세요.
                 설명, 코드블록, 마크다운, 번호 금지.
                 """.formatted(command.track());

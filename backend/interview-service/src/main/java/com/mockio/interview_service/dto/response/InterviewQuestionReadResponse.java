@@ -1,5 +1,7 @@
 package com.mockio.interview_service.dto.response;
 
+import com.mockio.common_spring.util.response.EnumResponse;
+
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +14,7 @@ public record InterviewQuestionReadResponse(
             Integer seq,
             String title,
             String questionText,
-            Set<String> tags
+            Set<String> tags,
+            EnumResponse type
     ) {}
 }

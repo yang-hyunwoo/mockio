@@ -17,7 +17,14 @@ public class FakeFeedBackGenerator implements FeedbackGenerator {
 
     @Override
     public GeneratedFeedback generate(GenerateFeedbackCommand command) {
-        return null;
+        return new GeneratedFeedback(
+                "페이크 피드백",
+                30,
+                "FAKE",
+                "FAKE",
+                "0.0",
+                0.0
+        );
     }
 
 }

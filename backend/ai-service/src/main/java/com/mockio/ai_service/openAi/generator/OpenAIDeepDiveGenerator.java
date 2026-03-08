@@ -73,8 +73,8 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
         String commandText = """
                         당신은 %s 기술 면접 보조 시스템입니다.
                         모든 질문은 반드시 한국어로 작성한다.
-                        영어 문장 사용 금지
-                        기술 용어만 영어 허용
+                        영어 문장 사용 금지, 기술 용어만 영어 허용.
+                        
                         반드시 JSON만 출력하세요.
                         설명/마크다운/코드블록/번호/불릿 금지.
                         스키마를 절대 깨지 마세요.

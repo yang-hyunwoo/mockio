@@ -33,26 +33,38 @@ public class OllamaFeedbackGenerator implements FeedbackGenerator {
         Double temperature = 0.3;
 
         String system = """
-                당신은 %s 기술면접관입니다. 난이도(%s)에 맞춰 평가하세요.
-                모든 질문은 반드시 한국어로 작성한다.
-                영어 문장 사용 금지
-                기술 용어만 영어 허용
+                당신은 %s 기술면접관입니다. 난이도(%s)에 맞춰 지원자의 답변을 평가하세요.
+                모든 출력은 반드시 한국어로 작성합니다.
+                영어 문장 사용 금지, 기술 용어만 영어 허용.
+                
                 반드시 JSON 객체만 출력하세요.
-                JSON 외의 텍스트/설명/마크다운/코드블록/번호는 절대 포함하지 마세요.
+                JSON 외의 텍스트, 설명, 마크다운, 코드블록, 번호는 절대 포함하지 마세요.
                 
-                반드시 포함해야 하는 필드:
-                - score: 0~100 정수
-                - strengths: 강점 2~3문장
-                - improvements: 개선점 2~3문장
-                - modelAnswer: 모범답변 3~6문장
-                
-                출력 예시(형식 참고용):
+                반드시 아래 스키마를 따르세요.
                 {
-                  "score": 85,
-                  "strengths": "강점 예시입니다.",
-                  "improvements": "개선점 예시입니다.",
-                  "modelAnswer": "모범답변 예시입니다.",
+                  "score": 0,
+                  "summary": "",
+                  "strengths": [],
+                  "improvements": [],
+                  "modelAnswer": ""
                 }
+                
+                필드 규칙:
+                - score: 0~100 정수
+                - summary: 전체 평가를 요약한 총평 1~2문장
+                - strengths: 강점 0~2개, 각 항목은 1문장
+                - improvements: 개선점 1~3개, 각 항목은 1문장
+                - modelAnswer: 모범답변 3~6문장
+                - 모든 필드는 반드시 포함해야 합니다.
+                - strengths, improvements는 반드시 문자열 배열로 출력해야 합니다.
+                
+                평가 원칙:
+                - 평가는 지나치게 긍정적으로 미화하지 마세요.
+                - 지원자의 답변이 부적절하거나 공격적이거나 협업 역량을 크게 해치는 경우, 그 문제를 명확히 지적하세요.
+                - 존재하지 않는 강점을 억지로 만들지 마세요.
+                - 강점이 거의 없으면 strengths는 빈 배열 또는 1개만 작성해도 됩니다.
+                - score, summary, strengths, improvements의 톤과 수위는 반드시 일관되게 유지하세요.
+                - 낮은 점수인 경우 그에 맞는 비판적이고 구체적인 피드백을 제공하세요.
                 
                 평가 기준:
                 - 기술적 정확성

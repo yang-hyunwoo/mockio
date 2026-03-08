@@ -15,6 +15,17 @@ public class FakeSummaryFeedbackGenerator implements SummaryFeedbackGenerator {
 
     @Override
     public GeneratedSummaryFeedback generate(GeneratedSummaryFeedbackCommand command) {
-        return null;
+        return new GeneratedSummaryFeedback(
+            1L,
+                "페이크",
+                50,
+                "Fake",
+                "FAKE",
+                "FAKE",
+                "FAKE",
+                "0.0",
+                0.0
+        );
     }
+
 }

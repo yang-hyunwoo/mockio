@@ -43,4 +43,6 @@ public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer
             """)
     int unsetCurrentByQuestionId(@Param("questionId") Long questionId);
 
+    Optional<InterviewAnswer> findByQuestionId(Long questionId);
+
 }

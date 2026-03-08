@@ -31,4 +31,6 @@ spring:
 services:
   ai:
     base-url: http://localhost:9100
+  feedback:
+    base-url: http://localhost:9083
 

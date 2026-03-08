@@ -1,6 +1,7 @@
 package com.mockio.interview_service.service;
 
 import com.mockio.common_ai_contractor.constant.*;
+import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import com.mockio.common_core.exception.CustomApiException;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 import static java.time.OffsetDateTime.*;
@@ -79,6 +81,8 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
                 interview,
                 1,
                 "existing question",
+                Set.of(),
+                "TEST",
                 "TEST",
                 "test-model",
                 "v0",
@@ -105,9 +109,9 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
         // given
         given(aiServiceClient.generateQuestions(any()))
                 .willReturn(new GeneratedQuestion(List.of(
-                        new GeneratedQuestion.Item(1,"FAKE-Q1","FAKE","fake","v0",0.0),
-                        new GeneratedQuestion.Item(2,"FAKE-Q2","FAKE","fake","v0",0.0),
-                        new GeneratedQuestion.Item(3,"FAKE-Q3","FAKE","fake","v0",0.0)
+                        new GeneratedQuestion.Item(1,"FAKE-Q1","FAKE",  Set.of(),"fake","fake","v0",0.0),
+                        new GeneratedQuestion.Item(2,"FAKE-Q2","FAKE",  Set.of(),"fake","fake","v0",0.0),
+                        new GeneratedQuestion.Item(3,"FAKE-Q3","FAKE",  Set.of(),"fake","fake","v0",0.0)
                 )));
         Interview interview = interviewRepository.save(createInterview("user-1"));
 
@@ -137,9 +141,9 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
         Interview interview = interviewRepository.save(createInterview("user-1"));
 
         interviewQuestionRepository.saveAll(List.of(
-                InterviewQuestion.createInterviewQuestion(interview, 3, "Q3", "TEST", "m", "v", 0.0, now()),
-                InterviewQuestion.createInterviewQuestion(interview, 1, "Q1", "TEST", "m", "v", 0.0, now()),
-                InterviewQuestion.createInterviewQuestion(interview, 2, "Q2", "TEST", "m", "v", 0.0, now())
+                InterviewQuestion.createInterviewQuestion(interview, 3, "Q3", Set.of(),"TEST","TEST", "m", "v", 0.0, now()),
+                InterviewQuestion.createInterviewQuestion(interview, 1, "Q1", Set.of(),"TEST","TEST", "m", "v", 0.0, now()),
+                InterviewQuestion.createInterviewQuestion(interview, 2, "Q2", Set.of(),"TEST","TEST", "m", "v", 0.0, now())
         ));
 
         // when
@@ -158,23 +162,37 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
     // ---------------------------
     @TestConfiguration
     static class TestConfig {
+
         @Bean
         public InterviewQuestionGenerator interviewQuestionGenerator() {
-            return command -> {
-                int n = Math.max(1, command.questionCount());
-                List<GeneratedQuestion.Item> items =
-                        java.util.stream.IntStream.rangeClosed(1, n)
-                                .mapToObj(i -> new GeneratedQuestion.Item(
-                                        i,
-                                        "FAKE-Q" + i + " [" + command.track() + "/" + command.difficulty() + "]",
-                                        "FAKE",
-                                        "fake-model",
-                                        "v0",
-                                        0.0
-                                ))
-                                .toList();
+            return new InterviewQuestionGenerator() {
 
-                return new GeneratedQuestion(items);
+                @Override
+                public AiEngine engine() {
+                    return AiEngine.FAKE;
+                }
+
+                @Override
+                public GeneratedQuestion generate(GenerateQuestionCommand command) {
+
+                    int n = Math.max(1, command.questionCount());
+
+                    List<GeneratedQuestion.Item> items =
+                            java.util.stream.IntStream.rangeClosed(1, n)
+                                    .mapToObj(i -> new GeneratedQuestion.Item(
+                                            i,
+                                            "FAKE-Q" + i + " [" + command.track() + "/" + command.difficulty() + "]",
+                                            "FAKE",
+                                            Set.of(),
+                                            "FAKE",
+                                            "fake-model",
+                                            "v0",
+                                            0.0
+                                    ))
+                                    .toList();
+
+                    return new GeneratedQuestion(items);
+                }
             };
         }
     }

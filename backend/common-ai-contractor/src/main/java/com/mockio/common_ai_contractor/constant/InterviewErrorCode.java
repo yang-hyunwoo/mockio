@@ -15,6 +15,7 @@ public enum InterviewErrorCode implements ErrorCode {
     QUESTIONS_MAX_COUNT(409, "QUESTIONS_MAX_COUNT", "최대 질문 생성 갯수에 도달 하였습니다."),
     QUESTIONS_ALREADY_GENERATED(409, "QUESTIONS_ALREADY_GENERATED", "이미 질문이 생성된 면접입니다."),
     QUESTION_NOT_FOUND(404, "QUESTION_NOT_FOUND", "질문이 존재하지 않습니다."),
+    FEEDBACK_NOT_CREATED(403, "FEEDBACK_NOT_CREATED", "피드백 생성시 오류가 발생 하였습니다."),
 
     ANSWER_NOT_FOUND(404, "ANSWER_NOT_FOUND", "답변이 존재하지 않습니다."),
 

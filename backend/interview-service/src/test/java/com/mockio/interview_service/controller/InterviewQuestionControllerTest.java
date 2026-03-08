@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.*;
@@ -49,8 +50,8 @@ class InterviewQuestionControllerTest {
 
         InterviewQuestionReadResponse response = new InterviewQuestionReadResponse(
                 List.of(
-                        new InterviewQuestionReadResponse.Item(1L, 1, "Q1"),
-                        new InterviewQuestionReadResponse.Item(2L, 2, "Q2")
+                        new InterviewQuestionReadResponse.Item(1L, 1L, 1,"T1","A1", Set.of()),
+                        new InterviewQuestionReadResponse.Item(2L, 2L, 2,"T1","A1", Set.of())
                 )
         );
 
@@ -84,7 +85,7 @@ class InterviewQuestionControllerTest {
         given(messageUtil.getMessage("response.read")).willReturn("read ok");
 
         InterviewQuestionReadResponse response = new InterviewQuestionReadResponse(
-                List.of(new InterviewQuestionReadResponse.Item(1L, 1, "Q1"))
+                List.of(new InterviewQuestionReadResponse.Item(1L, 1L, 15, "TITLE", "ANSWER", Set.of()))
         );
 
         given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId)))
@@ -116,8 +117,8 @@ class InterviewQuestionControllerTest {
 
         InterviewQuestionReadResponse response = new InterviewQuestionReadResponse(
                 List.of(
-                        new InterviewQuestionReadResponse.Item(1L, 1, "Q1"),
-                        new InterviewQuestionReadResponse.Item(2L, 2, "Q2")
+                        new InterviewQuestionReadResponse.Item(1L, 1L, 15, "Q1", "QUESTION", Set.of()),
+                        new InterviewQuestionReadResponse.Item(2L, 2L, 15, "Q2", "QUESTION", Set.of())
                 )
         );
 

@@ -1,5 +1,6 @@
 package com.mockio.interview_service.Mapper;
 
+import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 
@@ -20,7 +21,11 @@ public class InterviewQuestionMapper {
                 question.getSeq(),
                 question.getTitle(),
                 question.getQuestionText(),
-                question.getTags()
+                question.getTags(),
+                EnumResponse.of(
+                        question.getType().name(),
+                        question.getType().getLabel()
+                )
         );
     }
 

@@ -1,7 +1,5 @@
 package com.mockio.interview_service.controller;
 
-import com.mockio.common_security.annotation.CurrentSubject;
-import com.mockio.interview_service.dto.response.InterviewListResponse;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.interview_service.service.InternalInterviewReadService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +13,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/interview/v1/internal")
-public class InternalInterviewReadController {
+public class InternalInterviewController {
 
     private final InternalInterviewReadService internalInterviewReadService;
 

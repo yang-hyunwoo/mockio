@@ -3,7 +3,7 @@ package com.mockio.feedback_service.kafka.consumer;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.feedback_service.domain.InterviewFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
-import com.mockio.feedback_service.repository.InterviewFeedbackRepository;
+import com.mockio.feedback_service.repository.FeedbackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 @RequiredArgsConstructor
 public class FeedbackTxService {
 
-    private final InterviewFeedbackRepository interviewFeedbackRepository;
+    private final FeedbackRepository interviewFeedbackRepository;
 
     @Transactional
     public InterviewFeedback ensurePending(Long answerId) {

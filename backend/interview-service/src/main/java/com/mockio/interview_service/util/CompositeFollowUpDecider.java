@@ -1,5 +1,6 @@
 package com.mockio.interview_service.util;
 
+import com.mockio.interview_service.constant.QuestionType;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.request.InterviewAnswerRequest;
@@ -26,8 +27,7 @@ public class CompositeFollowUpDecider implements FollowUpDecider {
         if (rule.askFollowUp()) {
             return rule; // askNormal
         }
-
-        if (!deepDiveGate.shouldCallAiForDeepDive(interview, req)) {
+        if (!deepDiveGate.shouldCallAiForDeepDive(interview, req,question.getType())) {
             return FollowUpDecision.skip("DEEPDIVE_GATE_FALSE");
         }
 

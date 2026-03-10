@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 public record InterviewQuestionReadResponse(
-        List<Item> questions
+        List<Item> questions,
+        Long interviewId,
+        boolean completed
 ) {
     public record Item(
             Long id,

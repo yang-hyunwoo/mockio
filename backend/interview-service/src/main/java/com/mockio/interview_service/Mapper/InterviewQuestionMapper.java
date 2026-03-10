@@ -30,12 +30,14 @@ public class InterviewQuestionMapper {
     }
 
     /** 엔티티 리스트 → Response */
-    public static InterviewQuestionReadResponse fromList(List<InterviewQuestion> questions) {
+    public static InterviewQuestionReadResponse fromList(List<InterviewQuestion> questions, boolean completed , Long interviewId) {
         return new InterviewQuestionReadResponse(
                 questions.stream()
                         .map(InterviewQuestionMapper::from)
-                        .toList()
-        );
+                        .toList(),
+                interviewId,
+                completed
+                );
     }
 
 }

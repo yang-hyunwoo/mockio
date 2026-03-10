@@ -2,14 +2,20 @@ package com.mockio.ai_service.ollama.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mockio.ai_service.ollama.client.OllamaClient;
+import com.mockio.ai_service.util.AiResponseSanitizer;
+import com.mockio.ai_service.util.PromptLoader;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
 import com.mockio.common_ai_contractor.generator.feedback.SummaryFeedbackGenerator;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -19,10 +25,24 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
 
     private final OllamaClient client;
     private final ObjectMapper objectMapper;
-
+    private final PromptLoader promptLoader;
+    private final AiResponseSanitizer sanitizer;
     private static final String MODEL = "llama3.1:8b";
     private static final String PROVIDER = "OLLAMA";
-    private static final String PROMPT_VERSION = "v1";
+    private String commandPrompt;
+    private String commandPromptRepair;
+    private String systemRepairPrompt;
+
+    @Value("${ai.prompt-version}")
+    private String promptVersion;
+
+    @PostConstruct
+    void init() {
+        String absPath = "prompt/summary/";
+        commandPrompt = promptLoader.load(absPath + "summary-command-prompt-" + promptVersion + ".txt");
+        commandPromptRepair = promptLoader.load(absPath + "summary-command-prompt-repair-" + promptVersion + ".txt");
+        systemRepairPrompt = promptLoader.load(absPath + "summary-prompt-repair-" + promptVersion + ".txt");
+    }
 
     @Override
     public AiEngine engine() {
@@ -32,46 +52,33 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
     @Override
     @CircuitBreaker(name = "ollamaSummaryChat")
     public GeneratedSummaryFeedback generate(GeneratedSummaryFeedbackCommand command) {
+
+        String commandText = commandPrompt.formatted(command.track(), command.difficulty(), command.feedbackStyle());
+        String prompt = buildUser(command);
+
         Double temperature = 0.2;
 
-        String system = """
-                당신은 %s 기술면접관입니다. 난이도(%s)에 맞춰 전체 인터뷰 답변을 종합 평가하세요.
-                summaryText, strengths, improvements를 모두 한국어로 작성하세요.
-                영어 문장 사용 금지, 기술 용어만 영어 허용.
-                반드시 JSON 객체만 출력하세요.
-                JSON 외의 텍스트/설명/마크다운/코드블록/번호는 절대 포함하지 마세요.
+        String rawJson = client.chat(MODEL, prompt, commandText, temperature);
 
-                반드시 포함해야 하는 필드:
-                - totalScore: 0~100 정수
-                - summaryText: 총평 3~6문장
-                - strengths: 강점 3~5개(문장 또는 bullet 문자열)
-                - improvements: 개선점 3~5개(문장 또는 bullet 문자열)
+        if (!isValidSummaryFeedbackJson(rawJson)) {
+            log.warn("summary feedback json invalid. try repair. raw={}", sanitizer.truncate(rawJson));
+            rawJson = repairSummaryFeedback(rawJson, temperature);
+        }
 
-                출력 예시(형식 참고용):
-                {
-                  "totalScore": 85,
-                  "summaryText": "총평 예시입니다.",
-                  "strengths": "강점 예시입니다.",
-                  "improvements": "개선점 예시입니다."
-                }
-                """.formatted(command.track(), command.difficulty());
+        if (!isValidSummaryFeedbackJson(rawJson)) {
+            log.warn("summary feedback repair failed. use fallback. raw={}", sanitizer.truncate(rawJson));
+            rawJson = buildFallbackSummaryFeedbackJson();
+        }
 
-        String user = buildUser(command);
-
-        String rawJson = client.chat(MODEL, user, system, temperature);
-
-        // JSON 파싱 (필드 추출)
-        ParsedSummary parsed = parseSummary(rawJson);
+        Integer score = sanitizer.extractScoreSafely(rawJson,"totalScore");
 
         return new GeneratedSummaryFeedback(
                 command.interviewId(),
-                parsed.summaryText(),
-                parsed.totalScore(),
-                parsed.strengths(),
-                parsed.improvements(),
+                rawJson,
+                score,
                 PROVIDER,
                 MODEL,
-                PROMPT_VERSION,
+                promptVersion,
                 temperature
         );
     }
@@ -84,6 +91,16 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
                 .append("- 난이도: ").append(command.difficulty()).append("\n")
                 .append("- 피드백 스타일: ").append(command.feedbackStyle()).append("\n\n");
 
+        sb.append("평가 참고 메모:\n")
+                .append("- 답변 수: ").append(command.items().size()).append("\n")
+                .append("- 각 답변을 읽고 반복적으로 나타나는 장점과 약점을 중심으로 총평을 작성하세요.\n")
+                .append("- 개별 질문 하나의 특이점보다 전체적인 패턴을 우선 반영하세요.\n\n");
+
+        sb.append("요약 작성 지침:\n")
+                .append("- 반복적으로 드러난 장점과 약점을 우선 반영하세요.\n")
+                .append("- 한 질문에서만 나타난 특이점보다 여러 답변에서 공통으로 보인 특징을 더 중요하게 평가하세요.\n")
+                .append("- 총평은 전체 인터뷰를 대표하는 내용만 포함하세요.\n\n");
+
         sb.append("전체 답변 목록:\n");
         command.items().forEach(it -> {
             sb.append("\n")
@@ -95,73 +112,89 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
         return sb.toString();
     }
 
-    private ParsedSummary parseSummary(String rawJson) {
+    private String repairSummaryFeedback(String invalidRawJson, Double temperature) {
+        String repairSystem = commandPromptRepair;
+
+        String repairUser = systemRepairPrompt.formatted(nullToEmpty(invalidRawJson));
+
+        try {
+            return client.chat(MODEL, repairUser, repairSystem, temperature);
+        } catch (Exception e) {
+            log.warn("summary repair call failed. raw={}", sanitizer.truncate(invalidRawJson), e);
+            return invalidRawJson;
+        }
+    }
+
+    private boolean isValidSummaryFeedbackJson(String rawJson) {
         try {
             JsonNode root = objectMapper.readTree(rawJson);
 
-            Integer totalScore = extractIntSafely(root.get("totalScore"));
-            String summaryText = extractTextSafely(root.get("summaryText"));
-            String strengths = extractTextSafely(root.get("strengths"));
-            String improvements = extractTextSafely(root.get("improvements"));
+            JsonNode totalScore = root.get("totalScore");
+            JsonNode summaryText = root.get("summaryText");
+            JsonNode strengths = root.get("strengths");
+            JsonNode improvements = root.get("improvements");
 
-            // 최소 방어: summaryText 없으면 rawJson 일부라도 남기기
-            if (summaryText == null || summaryText.isBlank()) {
-                summaryText = "요약 파싱에 실패했습니다. raw=" + truncate(rawJson);
+            if (totalScore == null || totalScore.isNull()) return false;
+            if (sanitizer.extractScoreSafely(rawJson,"totalScore") == null) return false;
+
+            if (summaryText == null || !summaryText.isTextual() || summaryText.asText().isBlank()) {
+                return false;
             }
 
-            return new ParsedSummary(
-                    summaryText,
-                    totalScore,
-                    strengths,
-                    improvements
-            );
+            if (strengths == null || !strengths.isArray()) return false;
+            if (improvements == null || !improvements.isArray()) return false;
+
+            for (JsonNode item : strengths) {
+                if (!item.isTextual() || item.asText().isBlank()) return false;
+            }
+
+            for (JsonNode item : improvements) {
+                if (!item.isTextual() || item.asText().isBlank()) return false;
+            }
+            return true;
         } catch (Exception e) {
-            log.warn("summary parse failed. raw={}", truncate(rawJson), e);
-            return new ParsedSummary(
-                    "요약 파싱에 실패했습니다. raw=" + truncate(rawJson),
-                    null,
-                    null,
-                    null
+            log.warn("summary feedback json validation failed. raw={}", sanitizer.truncate(rawJson), e);
+            return false;
+        }
+    }
+
+    private String buildFallbackSummaryFeedbackJson() {
+        try {
+            ObjectNode root = objectMapper.createObjectNode();
+            root.put("totalScore", 50);
+            root.put("summaryText",
+                    "전체적으로 답변의 방향성은 보였지만, 구체적인 사례와 설명이 충분히 드러나지 않아 강점과 개선점을 더 분명하게 파악하기는 어려웠습니다. "
+                            + "질문의 핵심을 벗어나지는 않았지만, 실제 경험을 바탕으로 한 설명이 조금 더 보완되면 좋겠습니다. "
+                            + "특히 문제 해결 과정과 판단 기준을 함께 설명해 주시면 답변의 설득력이 더 높아질 수 있습니다. "
+                            + "다음에는 경험 중심으로 조금 더 구체적으로 답변해 주시면 더 좋은 평가로 이어질 수 있겠습니다."
             );
+
+            ArrayNode strengths = root.putArray("strengths");
+            strengths.add("답변에 성실하게 임하려는 태도가 보였습니다.");
+
+            ArrayNode improvements = root.putArray("improvements");
+            improvements.add("실제 경험이나 사례를 중심으로 설명해 주시면 좋겠습니다.");
+            improvements.add("문제 해결 과정과 판단 기준을 조금 더 구체적으로 들려주시면 좋겠습니다.");
+
+            return objectMapper.writeValueAsString(root);
+        } catch (Exception e) {
+            log.error("fallback summary feedback json build failed", e);
+            return """
+                {
+                  "totalScore": 50,
+                  "summaryText": "전체적으로 답변의 방향성은 보였지만, 구체적인 사례와 설명이 충분히 드러나지 않아 강점과 개선점을 더 분명하게 파악하기는 어려웠습니다. 질문의 핵심을 벗어나지는 않았지만, 실제 경험을 바탕으로 한 설명이 조금 더 보완되면 좋겠습니다. 특히 문제 해결 과정과 판단 기준을 함께 설명해 주시면 답변의 설득력이 더 높아질 수 있습니다. 다음에는 경험 중심으로 조금 더 구체적으로 답변해 주시면 더 좋은 평가로 이어질 수 있겠습니다.",
+                  "strengths": ["답변에 성실하게 임하려는 태도가 보였습니다."],
+                  "improvements": [
+                    "실제 경험이나 사례를 중심으로 설명해 주시면 좋겠습니다.",
+                    "문제 해결 과정과 판단 기준을 조금 더 구체적으로 들려주시면 좋겠습니다."
+                  ]
+                }
+                """;
         }
-    }
-
-    private Integer extractIntSafely(JsonNode node) {
-        if (node == null || node.isNull()) return null;
-        if (node.isInt()) return clamp(node.asInt());
-        if (node.isNumber()) return clamp((int) Math.round(node.asDouble()));
-        if (node.isTextual()) {
-            String digits = node.asText().replaceAll("[^0-9]", "");
-            if (digits.isBlank()) return null;
-            return clamp(Integer.parseInt(digits));
-        }
-        return null;
-    }
-
-    private String extractTextSafely(JsonNode node) {
-        if (node == null || node.isNull()) return null;
-        if (node.isTextual()) return node.asText();
-        // 배열/객체로 오면 문자열로 변환 (bullet list가 배열로 오는 케이스 대응)
-        return node.toString();
-    }
-
-    private Integer clamp(int v) {
-        return (v >= 0 && v <= 100) ? v : null;
-    }
-
-    private String truncate(String s) {
-        if (s == null) return "";
-        return s.length() > 500 ? s.substring(0, 500) + "...(truncated)" : s;
     }
 
     private String nullToEmpty(String s) {
         return s == null ? "" : s;
     }
 
-    private record ParsedSummary(
-            String summaryText,
-            Integer totalScore,
-            String strengths,
-            String improvements
-    ) {}
 }

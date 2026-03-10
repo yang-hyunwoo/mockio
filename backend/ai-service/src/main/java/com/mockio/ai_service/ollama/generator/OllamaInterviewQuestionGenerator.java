@@ -14,23 +14,22 @@ package com.mockio.ai_service.ollama.generator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
+import com.mockio.ai_service.util.AiResponseSanitizer;
+import com.mockio.ai_service.util.PromptLoader;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.AiQuestion;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.*;
 
 @Slf4j
 @Component
@@ -38,8 +37,21 @@ import static java.util.stream.Collectors.*;
 public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenerator {
 
     private final OllamaClient client;
-    private final String model = "llama3.1:8b";
+    private final PromptLoader promptLoader;
+    private final AiResponseSanitizer sanitizer;
+    private static final String model = "llama3.1:8b";
+    private String commandPrompt;
+    private String systemPrompt;
 
+    @Value("${ai.prompt-version}")
+    private String promptVersion;
+
+    @PostConstruct
+    void init() {
+        String absPath = "prompt/question/";
+        commandPrompt = promptLoader.load(absPath + "question-command-prompt-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "question-prompt-" + promptVersion + ".txt");
+    }
 
     @Override
     public AiEngine engine() {
@@ -59,35 +71,9 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     @Override
     @CircuitBreaker(name = "ollamaChat")
     public GeneratedQuestion generate(GenerateQuestionCommand command) {
-        String commandText = """
-                당신은 %s 기술 면접관입니다.
-                title, body, tags를 모두 한국어로 작성하세요.
-                영어 문장 사용 금지, 기술 용어만 영어 허용.
-                반드시 JSON 배열만 출력하세요.
-                설명, 코드블록, 마크다운, 번호 금지.
-                """.formatted(command.track());
+        String commandText = commandPrompt.formatted(command.track());
 
-        String prompt = """
-            다음 조건으로 면접 질문을 %d개 생성하세요.
-                
-            출력 형식(JSON):
-                    [
-                      {
-                        "title": "string",
-                        "body": "string",
-                        "tags": ["string","string"]
-                      }
-                    ]
-            규칙:
-                    - title은 3~8단어의 짧은 주제명
-                    - body는 실제 면접 질문 문장
-                    - tags는 2~4개, 짧은 기술 키워드
-                    - JSON 외의 텍스트는 절대 출력하지 마세요
-           조건:
-           - 면접 질문 분야: %s
-           - 난이도: %s
-           - 질문은 실무 중심으로 작성
-        """.formatted(
+        String prompt = systemPrompt.formatted(
                 command.questionCount(),
                 command.track(),
                 command.difficulty()
@@ -113,26 +99,14 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
                     ((i + 1) * 10),
                     q.title(),
                     q.body(),
-                    sanitizeTags(q.tags()),
+                    sanitizer.sanitizeTags(q.tags()),
                     "ollama",
                     "ollama",
                     "v1",
                     temperature
             ));
         }
-
        return new GeneratedQuestion(result);
     }
 
-    private Set<String> sanitizeTags(Set<String> tags) {
-        if (tags == null) return Set.of();
-
-        return tags.stream()
-                .map(String::trim)
-                .filter(t -> !t.isBlank())
-                .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
-                .distinct()
-                .limit(4)
-                .collect(toSet());
-    }
 }

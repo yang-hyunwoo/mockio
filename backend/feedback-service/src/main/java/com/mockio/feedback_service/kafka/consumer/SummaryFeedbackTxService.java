@@ -38,10 +38,8 @@ public class SummaryFeedbackTxService {
         if (isf.successChk()) return;
 
         isf.succeed(
-                result.summaryText(),
+                result.summaryFeedbackText(),
                 result.totalScore(),
-                result.strengths(),
-                result.improvements(),
                 result.provider(),
                 result.model(),
                 result.promptVersion(),

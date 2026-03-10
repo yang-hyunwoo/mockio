@@ -2,10 +2,8 @@
 CREATE TABLE interview_summary_feedbacks (
     id BIGSERIAL PRIMARY KEY,
     interview_id BIGINT NOT NULL,
-    summary_text TEXT NULL,
+    summary_feedback_text TEXT NULL,
     total_score  INTEGER,
-    strengths TEXT,
-    improvements TEXT,
     provider VARCHAR(30),
     model VARCHAR(100),
     prompt_version VARCHAR(50),

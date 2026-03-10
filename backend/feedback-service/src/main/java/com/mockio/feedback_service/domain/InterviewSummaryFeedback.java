@@ -27,17 +27,11 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
 
     private int failCount;
 
-    @Column(name = "summary_text", nullable = false, columnDefinition = "TEXT")
-    private String summaryText;
+    @Column(name = "summary_feedback_text", nullable = false, columnDefinition = "TEXT")
+    private String summaryFeedbackText;
 
     @Column(name = "total_score")
     private Integer totalScore;
-
-    @Column(name = "strengths", columnDefinition = "TEXT")
-    private String strengths;
-
-    @Column(name = "improvements", columnDefinition = "TEXT")
-    private String improvements;
 
     @Column(name = "provider", length = 30)
     private String provider;
@@ -60,10 +54,8 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
             Long interviewId,
             Status status,
             int failCount,
-            String summaryText,
+            String summaryFeedbackText,
             Integer totalScore,
-            String strengths,
-            String improvements,
             String provider,
             String model,
             String promptVersion,
@@ -74,10 +66,8 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
         this.interviewId = interviewId;
         this.status = status;
         this.failCount = failCount;
-        this.summaryText = summaryText;
+        this.summaryFeedbackText = summaryFeedbackText;
         this.totalScore = totalScore;
-        this.strengths = strengths;
-        this.improvements = improvements;
         this.provider = provider;
         this.model = model;
         this.promptVersion = promptVersion;
@@ -101,19 +91,15 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
         return Status.SUCCEEDED == this.status;
     }
 
-    public void succeed(String summaryText,
+    public void succeed(String summaryFeedbackText,
                         Integer totalScore,
-                        String strengths,
-                        String improvements,
                         String provider,
                         String model,
                         String promptVersion,
                         Double temperature
     ) {
-        this.summaryText = summaryText;
+        this.summaryFeedbackText = summaryFeedbackText;
         this.totalScore = totalScore;
-        this.strengths = strengths;
-        this.improvements = improvements;
         this.provider = provider;
         this.model = model;
         this.promptVersion = promptVersion;

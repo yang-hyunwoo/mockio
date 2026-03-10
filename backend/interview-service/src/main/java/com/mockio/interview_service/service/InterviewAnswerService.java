@@ -177,13 +177,13 @@ public class InterviewAnswerService {
                 interviewQuestionRepository.save(saveFollowQuestion);
                 interviewRepository.incrementTotalCount(interview.getId());
                 answer.followupUpdate(decision.reason());
-                return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion));
+                return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion),false,interview.getId());
             } catch (DataIntegrityViolationException e) {
                 InterviewQuestion existingFollowQuestion = interviewQuestionRepository
                         .findByInterviewIdAndSeq(interview.getId(), nextSeq)
                         .orElseThrow(() -> e);
 
-                return InterviewQuestionMapper.fromList(List.of(existingFollowQuestion));
+                return InterviewQuestionMapper.fromList(List.of(existingFollowQuestion),false,interview.getId());
             }
         }
 
@@ -241,13 +241,13 @@ public class InterviewAnswerService {
                             interviewQuestionRepository.save(saveDeepDiveQuestion);
                             answer.followupUpdate(deepDiveContext);
                             interviewRepository.incrementTotalCount(interview.getId());
-                            return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion));
+                            return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion),false,interview.getId());
                         } catch (DataIntegrityViolationException e) {
                             InterviewQuestion existingDeepDiveQuestion = interviewQuestionRepository
                                     .findByInterviewIdAndSeq(interview.getId(), deepDiveSeq)
                                     .orElseThrow(() -> e);
 
-                            return InterviewQuestionMapper.fromList(List.of(existingDeepDiveQuestion));
+                            return InterviewQuestionMapper.fromList(List.of(existingDeepDiveQuestion),false,interview.getId());
                         }
                     }
 
@@ -259,7 +259,7 @@ public class InterviewAnswerService {
 
         return interviewQuestionRepository
                 .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq())
-                .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
+                .map(q -> InterviewQuestionMapper.fromList(List.of(q),false,interview.getId()))
                 .orElseGet(() -> {
                     interview.complete();
 
@@ -281,7 +281,7 @@ public class InterviewAnswerService {
                             )
                     );
 
-                    return InterviewQuestionMapper.fromList(List.of());
+                    return InterviewQuestionMapper.fromList(List.of(),true,interview.getId());
                 });
     }
 
@@ -314,10 +314,10 @@ public class InterviewAnswerService {
                         interview.getId(),
                         interviewQuestion.getSeq()
                 )
-                .map(q -> InterviewQuestionMapper.fromList(List.of(q)))
+                .map(q -> InterviewQuestionMapper.fromList(List.of(q),false,interview.getId()))
                 .orElseGet(() -> {
                     // 이미 완료된 인터뷰라면 그냥 빈 응답
-                    return InterviewQuestionMapper.fromList(List.of());
+                    return InterviewQuestionMapper.fromList(List.of(),false,interview.getId());
                 });
     }
 

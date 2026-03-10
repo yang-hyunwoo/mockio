@@ -17,7 +17,8 @@ package com.mockio.ai_service.ollama.generator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.ollama.client.OllamaClient;
-import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
+import com.mockio.ai_service.util.AiResponseSanitizer;
+import com.mockio.ai_service.util.PromptLoader;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveGenerator;
@@ -25,30 +26,43 @@ import com.mockio.common_ai_contractor.generator.deepdive.GenerateDeepDiveComman
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toSet;
 
 @Component
 @RequiredArgsConstructor
 public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
 
     private final ObjectMapper objectMapper;
+    private final PromptLoader promptLoader;
+    private final AiResponseSanitizer sanitizer;
+    private final OllamaClient client;
     private static final String MODEL = "llama3.1:8b";
     private static final String PROMPT_VERSION = "followup-v1";
+    private String commandPrompt;
+    private String systemPrompt;
+    private String systemRepairPrompt;
 
-    private final OllamaClient client;
+    @Value("${ai.prompt-version}")
+    private String promptVersion;
+
+    @PostConstruct
+    void init() {
+        String absPath = "prompt/deepdive/";
+        commandPrompt = promptLoader.load(absPath + "deep-dive-command-prompt-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "deep-dive-prompt-" + promptVersion + ".txt");
+        systemRepairPrompt = promptLoader.load(absPath + "deep-dive-prompt-repair-" + promptVersion + ".txt");
+    }
 
     @Override
     public AiEngine engine() {
         return AiEngine.OLLAMA;
     }
-
 
     /**
      * 최근 인터뷰 문답을 기반으로 심화 질문을 생성한다.
@@ -70,59 +84,16 @@ public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
         String qText = (command == null || command.question() == null) ? "N/A" : command.question();
         String aText = (command == null || command.answer() == null) ? "" : command.answer();
 
-        String commandText = """
-                        당신은 %s 기술 면접 보조 시스템입니다.
-                        모든 질문은 반드시 한국어로 작성한다.
-                        영어 문장 사용 금지, 기술 용어만 영어 허용.
-                        반드시 JSON만 출력하세요.
-                        설명/마크다운/코드블록/번호/불릿 금지.
-                        스키마를 절대 깨지 마세요.
-                        """.formatted(command.interviewTrack());
-        Double temperature = 0.2;
+        String commandText = commandPrompt.formatted(command.interviewTrack());
 
-        String prompt = """
-                당신은 기술 면접 보조 시스템입니다.
-                먼저 딥다이브 필요 여부를 판단하고,
-                필요한 경우에만 질문을 1개 생성하십시오.
-                반드시 JSON만 출력하십시오.
-                판단이 애매하면 shouldFollowUp=false로 하십시오.
-        
-                아래 스키마에 맞는 JSON만 반환하십시오.
-        
-                {
-                  "decision": {
-                    "shouldFollowUp": boolean,
-                    "depth": integer,           // 1..3
-                    "focus": string[],          // 0..3
-                    "gaps": string[],           // 0..3
-                    "reason": string            // 한 문장
-                  },
-                  "question": {
-                      "title": "string",
-                      "body": "string",
-                      "tags": ["string","string"]
-                  } | null
-                }
-                
-                조건:
-                - 트랙: %s
-                - 난이도: %s
-                
-                규칙:
-                - question.body는 1~2문장 이내
-                - “더 설명해보세요” 같은 일반 질문 금지
-                - tags는 2~4개, 짧은 기술 키워드
-                - JSON 외의 텍스트는 절대 출력하지 마세요.
-        
-                문답:
-                Q: %s
-                A: %s
-                """.formatted(
-                        command.interviewTrack(),
-                        command.interviewDifficulty(),
-                        qText,
-                        aText
-                );
+        String prompt = systemPrompt.formatted(command.interviewTrack(),
+                command.interviewTrack(),
+                command.interviewDifficulty(),
+                qText,
+                aText
+        );
+
+        Double temperature = 0.2;
         String answer = client.chat(MODEL, prompt,commandText,temperature);
         DeepDiveBundleDto dto = parseOrRepair(answer, commandText);
 
@@ -138,20 +109,19 @@ public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
             return new GeneratedDeepDiveBundle(decision, null);
         }
 
-        String normalizedBody = normalizeQuestionLine(dto.question().body());
+        String normalizedBody = sanitizer.normalizeQuestionLine(dto.question().body());
 
         FollowUpQuestion question = new FollowUpQuestion(
                 new FollowUpQuestion.Item(
                         safeTitle(dto.question().title()),
                         normalizedBody,
-                        sanitizeTags(dto.question().tags()),
+                        sanitizer.sanitizeTags(dto.question().tags()),
                         "OPENAI",
                         MODEL,
                         PROMPT_VERSION,
                         temperature
                 )
         );
-
         return new GeneratedDeepDiveBundle(decision, question);
     }
 
@@ -162,51 +132,13 @@ public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
         return t.isBlank() ? "후속 질문" : (t.length() > 40 ? t.substring(0, 40) : t);
     }
 
-    private Set<String> sanitizeTags(Set<String> tags) {
-        if (tags == null) return Set.of();
-
-        return tags.stream()
-                .map(String::trim)
-                .filter(t -> !t.isBlank())
-                .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
-                .distinct()
-                .limit(4)
-                .collect(toSet());
-    }
-
     private DeepDiveBundleDto parseOrRepair(String raw, String system) {
         try {
             return objectMapper.readValue(raw, DeepDiveBundleDto.class);
         } catch (Exception first) {
             // repair 1회
 
-            String repairPrompt = """
-            아래 텍스트를 '오직 JSON'으로만 변환하십시오.
-            스키마를 반드시 지키고, 누락 필드는 기본값으로 채우십시오.
-            추가 텍스트/설명/마크다운 금지.
-            모든 질문은 반드시 한국어로 작성한다.
-            영어 문장 사용 금지
-            기술 용어만 영어 허용 (Redis, Kafka, CQRS)
-            
-            스키마:
-            {
-              "decision": {
-                "shouldFollowUp": boolean,
-                "depth": integer,
-                "focus": string[],
-                "gaps": string[],
-                "reason": string
-              },
-            "question": {
-                      "title": "string",
-                      "body": "string",
-                      "tags": ["string","string"]
-                  } | null
-            }
-
-            원문:
-            %s
-            """.formatted(raw);
+            String repairPrompt = systemRepairPrompt.formatted(raw);
 
             String repaired = client.chat(MODEL, repairPrompt, system, 0.0);
 
@@ -217,13 +149,6 @@ public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
                 return DeepDiveBundleDto.fallback();
             }
         }
-    }
-
-    private String normalizeQuestionLine(String line) {
-        String q = line == null ? "" : line.trim();
-        q = q.replaceAll("^\"|\"$", "").trim();
-        if (!q.endsWith("?") && !q.endsWith("요.") && !q.endsWith(".")) q = q + "?";
-        return q;
     }
 
     private static int clamp(int v, int min, int max) {

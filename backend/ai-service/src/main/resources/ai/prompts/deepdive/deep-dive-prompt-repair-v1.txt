@@ -1,0 +1,22 @@
+아래 텍스트를 '오직 JSON'으로만 변환하십시오.
+스키마를 반드시 지키고, 누락 필드는 기본값으로 채우십시오.
+추가 텍스트/설명/마크다운 금지.
+
+스키마:
+{
+  "decision": {
+    "shouldFollowUp": boolean,
+    "depth": integer,
+    "focus": string[],
+    "gaps": string[],
+    "reason": string
+  },
+"question": {
+          "title": "string",
+          "body": "string",
+          "tags": ["string","string"]
+      } | null
+}
+
+원문:
+%s

@@ -92,8 +92,6 @@ public class CompositeSummaryFeedbackGenerator implements SummaryFeedbackGenerat
                 command.interviewId(),
                 "외부 AI 서버 오류로 요약 피드백을 생성하지 못했습니다.",
                 0,
-                null,
-                null,
                 "FALLBACK",
                 "N/A",
                 PROMPT_VERSION,

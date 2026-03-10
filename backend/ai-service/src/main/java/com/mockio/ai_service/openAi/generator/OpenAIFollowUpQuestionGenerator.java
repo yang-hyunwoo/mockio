@@ -17,30 +17,45 @@ package com.mockio.ai_service.openAi.generator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.ai_service.openAi.client.SpringAiOpenAIClient;
+import com.mockio.ai_service.util.AiResponseSanitizer;
+import com.mockio.ai_service.util.PromptLoader;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
 import com.mockio.common_ai_contractor.generator.question.AiQuestion;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.*;
 
 @Component
 @ConditionalOnProperty(name="ai.generator" , havingValue = "openai")
 @RequiredArgsConstructor
 public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerator {
 
-    private static final String MODEL = "gpt-4o-mini";
     private final SpringAiOpenAIClient client;
+    private final PromptLoader promptLoader;
+    private final AiResponseSanitizer sanitizer;
+    private static final String MODEL = "gpt-4o-mini";
+    private String commandPrompt;
+    private String systemPrompt;
+    private String systemRepairPrompt;
+
+    @Value("${ai.prompt-version}")
+    private String promptVersion;
+
+    @PostConstruct
+    void init() {
+        String absPath = "prompt/followup/";
+        commandPrompt = promptLoader.load(absPath + "followup-command-prompt-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "followup-prompt-" + promptVersion + ".txt");
+        systemRepairPrompt = promptLoader.load(absPath + "followup-prompt-repair-" + promptVersion + ".txt");
+    }
 
     @Override
     public AiEngine engine() {
@@ -68,43 +83,9 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         String qText = (qa == null || qa.question() == null) ? "N/A" : qa.question();
         String aText = (qa == null || qa.answer() == null) ? "" : qa.answer();
 
-        String commandText = """
-                당신은 %s 기술 면접관입니다.
-                title, body, tags를 모두 한국어로 작성하세요.
-                영어 문장 사용 금지, 기술 용어만 영어 허용.
-                
-                반드시 JSON 객체만 출력하세요.
-                설명/번호/불릿/마크다운/코드블록 금지.
-                """.formatted(command.interviewTrack());
+        String commandText = commandPrompt.formatted(command.interviewTrack());
 
-
-
-        String prompt = """
-                아래 문답을 바탕으로 다음 꼬리질문 1개를 생성하세요.
-                
-                출력 형식(JSON):
-                {
-                  "title": "string",
-                  "body": "string",
-                  "tags": ["string","string"]
-                }
-                
-                규칙:
-                - title: 3~8단어의 짧은 주제명
-                - body: 1~2문장 이내의 꼬리질문
-                - tags: 2~4개, 짧은 기술 키워드
-                - “더 설명해보세요” 같은 일반 질문 금지
-                - JSON 외 텍스트 절대 금지
-                
-                조건:
-                - 트랙: %s
-                - 난이도: %s
-                - 꼬리질문 사유: %s
-                
-                문답:
-                Q: %s
-                A: %s
-                """.formatted(
+        String prompt = systemPrompt.formatted(
                                 command.interviewTrack(),
                                 command.interviewDifficulty(),
                                 command.followUpReason(),
@@ -121,11 +102,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                 q = mapper.readValue(answer, AiQuestion.class);
             } catch (Exception e) {
                 // 1회 리페어
-                String repairSystem = """
-                        반드시 JSON 객체만 출력하세요. 다른 텍스트 금지.
-                        스키마:
-                        {"title":"string","body":"string","tags":["string","string"]}
-                        """;
+                String repairSystem = systemRepairPrompt;
                 String repaired = client.chat(MODEL, "이전 응답을 위 스키마에 맞는 JSON으로만 변환하세요.", repairSystem, temperature);
 
                 try {
@@ -142,8 +119,8 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
 
         return new FollowUpQuestion(new FollowUpQuestion.Item(
                 safeTitle(q.title()),
-                normalizeBody(q.body())
-                ,sanitizeTags(q.tags()),
+                sanitizer.normalizeBody(q.body())
+                ,sanitizer.sanitizeTags(q.tags()),
                 "OPENAI",
                 MODEL,
                 "v1",
@@ -151,30 +128,10 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         ));
     }
 
-    private String normalizeBody(String body) {
-        if (body == null) return "";
-        String q = body.trim();
-        if (q.isBlank()) return q;
-        if (!q.endsWith("?") && !q.endsWith("요.") && !q.endsWith(".")) q += "?";
-        return q;
-    }
-
     private String safeTitle(String title) {
         if (title == null) return "후속 질문";
         String t = title.trim().replaceAll("^\"|\"$", "").trim();
         return t.isBlank() ? "후속 질문" : (t.length() > 40 ? t.substring(0, 40) : t);
-    }
-
-    private Set<String> sanitizeTags(Set<String> tags) {
-        if (tags == null) return Set.of();
-
-        return tags.stream()
-                .map(String::trim)
-                .filter(t -> !t.isBlank())
-                .map(t -> t.length() > 20 ? t.substring(0, 20) : t)
-                .distinct()
-                .limit(4)
-                .collect(toSet());
     }
 
 }

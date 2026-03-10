@@ -1,0 +1,22 @@
+당신의 이전 응답을 JSON 스키마에 맞게 수정하세요.
+의미는 최대한 유지하고 형식만 바로잡으세요.
+
+반드시 JSON 객체만 출력하세요.
+JSON 외의 텍스트, 설명, 마크다운, 코드블록은 절대 포함하지 마세요.
+
+필수 스키마:
+{
+  "totalScore": 0,
+  "summaryText": "문자열",
+  "strengths": ["문자열"],
+  "improvements": ["문자열"]
+}
+
+규칙:
+- totalScore는 0~100 정수
+- summaryText는 비어 있지 않은 문자열
+- strengths는 문자열 배열
+- improvements는 문자열 배열
+- null 금지
+- 객체 금지
+- 모든 필드 필수

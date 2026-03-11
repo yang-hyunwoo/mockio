@@ -48,7 +48,7 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
 
     @PostConstruct
     void init() {
-        String absPath = "prompt/question/";
+        String absPath = "ai/prompt/question/";
         commandPrompt = promptLoader.load(absPath + "question-command-prompt-" + promptVersion + ".txt");
         systemPrompt = promptLoader.load(absPath + "question-prompt-" + promptVersion + ".txt");
     }

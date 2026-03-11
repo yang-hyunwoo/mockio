@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     Optional<Interview> findActiveByUserIdAndStatus(String userId, InterviewStatus status);
+    Optional<Interview>  findByUserIdAndIdempotencyKey(String userId, String idempotencyKey);
 
     int countByUserIdAndStatus(String userId, InterviewStatus status);
 

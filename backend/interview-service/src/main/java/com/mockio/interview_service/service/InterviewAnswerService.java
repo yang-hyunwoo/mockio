@@ -29,6 +29,7 @@ import com.mockio.interview_service.util.DeepDiveGate;
 import com.mockio.interview_service.util.followup.FollowUpDecider;
 import com.mockio.interview_service.util.followup.FollowUpDecision;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InterviewAnswerService {
 
     private final InterviewAnswerRepository interviewAnswerRepository;
@@ -261,7 +263,9 @@ public class InterviewAnswerService {
                 .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(interviewAnswerRequest.interviewId(), interviewQuestion.getSeq())
                 .map(q -> InterviewQuestionMapper.fromList(List.of(q),false,interview.getId()))
                 .orElseGet(() -> {
+                    log.info("before complete status={}", interview.getStatus());
                     interview.complete();
+                    log.info("after complete status={}", interview.getStatus());
 
                     InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
                             interview.getId(),

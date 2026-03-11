@@ -34,7 +34,7 @@ public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer
     """)
     List<InterviewAnswerDetailResponse> findDetailsByInterviewId(Long interviewId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Modifying(flushAutomatically = true)
     @Query("""
                 update InterviewAnswer a
                    set a.current = false

@@ -28,6 +28,8 @@ public class Interview extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String idempotencyKey;
+
     @Column(name = "user_id", nullable = false, length = 50)
     private String userId;
 
@@ -91,6 +93,7 @@ public class Interview extends BaseTimeEntity {
 
     @Builder
     private Interview(Long id,
+                      String idempotencyKey,
                       String userId,
                       InterviewTrack track,
                       InterviewDifficulty difficulty,
@@ -107,8 +110,8 @@ public class Interview extends BaseTimeEntity {
                       OffsetDateTime startedAt,
                       OffsetDateTime endedAt
     ) {
-
         this.id = id;
+        this.idempotencyKey = idempotencyKey;
         this.userId = userId;
         this.track = track;
         this.difficulty = difficulty;
@@ -130,6 +133,7 @@ public class Interview extends BaseTimeEntity {
     }
 
     public static Interview create(
+            String idempotencyKey,
             String userId,
             InterviewTrack track,
             InterviewDifficulty difficulty,
@@ -139,6 +143,7 @@ public class Interview extends BaseTimeEntity {
             int count
     ) {
         return Interview.builder()
+                .idempotencyKey(idempotencyKey)
                 .userId(userId)
                 .track(track)
                 .difficulty(difficulty)

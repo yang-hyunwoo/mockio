@@ -51,7 +51,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
 
     @PostConstruct
     void init() {
-        String absPath = "prompt/deepdive/";
+        String absPath = "ai/prompt/deepdive/";
         commandPrompt = promptLoader.load(absPath + "deep-dive-command-prompt-" + promptVersion + ".txt");
         systemPrompt = promptLoader.load(absPath + "deep-dive-prompt-" + promptVersion + ".txt");
         systemRepairPrompt = promptLoader.load(absPath + "deep-dive-prompt-repair-" + promptVersion + ".txt");

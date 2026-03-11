@@ -38,7 +38,7 @@ public class OllamaSummaryFeedbackGenerator implements SummaryFeedbackGenerator 
 
     @PostConstruct
     void init() {
-        String absPath = "prompt/summary/";
+        String absPath = "ai/prompt/summary/";
         commandPrompt = promptLoader.load(absPath + "summary-command-prompt-" + promptVersion + ".txt");
         commandPromptRepair = promptLoader.load(absPath + "summary-command-prompt-repair-" + promptVersion + ".txt");
         systemRepairPrompt = promptLoader.load(absPath + "summary-prompt-repair-" + promptVersion + ".txt");

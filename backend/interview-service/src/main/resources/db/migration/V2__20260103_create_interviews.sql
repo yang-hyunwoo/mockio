@@ -1,5 +1,6 @@
 CREATE TABLE interviews (
     id BIGSERIAL PRIMARY KEY,
+    idempotency_key VARCHAR(100) NULL,
     user_id VARCHAR(50) NOT NULL,
     track VARCHAR(30) NOT NULL,
     difficulty VARCHAR(30) NOT NULL,
@@ -29,5 +30,8 @@ CREATE TABLE interviews (
     CONSTRAINT ck_interviews_feedback_status CHECK (feedback_status IN ('NONE','REQUESTED','RUNNING','SUCCEEDED','FAILED')),
     CONSTRAINT ck_interviews_interview_mode CHECK (interview_mode IN ('TEXT','VOICE')),
     CONSTRAINT ck_interviews_status CHECK (status IN ('ACTIVE','ENDED','FAILED')),
-    CONSTRAINT ck_interviews_end_reason CHECK (end_reason IN ('COMPLETED','USER_EXIT','SYSTEM_EXIT','ERROR'))
+    CONSTRAINT ck_interviews_end_reason CHECK (end_reason IN ('COMPLETED','USER_EXIT','SYSTEM_EXIT','ERROR')),
+    CONSTRAINT uq_interviews_user_idempotency UNIQUE (user_id, idempotency_key)
 );
+
+CREATE INDEX idx_interviews_user_status ON interviews (user_id, status);

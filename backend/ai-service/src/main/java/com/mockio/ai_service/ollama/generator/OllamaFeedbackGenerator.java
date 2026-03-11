@@ -32,7 +32,7 @@ public class OllamaFeedbackGenerator implements FeedbackGenerator {
 
     @PostConstruct
     void init() {
-        String absPath = "prompt/feedback/";
+        String absPath = "ai/prompt/feedback/";
         commandPrompt = promptLoader.load(absPath + "feedback-command-prompt-" + promptVersion + ".txt");
         systemPrompt = promptLoader.load(absPath + "feedback-prompt-" + promptVersion + ".txt");
     }

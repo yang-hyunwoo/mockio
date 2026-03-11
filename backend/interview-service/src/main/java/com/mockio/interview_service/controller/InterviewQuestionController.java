@@ -3,6 +3,7 @@ package com.mockio.interview_service.controller;
 import com.mockio.common_security.annotation.CurrentSubject;
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
+import com.mockio.interview_service.dto.request.StartInterviewRequest;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.service.InterviewQuestionService;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +20,16 @@ public class InterviewQuestionController {
     private final MessageUtil messageUtil;
 
     @PostMapping("/interviews/current")
-    public ResponseEntity<Response<Long>> generateInterview(@CurrentSubject String userId) {
+    public ResponseEntity<Response<Long>> generateInterview(@CurrentSubject String userId,StartInterviewRequest request) {
         return Response.ok(messageUtil.getMessage("response.read"),
-                interviewQuestionService.generateInterview(userId));
+                interviewQuestionService.generateInterview(userId,request));
     }
 
     @PostMapping("/interviews/start-interview")
-    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject String userId) {
+    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject String userId ,
+                                                                                  @RequestBody StartInterviewRequest request) {
         return Response.ok(messageUtil.getMessage("response.read"),
-                interviewQuestionService.startInterview(userId));
+                interviewQuestionService.startInterview(userId,request));
     }
 
 

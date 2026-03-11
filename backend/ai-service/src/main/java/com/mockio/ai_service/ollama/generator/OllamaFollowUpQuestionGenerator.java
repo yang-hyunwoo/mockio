@@ -49,7 +49,7 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
 
     @PostConstruct
     void init() {
-        String absPath = "prompt/followup/";
+        String absPath = "ai/prompt/followup/";
         commandPrompt = promptLoader.load(absPath + "followup-command-prompt-" + promptVersion + ".txt");
         systemPrompt = promptLoader.load(absPath + "followup-prompt-" + promptVersion + ".txt");
         systemRepairPrompt = promptLoader.load(absPath + "followup-prompt-repair-" + promptVersion + ".txt");

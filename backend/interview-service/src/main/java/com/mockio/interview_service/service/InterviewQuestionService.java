@@ -7,12 +7,14 @@ import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.domain.UserInterviewSetting;
+import com.mockio.interview_service.dto.request.StartInterviewRequest;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.forward.ai.AIServiceClient;
 import com.mockio.interview_service.repository.InterviewQuestionRepository;
 import com.mockio.interview_service.repository.InterviewRepository;
 import com.mockio.interview_service.repository.UserInterviewSettingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,50 +39,47 @@ public class InterviewQuestionService {
 
 
     @Transactional
-    public InterviewQuestionReadResponse startInterview(String userId) {
-        return generateAndSaveQuestions(generateInterview(userId), userId);
+    public InterviewQuestionReadResponse startInterview(String userId, StartInterviewRequest request) {
+        return generateAndSaveQuestions(generateInterview(userId,request), userId);
     }
 
     @Transactional
-    public Long generateInterview(String userId) {
+    public Long generateInterview(String userId, StartInterviewRequest request) {
         //1.유저 인터뷰 세팅을 조회 한다.
         UserInterviewSetting userInterviewSetting = userInterviewSettingRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
 
         //2.유저 인터뷰 생성 및 조회 한다.
-        Interview returnInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
-                .orElseGet(() -> {
-                    Interview interview = Interview.create(
-                            userId,
-                            userInterviewSetting.getTrack(),
-                            userInterviewSetting.getDifficulty(),
-                            userInterviewSetting.getFeedbackStyle(),
-                            userInterviewSetting.getInterviewMode(),
-                            userInterviewSetting.getAnswerTimeSeconds(),
-                            userInterviewSetting.getInterviewQuestionCount()
-                    );
-                    return interviewRepository.save(interview);
-                });
-        //고민중 active 1개만 할지 10개로 할지
-//        int byCount = interviewRepository.countByUserIdAndStatus(userId, ACTIVE);
-//
-//        if (byCount > MaxInterviewCount) {
-//            throw new CustomApiException(QUESTIONS_MAX_COUNT.getHttpStatus(), QUESTIONS_MAX_COUNT, QUESTIONS_MAX_COUNT.getMessage());
-//        }
-//
-//        Interview interview = Interview.create(
-//                    userId,
-//                    userInterviewSetting.getTrack(),
-//                    userInterviewSetting.getDifficulty(),
-//                    userInterviewSetting.getFeedbackStyle(),
-//                    userInterviewSetting.getInterviewMode(),
-//                    userInterviewSetting.getAnswerTimeSeconds(),
-//                    userInterviewSetting.getInterviewQuestionCount()
-//        );
-//
-//        Interview returnInterview = interviewRepository.save(interview);
+        Interview activeInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
+                .orElse(null);
 
-        return returnInterview.getId();
+        if (activeInterview != null) {
+            return activeInterview.getId();
+        }
+        Interview existing = interviewRepository
+                .findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
+                .orElse(null);
+        if (existing != null) {
+            return existing.getId();
+        }
+        try {
+            Interview interview = Interview.create(
+                    request.idempotencyKey(),
+                    userId,
+                    userInterviewSetting.getTrack(),
+                    userInterviewSetting.getDifficulty(),
+                    userInterviewSetting.getFeedbackStyle(),
+                    userInterviewSetting.getInterviewMode(),
+                    userInterviewSetting.getAnswerTimeSeconds(),
+                    userInterviewSetting.getInterviewQuestionCount()
+            );
+
+            return interviewRepository.save(interview).getId();
+        } catch (DataIntegrityViolationException e) {
+            return interviewRepository.findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
+                    .orElseThrow(() -> e)
+                    .getId();
+        }
     }
 
     @Transactional

@@ -49,4 +49,11 @@ public class FeedbackTxService {
         );
     }
 
+    @Transactional(propagation = REQUIRES_NEW)
+    public void markSkipped(Long answerId) {
+        InterviewFeedback fb = interviewFeedbackRepository.findByAnswerId(answerId)
+                .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+        fb.skipped();
+    }
+
 }

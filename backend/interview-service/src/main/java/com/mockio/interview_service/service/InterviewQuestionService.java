@@ -35,16 +35,14 @@ public class InterviewQuestionService {
     private final UserInterviewSettingRepository userInterviewSettingRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final AIServiceClient aiServiceClient;
-    private final int MaxInterviewCount = 10;
-
 
     @Transactional
-    public InterviewQuestionReadResponse startInterview(String userId, StartInterviewRequest request) {
+    public InterviewQuestionReadResponse startInterview(Long userId, StartInterviewRequest request) {
         return generateAndSaveQuestions(generateInterview(userId,request), userId);
     }
 
     @Transactional
-    public Long generateInterview(String userId, StartInterviewRequest request) {
+    public Long generateInterview(Long userId, StartInterviewRequest request) {
         //1.유저 인터뷰 세팅을 조회 한다.
         UserInterviewSetting userInterviewSetting = userInterviewSettingRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
@@ -59,9 +57,11 @@ public class InterviewQuestionService {
         Interview existing = interviewRepository
                 .findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
                 .orElse(null);
+
         if (existing != null) {
             return existing.getId();
         }
+
         try {
             Interview interview = Interview.create(
                     request.idempotencyKey(),
@@ -83,7 +83,7 @@ public class InterviewQuestionService {
     }
 
     @Transactional
-    public InterviewQuestionReadResponse generateAndSaveQuestions(Long interviewId, String userId) {
+    public InterviewQuestionReadResponse generateAndSaveQuestions(Long interviewId, Long userId) {
         Interview interview = interviewRepository.findByIdAndUserIdForUpdate(interviewId, userId)
                 .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(), INTERVIEW_NOT_FOUND, INTERVIEW_NOT_FOUND.getMessage()));
 
@@ -140,11 +140,11 @@ public class InterviewQuestionService {
     }
 
     @Transactional(readOnly = true)
-    public InterviewQuestionReadResponse getQuestions(Long interviewId, String userId) {
+    public InterviewQuestionReadResponse getQuestions(Long interviewId, Long userId) {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(), INTERVIEW_NOT_FOUND, INTERVIEW_NOT_FOUND.getMessage()));
         if (interview.getUserId().equals(userId)) {
-            return InterviewQuestionMapper.fromList(interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interviewId),false,interview.getId());
+            return InterviewQuestionMapper.fromList(interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interviewId), false, interview);
         } else {
             throw new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(), INTERVIEW_FORBIDDEN, INTERVIEW_FORBIDDEN.getMessage());
         }

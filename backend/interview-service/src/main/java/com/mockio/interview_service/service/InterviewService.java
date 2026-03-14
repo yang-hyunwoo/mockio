@@ -26,7 +26,7 @@ public class InterviewService {
 
     private final InterviewRepository interviewRepository;
 
-    public InterviewListResponse getInterviewList(String userId) {
+    public InterviewListResponse getInterviewList(Long userId) {
         List<Interview> byinterview = interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE);
         return InterviewMapper.fromList(byinterview);
     }

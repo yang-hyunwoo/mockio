@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public interface UserInterviewSettingRepository extends JpaRepository<UserInterviewSetting, Long> {
 
-    Optional<UserInterviewSetting> findByUserId(String userId);
+    Optional<UserInterviewSetting> findByUserId(Long userId);
 
     @Modifying
     @Query(value = """
@@ -30,7 +30,7 @@ public interface UserInterviewSettingRepository extends JpaRepository<UserInterv
         ON CONFLICT (user_id) DO NOTHING
         """, nativeQuery = true)
     int insertIfAbsent(
-            @Param("userId") String userId,
+            @Param("userId") Long userId,
             @Param("track") String track,
             @Param("difficulty") String difficulty,
             @Param("feedbackStyle") String feedbackStyle,

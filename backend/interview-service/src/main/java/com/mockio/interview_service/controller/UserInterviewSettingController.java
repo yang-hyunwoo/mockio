@@ -43,8 +43,8 @@ public class UserInterviewSettingController {
      * @return
      */
     @GetMapping("/me/get-preference")
-    public ResponseEntity<Response<UserInterviewSettingReadResponse>> getPreference(@CurrentSubject String keycloakId) {
-        return Response.ok(messageUtil.getMessage("response.read"), userInterviewSettingService.getPreference(keycloakId));
+    public ResponseEntity<Response<UserInterviewSettingReadResponse>> getPreference(@CurrentSubject Long userId) {
+        return Response.ok(messageUtil.getMessage("response.read"), userInterviewSettingService.getPreference(userId));
     }
 
     /**
@@ -54,9 +54,9 @@ public class UserInterviewSettingController {
      * @return
      */
     @PatchMapping("/me/update-preference")
-    public ResponseEntity<Response<Void>> updatePreference(@CurrentSubject String keycloakId ,
+    public ResponseEntity<Response<Void>> updatePreference(@CurrentSubject Long userId ,
                                                            @RequestBody UserInterviewSettingUpdateRequest updateRequest) {
-        userInterviewSettingService.updatePreference(keycloakId, updateRequest);
+        userInterviewSettingService.updatePreference(userId, updateRequest);
 
         return Response.update(messageUtil.getMessage("response.update"));
 

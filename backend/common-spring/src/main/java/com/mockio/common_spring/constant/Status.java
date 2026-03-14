@@ -10,7 +10,8 @@ public enum Status {
     PROCESS("진행중"),
     SUCCEEDED("성공"),
     FAILED("실패"),
-    RETRY("재시도")
+    RETRY("재시도"),
+    SKIPPED("스킵")
     ;
 
     private final String label;

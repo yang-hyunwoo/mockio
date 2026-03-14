@@ -4,6 +4,12 @@ server:
 services:
   interview:
     base-url: http://localhost:9082
+    connect-timeout-ms: 2000
+    read-timeout-ms: 3000
+
+internal:
+  auth:
+    token: Zx9Q2mL7Kp4S0aW8RjHcVbD1YtE6Nf
 
 spring:
   messages:

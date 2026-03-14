@@ -16,7 +16,7 @@ CREATE TABLE interview_feedbacks (
      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
      CONSTRAINT chk_interview_feedbacks_status
-         CHECK (status IN ('PENDING', 'SUCCEEDED', 'FAILED', 'RETRY'))
+         CHECK (status IN ('PENDING', 'SUCCEEDED', 'FAILED', 'RETRY','SKIPPED'))
 );
 
 CREATE UNIQUE INDEX ux_interview_feedbacks_answer_id

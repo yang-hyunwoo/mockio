@@ -24,7 +24,7 @@ public class InterviewAnswerController {
 
     @GetMapping("/{questionId}/feedback")
     public ResponseEntity<Response<FeedbackDetailResponse>> interviewAnswerFeedbackRead(
-            @CurrentSubject String userId,
+            @CurrentSubject Long userId,
             @PathVariable Long questionId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewFacadeService.readFeedback(userId, questionId));
@@ -32,14 +32,14 @@ public class InterviewAnswerController {
 
     @PostMapping("/interviews/answer")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> interviewAnswerSave(
-            @CurrentSubject String userId,
+            @CurrentSubject Long userId,
             @RequestBody InterviewAnswerRequest interviewAnswerRequest) {
         return Response.create(messageUtil.getMessage("response.create"),interviewAnswerService.interviewAnswerSave(userId, interviewAnswerRequest));
     }
 
     @GetMapping("/interviews/answer/{questionId}")
     public ResponseEntity<Response<InterviewQuestionAnswerDetailResponse>> interviewAnswerRead(
-            @CurrentSubject String userId,
+            @CurrentSubject Long userId,
             @PathVariable Long questionId) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewAnswerService.interviewAnswerRead(userId, questionId));
     }

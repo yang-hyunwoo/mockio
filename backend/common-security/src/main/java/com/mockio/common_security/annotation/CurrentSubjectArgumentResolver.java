@@ -16,8 +16,14 @@ public class CurrentSubjectArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(CurrentSubject.class)
-                && String.class.isAssignableFrom(parameter.getParameterType());
+        if (!parameter.hasParameterAnnotation(CurrentSubject.class)) {
+            return false;
+        }
+
+        Class<?> parameterType = parameter.getParameterType();
+        return String.class.equals(parameterType)
+                || Long.class.equals(parameterType)
+                || long.class.equals(parameterType);
     }
 
     @Override
@@ -49,7 +55,21 @@ public class CurrentSubjectArgumentResolver implements HandlerMethodArgumentReso
             return null;
         }
 
-        return sub; // keycloakId
+        Class<?> parameterType = parameter.getParameterType();
+
+        if (String.class.equals(parameterType)) {
+            return sub;
+        }
+
+        if (Long.class.equals(parameterType) || long.class.equals(parameterType)) {
+            try {
+                return Long.valueOf(sub);
+            } catch (NumberFormatException e) {
+                throw new UnauthorizedException("INVALID_SUBJECT_TYPE");
+            }
+        }
+
+        throw new IllegalArgumentException("@CurrentSubject는 String 또는 Long 타입만 지원합니다.");
     }
 
     public static class UnauthorizedException extends RuntimeException {

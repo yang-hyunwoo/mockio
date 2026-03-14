@@ -2,43 +2,33 @@ package com.mockio.user_service.client;
 
 import com.mockio.user_service.dto.request.EnsureInterviewSettingRequest;
 import com.mockio.user_service.dto.response.EnsureInterviewSettingResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
+@Slf4j
 @Component
 public class InterviewServiceClient {
 
-    private final RestClient restClient;
-    private final String internalToken;
+    private final RestClient interviewRestClient;
 
-    public InterviewServiceClient(
-            @Value("${services.interview.base-url}") String baseUrl,
-            RestClient.Builder builder,
-            @Value("${internal.auth.token}") String internalToken
-    ) {
-        this.restClient = builder.baseUrl(baseUrl).build();
-        this.internalToken = internalToken;
+    public InterviewServiceClient(RestClient interviewRestClient) {
+        this.interviewRestClient = interviewRestClient;
     }
 
-    public EnsureInterviewSettingResponse ensureInterviewSetting(String keycloakId) {
-        return restClient.post()
-                .uri("/api/interview/v1/internal/interview-setting/ensure")
-                .header("X-Internal-Token",internalToken)
-                .body(new EnsureInterviewSettingRequest(keycloakId))
-                .retrieve()
-                .body(EnsureInterviewSettingResponse.class);
-    }
-
-    private String currentBearerToken() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof JwtAuthenticationToken jwtAuth) {
-            return jwtAuth.getToken().getTokenValue();
+    public EnsureInterviewSettingResponse ensureInterviewSetting(Long userId) {
+        try {
+            return interviewRestClient.post()
+                    .uri("/api/interview/v1/internal/interview-setting/ensure")
+                    .body(new EnsureInterviewSettingRequest(userId))
+                    .retrieve()
+                    .body(EnsureInterviewSettingResponse.class);
+        } catch (RestClientException ex) {
+            log.error("interview-service ensureInterviewSetting 호출 실패. keycloakId={}", userId, ex);
+            throw new IllegalStateException("interview-service 호출 실패", ex);
         }
-        return null;
     }
 
 }

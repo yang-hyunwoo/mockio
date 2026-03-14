@@ -14,18 +14,18 @@ import java.util.Optional;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
-    Optional<Interview> findActiveByUserIdAndStatus(String userId, InterviewStatus status);
-    Optional<Interview>  findByUserIdAndIdempotencyKey(String userId, String idempotencyKey);
+    Optional<Interview> findActiveByUserIdAndStatus(Long userId, InterviewStatus status);
+    Optional<Interview>  findByUserIdAndIdempotencyKey(Long userId, String idempotencyKey);
 
-    int countByUserIdAndStatus(String userId, InterviewStatus status);
+    int countByUserIdAndStatus(Long userId, InterviewStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Interview i where i.id = :id and i.userId = :userId")
-    Optional<Interview> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") String userId);
+    Optional<Interview> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") Long userId);
 
-    Optional<Interview> findByIdAndUserId(Long id, String userId);
+    Optional<Interview> findByIdAndUserId(Long id, Long userId);
 
-    List<Interview> findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(String userId , InterviewStatus status);
+    List<Interview> findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(Long userId , InterviewStatus status);
 
     @Modifying
     @Query("update Interview i set i.answeredQuestions = i.answeredQuestions + 1 where i.id = :id")

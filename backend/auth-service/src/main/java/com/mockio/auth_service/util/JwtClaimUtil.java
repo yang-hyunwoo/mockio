@@ -3,6 +3,7 @@ package com.mockio.auth_service.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.auth_service.dto.VerifiedTokenClaims;
 import com.mockio.auth_service.dto.response.SessionValidateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,13 +26,12 @@ public class JwtClaimUtil {
     @Value("${keycloak.client-id}")
     private String clientId;
 
-    public SessionValidateResponse verifyAndExtract(String jwt) {
-        Jwt decoded = keycloakJwtDecoder.decode(jwt); // ✅ 서명/exp 검증
+    public VerifiedTokenClaims verifyAndExtract(String jwt) {
+        Jwt decoded = keycloakJwtDecoder.decode(jwt); //  서명/exp 검증
 
-        String userId = decoded.getSubject();
+        String keycloakUserId = decoded.getSubject();
         String email = decoded.getClaimAsString("email");
 
-        // provider/username은 당신이 커스텀 클레임(profile.attributes.*)을 쓰는 것 같아서 그대로 꺼내되 null-safe
         Map<String, Object> profile = decoded.getClaim("profile");
         String provider = null;
         String username = null;
@@ -48,7 +48,7 @@ public class JwtClaimUtil {
 
         List<String> roles = extractRoles(decoded.getClaims(), clientId);
 
-        return new SessionValidateResponse(userId, username, email, provider, roles);
+        return new VerifiedTokenClaims(keycloakUserId, username, email, provider, roles);
     }
 
     public static List<String> extractRoles(Map<String, Object> claims, String clientId) {

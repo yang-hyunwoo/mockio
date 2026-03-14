@@ -11,10 +11,13 @@ package com.mockio.auth_service.controller;
  * 새 Refresh Token을 쿠키로 다시 설정한다.</p>
  */
 
+import com.mockio.auth_service.client.UserProfileClient;
 import com.mockio.auth_service.dto.AuthSession;
+import com.mockio.auth_service.dto.VerifiedTokenClaims;
 import com.mockio.auth_service.dto.response.KeycloakTokenResponse;
 import com.mockio.auth_service.dto.response.RefreshResponse;
 import com.mockio.auth_service.dto.response.SessionValidateResponse;
+import com.mockio.auth_service.dto.response.UserIdResponse;
 import com.mockio.auth_service.service.RefreshService;
 import com.mockio.auth_service.util.AuthSessionStore;
 import com.mockio.auth_service.util.CookieFactory;
@@ -48,6 +51,7 @@ public class AuthRefreshController {
     private final AuthSessionStore authSessionStore;
     private final JwtClaimUtil jwtClaimUtil;
     private final MessageUtil messageUtil;
+    private final UserProfileClient userProfileClient;
 
     /**
      * Refresh Token을 이용해 새로운 Access Token을 발급한다.
@@ -72,8 +76,19 @@ public class AuthRefreshController {
 
 
         s = refreshService.refreshBy(sessionId, s);
-        return Response.ok(messageUtil.getMessage("response.read"),
-                jwtClaimUtil.verifyAndExtract(s.accessToken()));
+        VerifiedTokenClaims claims = jwtClaimUtil.verifyAndExtract(s.accessToken());
+        UserIdResponse userMapping = userProfileClient.getUserId(claims.keycloakUserId());
+
+        SessionValidateResponse response = new SessionValidateResponse(
+                userMapping.userId(),
+                userMapping.keycloakUserId(),
+                claims.username(),
+                claims.email(),
+                claims.provider(),
+                claims.roles()
+        );
+
+        return Response.ok(messageUtil.getMessage("response.read"), response);
     }
 
     /**

@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_FORBIDDEN;
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_NOT_FOUND;
 
@@ -23,7 +25,7 @@ public class InterviewFacadeService {
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final FeedbackServiceClient feedbackServiceClient;
 
-    public FeedbackDetailResponse readFeedback(String userId, Long questionId) {
+    public FeedbackDetailResponse readFeedback(Long userId, Long questionId) {
         InterviewQuestion question = interviewQuestionRepository
                 .findByIdWithInterview(questionId)
                 .orElseThrow(() -> new CustomApiException(
@@ -44,8 +46,8 @@ public class InterviewFacadeService {
         return feedbackServiceClient.getFeedbackDetail(answer.getId());
     }
 
-    private static void InterviewUserCheck(String userId, InterviewQuestion question) {
-        if (!question.getInterview().getUserId().equals(userId)) {
+    private static void InterviewUserCheck(Long userId, InterviewQuestion question) {
+        if (!Objects.equals(question.getInterview().getUserId(), userId)) {
             throw new CustomApiException(
                     INTERVIEW_FORBIDDEN.getHttpStatus(),
                     INTERVIEW_FORBIDDEN,

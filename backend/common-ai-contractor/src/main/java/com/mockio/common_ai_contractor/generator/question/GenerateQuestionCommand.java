@@ -6,7 +6,7 @@ import com.mockio.common_ai_contractor.constant.InterviewMode;
 import com.mockio.common_ai_contractor.constant.InterviewTrack;
 
 public record GenerateQuestionCommand(
-        String userId,
+        Long userId,
         InterviewTrack track,
         InterviewDifficulty difficulty,
         InterviewMode interviewMode,

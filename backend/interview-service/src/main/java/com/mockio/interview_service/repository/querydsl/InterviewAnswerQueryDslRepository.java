@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface InterviewAnswerQueryDslRepository {
 
-    Optional<InterviewQuestionAnswerDetailResponse> interviewAnswerDetail(String userId, Long questionId);
+    Optional<InterviewQuestionAnswerDetailResponse> interviewAnswerDetail(Long userId, Long questionId);
 }

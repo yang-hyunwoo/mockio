@@ -20,13 +20,13 @@ public class InterviewQuestionController {
     private final MessageUtil messageUtil;
 
     @PostMapping("/interviews/current")
-    public ResponseEntity<Response<Long>> generateInterview(@CurrentSubject String userId,StartInterviewRequest request) {
+    public ResponseEntity<Response<Long>> generateInterview(@CurrentSubject Long userId,StartInterviewRequest request) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 interviewQuestionService.generateInterview(userId,request));
     }
 
     @PostMapping("/interviews/start-interview")
-    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject String userId ,
+    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject Long userId ,
                                                                                   @RequestBody StartInterviewRequest request) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 interviewQuestionService.startInterview(userId,request));
@@ -35,7 +35,7 @@ public class InterviewQuestionController {
 
     @PostMapping("/interviews/{interviewId}/questions:generate")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> generateQuestions(
-            @CurrentSubject String userId,
+            @CurrentSubject Long userId,
             @PathVariable Long interviewId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"),
@@ -44,7 +44,7 @@ public class InterviewQuestionController {
 
     @GetMapping("/interviews/{interviewId}/questions")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> getQuestions(
-            @CurrentSubject String userId,
+            @CurrentSubject Long userId,
             @PathVariable Long interviewId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"),

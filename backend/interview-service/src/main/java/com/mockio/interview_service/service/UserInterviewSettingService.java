@@ -35,7 +35,7 @@ public class UserInterviewSettingService {
      */
     public void ensureInterviewSettingSave(EnsureInterviewSettingRequest request) {
         UserInterviewSetting setting =
-                UserInterviewSetting.createUserInterviewPreference(request.keycloakId());
+                UserInterviewSetting.createUserInterviewPreference(request.userId());
 
         userInterviewSettingRepository.insertIfAbsent(
                 setting.getUserId(),
@@ -50,22 +50,22 @@ public class UserInterviewSettingService {
 
     /**
      * 면접 설정 조회
-     * @param keycloakId
+     * @param userId
      * @return
      */
-    public UserInterviewSettingReadResponse getPreference(String keycloakId) {
-        UserInterviewSetting byUserId = findByUserId(keycloakId);
+    public UserInterviewSettingReadResponse getPreference(Long userId) {
+        UserInterviewSetting byUserId = findByUserId(userId);
         return UserInterviewSettingMapper.from(byUserId);
     }
 
     /**
      * 면접 설정 수정
      *
-     * @param keycloakId
+     * @param userId
      * @param userRequest
      */
-    public void updatePreference(String keycloakId, UserInterviewSettingUpdateRequest userRequest) {
-        UserInterviewSetting byUserId = findByUserId(keycloakId);
+    public void updatePreference(Long userId, UserInterviewSettingUpdateRequest userRequest) {
+        UserInterviewSetting byUserId = findByUserId(userId);
         byUserId.applyPatch(userRequest.track(),
                 userRequest.difficulty(),
                 userRequest.feedbackStyle(),
@@ -77,11 +77,11 @@ public class UserInterviewSettingService {
 
     /**
      * 면접 질문 테이블 조회
-     * @param keycloakId
+     * @param userId
      * @return
      */
-    private UserInterviewSetting findByUserId(String keycloakId) {
-       return userInterviewSettingRepository.findByUserId(keycloakId)
+    private UserInterviewSetting findByUserId(Long userId) {
+       return userInterviewSettingRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
     }
 

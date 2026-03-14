@@ -24,7 +24,7 @@ public class InterviewAnswerQueryDslRepositoryImpl implements InterviewAnswerQue
     QInterviewAnswer answer = QInterviewAnswer.interviewAnswer;
 
     @Override
-    public Optional<InterviewQuestionAnswerDetailResponse> interviewAnswerDetail(String userId, Long questionId) {
+    public Optional<InterviewQuestionAnswerDetailResponse> interviewAnswerDetail(Long userId, Long questionId) {
         BooleanBuilder builder = new BooleanBuilder();
         answerCondition(userId, questionId, builder);
 
@@ -45,7 +45,7 @@ public class InterviewAnswerQueryDslRepositoryImpl implements InterviewAnswerQue
         return Optional.ofNullable(interviewQuestionAnswerDetailResponse);
     }
 
-    private void answerCondition(String userId,
+    private void answerCondition(Long userId,
                                  Long questionId,
                                  BooleanBuilder builder) {
         builder.and(interview.userId.eq(userId));

@@ -12,6 +12,7 @@ import com.mockio.common_spring.util.response.Response;
 import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
+import com.mockio.user_service.dto.response.UserIdResponse;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,13 @@ public class UserProfileController {
      * @return
      */
     @PostMapping("/internal/me/sync")
-    public ResponseEntity<Response<UserProfileResponse>> syncMyProfile(@RequestBody ProfileSyncRequest profileSyncRequest) {
-        return Response.ok(messageUtil.getMessage("response.read"),
-                userProfileService.loadOrCreateFromToken(profileSyncRequest));
+    public UserProfileResponse syncMyProfile(@RequestBody ProfileSyncRequest profileSyncRequest) {
+        return  userProfileService.loadOrCreateFromToken(profileSyncRequest);
+    }
+
+    @GetMapping("/internal/by-keycloak-id/{keycloakUserId}")
+    public UserIdResponse getUserId(@PathVariable String keycloakUserId) {
+        return userProfileService.getUserId(keycloakUserId);
     }
 
     /**

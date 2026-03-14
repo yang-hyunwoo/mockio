@@ -1,17 +1,6 @@
-package com.mockio.auth_service.config;
+package com.mockio.user_service.config;
 
-/**
- * RestClient 공통 설정 클래스.
- *
- * <p>Apache HttpClient 기반 RequestFactory를 사용하여
- * 연결/응답 타임아웃을 명시적으로 설정한 RestClient Bean을 제공한다.</p>
- *
- * <p>외부 인증 서버(Keycloak 등) 호출 시
- * 무한 대기나 스레드 고갈을 방지하기 위한 보호 설정이다.</p>
- */
-
-import com.mockio.auth_service.properties.UserServiceClientProperties;
-import lombok.NonNull;
+import com.mockio.user_service.properties.InterviewServiceClientProperties;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -24,28 +13,29 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableConfigurationProperties(UserServiceClientProperties.class)
+@EnableConfigurationProperties(InterviewServiceClientProperties.class)
 public class RestClientConfig {
 
     private final String internalToken;
-    private final UserServiceClientProperties properties;
+    private final InterviewServiceClientProperties properties;
 
     public RestClientConfig(
-            @Value("${internal.auth.token}") String internalToken
-            , UserServiceClientProperties properties
+            @Value("${internal.auth.token}") String internalToken,
+            InterviewServiceClientProperties properties
     ) {
         this.internalToken = internalToken;
         this.properties = properties;
     }
 
     @Bean
-    public RestClient userRestClient(HttpComponentsClientHttpRequestFactory requestFactory) {
+    public RestClient interviewRestClient(HttpComponentsClientHttpRequestFactory requestFactory) {
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
                 .defaultHeader("X-Internal-Token", internalToken)
                 .requestFactory(requestFactory)
                 .build();
     }
+
 
     @Bean
     public HttpComponentsClientHttpRequestFactory interviewRequestFactory() {
@@ -60,5 +50,4 @@ public class RestClientConfig {
 
         return new HttpComponentsClientHttpRequestFactory(httpClient);
     }
-
 }

@@ -20,7 +20,7 @@ public class InterviewReadController {
     private final MessageUtil messageUtil;
 
     @GetMapping("/main/list")
-    public ResponseEntity<Response<InterviewListResponse>> getInterviewMainList(@CurrentSubject String userId) {
+    public ResponseEntity<Response<InterviewListResponse>> getInterviewMainList(@CurrentSubject Long userId) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewService.getInterviewList(userId));
     }
 

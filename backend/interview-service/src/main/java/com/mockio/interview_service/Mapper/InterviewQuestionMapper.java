@@ -1,6 +1,7 @@
 package com.mockio.interview_service.Mapper;
 
 import com.mockio.common_spring.util.response.EnumResponse;
+import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 
@@ -30,13 +31,14 @@ public class InterviewQuestionMapper {
     }
 
     /** 엔티티 리스트 → Response */
-    public static InterviewQuestionReadResponse fromList(List<InterviewQuestion> questions, boolean completed , Long interviewId) {
+    public static InterviewQuestionReadResponse fromList(List<InterviewQuestion> questions, boolean completed , Interview interview) {
         return new InterviewQuestionReadResponse(
                 questions.stream()
                         .map(InterviewQuestionMapper::from)
                         .toList(),
-                interviewId,
-                completed
+                interview.getId(),
+                completed,
+                interview.getAnswerTimeSeconds()
                 );
     }
 

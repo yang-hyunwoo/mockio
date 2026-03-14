@@ -2,6 +2,7 @@ package com.mockio.auth_service.controller;
 
 import com.mockio.auth_service.client.UserProfileClient;
 import com.mockio.auth_service.dto.AuthSession;
+import com.mockio.auth_service.dto.VerifiedTokenClaims;
 import com.mockio.auth_service.dto.request.ProfileSyncRequest;
 import com.mockio.auth_service.dto.response.SessionValidateResponse;
 import com.mockio.auth_service.util.AuthSessionStore;
@@ -142,12 +143,12 @@ public class AuthLoginController {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        SessionValidateResponse sessionValidateResponse = jwtClaimUtil.verifyAndExtract(accessToken);
+        VerifiedTokenClaims verifiedTokenClaims = jwtClaimUtil.verifyAndExtract(accessToken);
         userProfileClient.syncProfile(new ProfileSyncRequest(
-                sessionValidateResponse.userId(),
-                sessionValidateResponse.provider(),
-                sessionValidateResponse.username(),
-                sessionValidateResponse.email()
+                verifiedTokenClaims.keycloakUserId(),
+                verifiedTokenClaims.provider(),
+                verifiedTokenClaims.username(),
+                verifiedTokenClaims.email()
         ));
         // 4) 프론트로 redirect
         response.sendRedirect("http://localhost:3000/");

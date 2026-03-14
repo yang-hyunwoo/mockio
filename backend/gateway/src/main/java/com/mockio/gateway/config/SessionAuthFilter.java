@@ -76,7 +76,7 @@ public class SessionAuthFilter implements GlobalFilter, Ordered {
                 .retrieve()
                 .bodyToMono(SessionValidateResponse.class)
                 .flatMap(res -> {
-                    String internalJwt = internalJwtIssuer.issue(res.userId(), res.roles());
+                    String internalJwt = internalJwtIssuer.issue(res.userId(),res.keycloakUserId(), res.roles());
                     ServerHttpRequest original = exchange.getRequest();
 
                     ServerHttpRequest newRequest =

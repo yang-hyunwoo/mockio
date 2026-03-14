@@ -16,6 +16,7 @@ import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.UserDeletedEvent;
 import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
+import com.mockio.user_service.dto.response.UserIdResponse;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
@@ -26,6 +27,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.oauth2.jwt.Jwt;
+
+import java.util.Optional;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -49,20 +52,30 @@ public class UserProfileService {
      * @param jwt
      */
     public UserProfileResponse loadOrCreateFromToken(ProfileSyncRequest profileSyncRequest) {
-        String keycloakId = profileSyncRequest.userId();
+        String keycloakUserId = profileSyncRequest.keycloakUserId();
         String email = profileSyncRequest.email();
 
         String fullName = resolveFullName(profileSyncRequest);
 
-        UserProfile userProfile = userRepository.findByKeycloakId(keycloakId)
+        UserProfile userProfile = userRepository.findByKeycloakId(keycloakUserId)
                 .map(existing -> {
                     existing.updateLastLoginAt();
-                    interviewServiceClient.ensureInterviewSetting(keycloakId);
+                    interviewServiceClient.ensureInterviewSetting(existing.getId());
                     return existing;
                 })
-                .orElseGet(() -> createNewProfile(keycloakId, email, fullName));
+                .orElseGet(() -> createNewProfile(keycloakUserId, email, fullName));
 
         return UserProfileMapper.from(userProfile);
+    }
+
+    public UserIdResponse getUserId(String keycloakId) {
+        UserProfile userProfile = userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
+        log.info("userProfile={}", userProfile);
+        return new UserIdResponse(
+                userProfile.getId(),
+                userProfile.getKeycloakId()
+        );
     }
 
     /**
@@ -108,10 +121,9 @@ public class UserProfileService {
 
     private UserProfile createNewProfile(String keycloakId, String email, String fullName) {
         String nickname = generateRandomNickname();
-
         UserProfile created = UserProfile.createUserProfile(keycloakId, email, fullName, nickname);
         created = userRepository.save(created);
-        interviewServiceClient.ensureInterviewSetting(keycloakId);
+        interviewServiceClient.ensureInterviewSetting(created.getId());
 
         created.updateLastLoginAt();
         return created;

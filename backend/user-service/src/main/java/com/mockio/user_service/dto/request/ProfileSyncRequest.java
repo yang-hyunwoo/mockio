@@ -1,7 +1,7 @@
 package com.mockio.user_service.dto.request;
 
 public record ProfileSyncRequest(
-        String userId,
+        String keycloakUserId,
         String provider,
         String name,
         String email,

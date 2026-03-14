@@ -28,8 +28,8 @@ public class UserInterviewSetting extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -57,7 +57,7 @@ public class UserInterviewSetting extends BaseTimeEntity {
     @Builder
     private UserInterviewSetting(
         Long id,
-        String userId,
+        Long userId,
         InterviewTrack track,
         InterviewDifficulty difficulty,
         InterviewFeedbackStyle feedbackStyle,
@@ -75,9 +75,9 @@ public class UserInterviewSetting extends BaseTimeEntity {
         this.interviewQuestionCount = interviewQuestionCount;
     }
 
-    public static UserInterviewSetting createUserInterviewPreference(String keycloakId) {
+    public static UserInterviewSetting createUserInterviewPreference(Long userId) {
         return UserInterviewSetting.builder()
-                .userId(keycloakId)
+                .userId(userId)
                 .track(InterviewTrack.GENERAL)
                 .difficulty(InterviewDifficulty.MEDIUM)
                 .feedbackStyle(InterviewFeedbackStyle.COACHING)

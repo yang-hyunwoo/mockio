@@ -1,7 +1,7 @@
 CREATE TABLE interviews (
     id BIGSERIAL PRIMARY KEY,
     idempotency_key VARCHAR(100) NULL,
-    user_id VARCHAR(50) NOT NULL,
+    user_id BIGINT  NOT NULL,
     track VARCHAR(30) NOT NULL,
     difficulty VARCHAR(30) NOT NULL,
     feedback_style VARCHAR(30) NOT NULL,

@@ -118,6 +118,10 @@ public class InterviewFeedback extends BaseTimeEntity {
         this.temperature = temperature;
     }
 
+    public void skipped() {
+        this.status = Status.SKIPPED;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

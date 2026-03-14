@@ -1,6 +1,6 @@
 CREATE TABLE user_interview_settings (
      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-     user_id VARCHAR(50) NOT NULL,
+     user_id BIGINT  NOT NULL,
      track VARCHAR(30) NOT NULL,
      difficulty VARCHAR(30) NOT NULL,
      interview_feedback_style VARCHAR(30) NOT NULL,

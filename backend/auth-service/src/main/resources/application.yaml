@@ -22,3 +22,9 @@ spring:
     show-sql: true
   config:
     import: classpath:application-kafka.yaml
+
+services:
+  interview:
+    base-url: http://localhost:9081
+    connect-timeout-ms: 2000
+    read-timeout-ms: 3000

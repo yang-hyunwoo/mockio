@@ -1,4 +1,4 @@
 package com.mockio.interview_service.dto.request;
 
-public record EnsureInterviewSettingRequest(String keycloakId) {
+public record EnsureInterviewSettingRequest(Long userId) {
 }

@@ -8,7 +8,8 @@ import java.util.Set;
 public record InterviewQuestionReadResponse(
         List<Item> questions,
         Long interviewId,
-        boolean completed
+        boolean completed,
+        Integer answerTimeSeconds
 ) {
     public record Item(
             Long id,

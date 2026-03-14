@@ -30,8 +30,8 @@ public class Interview extends BaseTimeEntity {
 
     private String idempotencyKey;
 
-    @Column(name = "user_id", nullable = false, length = 50)
-    private String userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -94,7 +94,7 @@ public class Interview extends BaseTimeEntity {
     @Builder
     private Interview(Long id,
                       String idempotencyKey,
-                      String userId,
+                      Long userId,
                       InterviewTrack track,
                       InterviewDifficulty difficulty,
                       InterviewFeedbackStyle feedbackStyle,
@@ -134,7 +134,7 @@ public class Interview extends BaseTimeEntity {
 
     public static Interview create(
             String idempotencyKey,
-            String userId,
+            Long userId,
             InterviewTrack track,
             InterviewDifficulty difficulty,
             InterviewFeedbackStyle feedbackStyle,

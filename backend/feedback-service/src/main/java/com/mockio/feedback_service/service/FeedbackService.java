@@ -47,8 +47,8 @@ public class FeedbackService {
                     List.of(),
                     null,
                     EnumResponse.of(
-                            Status.PENDING.name(),
-                            Status.PENDING.getLabel()
+                            interviewFeedback.getStatus().name(),
+                            interviewFeedback.getStatus().getLabel()
                     )
             );
         }

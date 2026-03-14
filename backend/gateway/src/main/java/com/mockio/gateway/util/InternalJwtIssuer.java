@@ -2,23 +2,17 @@ package com.mockio.gateway.util;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -26,16 +20,21 @@ public class InternalJwtIssuer {
 
     private final KeyPair keyPair;
 
-    public String issue(String userId, List<String> roles) {
+    public String issue(Long userId, String keycloakUserId, List<String> roles) {
         try {
             JWSSigner signer = new RSASSASigner((RSAPrivateKey) keyPair.getPrivate());
 
+            Instant now = Instant.now();
+
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                    .subject(userId)
+                    .subject(String.valueOf(userId))
                     .issuer("mockio-gateway")
+                    .jwtID(UUID.randomUUID().toString())
+                    .issueTime(Date.from(now))
+                    .expirationTime(Date.from(now.plusSeconds(1800)))
+                    .claim("userId", userId)
+                    .claim("keycloakUserId", keycloakUserId)
                     .claim("roles", roles)
-                    .issueTime(new Date())
-                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
                     .build();
 
             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.RS256)
@@ -47,10 +46,8 @@ public class InternalJwtIssuer {
             signedJWT.sign(signer);
 
             return signedJWT.serialize();
-
-        } catch (Exception e) {
-            throw new RuntimeException("JWT 생성 실패", e);
+        } catch (JOSEException e) {
+            throw new IllegalStateException("내부 JWT 생성 실패", e);
         }
     }
-
 }

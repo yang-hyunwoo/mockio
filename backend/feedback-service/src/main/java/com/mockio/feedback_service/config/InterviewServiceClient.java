@@ -37,7 +37,7 @@ public class InterviewServiceClient {
      */
     public InterviewAnswerDetailResponse getAnswerDetail(Long answerId) {
         return interviewWebClient.get()
-                .uri("/api/interview/v1/internal/interview-answers/{answerId}", answerId)
+                .uri("/api/interview/v1/internal/interview-answer/{answerId}", answerId)
                 .header("X-Internal-Token", internalToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, r ->

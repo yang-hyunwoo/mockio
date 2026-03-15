@@ -49,19 +49,42 @@ public class CurrentSubjectArgumentResolver implements HandlerMethodArgumentReso
             return null;
         }
 
-        String sub = jwt.getSubject();
-        if (sub == null || sub.isBlank()) {
-            if (required) throw new UnauthorizedException("MISSING_SUBJECT");
-            return null;
-        }
-
         Class<?> parameterType = parameter.getParameterType();
 
         if (String.class.equals(parameterType)) {
+            String sub = jwt.getSubject();
+            if (sub == null || sub.isBlank()) {
+                if (required) throw new UnauthorizedException("MISSING_SUBJECT");
+                return null;
+            }
             return sub;
         }
 
         if (Long.class.equals(parameterType) || long.class.equals(parameterType)) {
+            Object userIdClaim = jwt.getClaims().get("userId");
+
+            if (userIdClaim instanceof Long l) {
+                return l;
+            }
+
+            if (userIdClaim instanceof Integer i) {
+                return i.longValue();
+            }
+
+            if (userIdClaim instanceof String s) {
+                try {
+                    return Long.valueOf(s);
+                } catch (NumberFormatException e) {
+                    throw new UnauthorizedException("INVALID_USER_ID_CLAIM");
+                }
+            }
+
+            String sub = jwt.getSubject();
+            if (sub == null || sub.isBlank()) {
+                if (required) throw new UnauthorizedException("MISSING_SUBJECT");
+                return null;
+            }
+
             try {
                 return Long.valueOf(sub);
             } catch (NumberFormatException e) {
@@ -77,5 +100,4 @@ public class CurrentSubjectArgumentResolver implements HandlerMethodArgumentReso
             super(message);
         }
     }
-
 }

@@ -17,7 +17,7 @@ public class InternalInterviewController {
 
     private final InternalInterviewReadService internalInterviewReadService;
 
-    @GetMapping("/interview-answers/{answerId}")
+    @GetMapping("/interview-answer/{answerId}")
     public InterviewAnswerDetailResponse getAnswer(@PathVariable Long answerId) {
 
         return internalInterviewReadService.getInterviewDetail(answerId);
@@ -27,5 +27,6 @@ public class InternalInterviewController {
     public List<InterviewAnswerDetailResponse> getInterviewList(@PathVariable Long interviewId) {
         return internalInterviewReadService.getInterviewList(interviewId);
     }
+
 
 }

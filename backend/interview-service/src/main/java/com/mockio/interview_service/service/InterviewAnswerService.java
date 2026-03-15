@@ -351,6 +351,7 @@ public class InterviewAnswerService {
                     interview.complete();
 
                     InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
+                            interview.getUserId(),
                             interview.getId(),
                             interview.getTrack().name(),
                             interview.getDifficulty().name(),

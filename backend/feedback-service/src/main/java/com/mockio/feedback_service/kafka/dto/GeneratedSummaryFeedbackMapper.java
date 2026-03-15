@@ -1,6 +1,7 @@
 package com.mockio.feedback_service.kafka.dto;
 
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
+import com.mockio.feedback_service.kafka.dto.request.InterviewCompletedPayload;
 import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailResponse;
 
 import java.util.List;

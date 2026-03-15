@@ -11,6 +11,10 @@ import com.mockio.feedback_service.kafka.domain.ProcessedEvent;
 import com.mockio.feedback_service.kafka.dto.*;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
+import com.mockio.feedback_service.kafka.dto.request.InterviewAnswerSkippedPayload;
+import com.mockio.feedback_service.kafka.dto.request.InterviewAnswerSubmittedPayload;
+import com.mockio.feedback_service.kafka.dto.request.InterviewCompletedPayload;
+import com.mockio.feedback_service.kafka.dto.request.InterviewLifecycleEvent;
 import com.mockio.feedback_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.feedback_service.kafka.repository.ProcessedEventRepository;
 import com.mockio.feedback_service.kafka.support.InterviewEventParser;
@@ -105,16 +109,29 @@ public class InterviewFeedbackConsumer {
     private void handleInterviewCompleted(InterviewLifecycleEvent event) {
         InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
 
-        // 인터뷰 전체 답변 목록 조회
         //피드백 생성
         InterviewSummaryFeedback interviewSummaryFeedback = summaryFeedbackTxService.ensurePending(payload.interviewId());
 
+        // 인터뷰 전체 답변 목록 조회
         List<InterviewAnswerDetailResponse> answers = interviewServiceClient.getInterviewList(payload.interviewId());
-        GeneratedSummaryFeedbackCommand generateSummaryFeedbackCommand = GeneratedSummaryFeedbackMapper.from(payload, answers);
+        long answeredCount = answers.stream()
+                .map(answer -> answer.answerText() == null ? "" : answer.answerText().trim())
+                .filter(text -> !text.isBlank())
+                .count();
+
+        if (answeredCount == 0) {
+            summaryFeedbackTxService.markSkipped(interviewSummaryFeedback.getInterviewId());
+            return;
+        }
+        List<InterviewAnswerDetailResponse> list = answers.stream()
+                .filter(answer -> answer.answerText() != null && !answer.answerText().trim().isBlank())
+                .toList();
+
+        GeneratedSummaryFeedbackCommand generateSummaryFeedbackCommand = GeneratedSummaryFeedbackMapper.from(payload, list);
         GeneratedSummaryFeedback generatedSummaryFeedback = aiFeedbackClient.generateSummaryFeedback(generateSummaryFeedbackCommand);
 
         // 저장: interview_id
-        summaryFeedbackTxService.markSucceeded(interviewSummaryFeedback.getInterviewId(), generatedSummaryFeedback);
+        summaryFeedbackTxService.markSucceeded(interviewSummaryFeedback.getInterviewId(), generatedSummaryFeedback,payload);
     }
 
 }

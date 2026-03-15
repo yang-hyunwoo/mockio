@@ -108,6 +108,12 @@ public class InterviewSummaryFeedback extends BaseTimeEntity {
         this.status = Status.SUCCEEDED;
     }
 
+    public void skipped() {
+        this.summaryFeedbackText = "답변이 없어 종합 피드백을 생성하지 못했습니다.";
+        this.totalScore = 0;
+        this.status = Status.SKIPPED;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

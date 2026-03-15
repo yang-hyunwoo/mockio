@@ -1,6 +1,7 @@
 package com.mockio.interview_service.kafka.dto.request;
 
 public record InterviewCompletedPayload(
+        Long userId,
         Long interviewId,
         String track,
         String difficulty,

@@ -1,25 +1,25 @@
-package com.mockio.feedback_service.kafka.support;
+package com.mockio.notification_service.kafka.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.feedback_service.kafka.dto.request.InterviewLifecycleEvent;
+import com.mockio.notification_service.kafka.dto.FeedbackLifecycleEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class InterviewEventParser {
+public class FeedbackEventParser {
 
     private final ObjectMapper objectMapper;
 
-    public InterviewLifecycleEvent parse(String messageJson) {
+    public FeedbackLifecycleEvent parse(String messageJson) {
         try {
-            return objectMapper.readValue(messageJson, InterviewLifecycleEvent.class);
+            return objectMapper.readValue(messageJson, FeedbackLifecycleEvent.class);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid event message", e);
         }
     }
 
-    public <T> T payloadAs(InterviewLifecycleEvent event, Class<T> clazz) {
+    public <T> T payloadAs(FeedbackLifecycleEvent event, Class<T> clazz) {
         try {
             return objectMapper.treeToValue(event.payload(), clazz);
         } catch (Exception e) {

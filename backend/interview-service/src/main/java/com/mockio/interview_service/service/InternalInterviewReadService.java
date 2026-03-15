@@ -41,4 +41,6 @@ public class InternalInterviewReadService {
         return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
     }
 
+
+
 }

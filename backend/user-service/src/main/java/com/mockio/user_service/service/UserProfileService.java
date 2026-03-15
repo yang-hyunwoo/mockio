@@ -9,7 +9,7 @@ package com.mockio.user_service.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_core.exception.CustomApiException;
-import com.mockio.user_service.Mapper.UserProfileMapper;
+import com.mockio.user_service.mapper.UserProfileMapper;
 import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.UserStatus;
 import com.mockio.user_service.domain.UserProfile;
@@ -26,9 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.util.Optional;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static org.springframework.http.HttpStatus.NOT_FOUND;

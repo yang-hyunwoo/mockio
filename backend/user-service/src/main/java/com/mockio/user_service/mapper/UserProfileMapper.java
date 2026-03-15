@@ -1,4 +1,4 @@
-package com.mockio.user_service.Mapper;
+package com.mockio.user_service.mapper;
 
 /**
  * UserProfileMapper

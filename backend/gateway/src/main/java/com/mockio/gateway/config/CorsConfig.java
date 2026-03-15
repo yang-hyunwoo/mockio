@@ -15,7 +15,7 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
 
         final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000");
-        final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE");
+        final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE","PATCH");
         final List<String> ALLOWED_HEADERS = List.of("Authorization", "Content-Type");
         final List<String> EXPOSED_HEADERS = List.of("Authorization", "refresh-token");
 

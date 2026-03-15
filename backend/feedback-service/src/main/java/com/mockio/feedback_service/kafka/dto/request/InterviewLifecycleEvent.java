@@ -1,4 +1,4 @@
-package com.mockio.feedback_service.kafka.dto;
+package com.mockio.feedback_service.kafka.dto.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

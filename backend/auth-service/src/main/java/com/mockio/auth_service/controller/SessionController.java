@@ -51,7 +51,7 @@ public class SessionController {
         return new SessionValidateResponse(
                 userInfo.userId(),
                 userInfo.keycloakUserId(),
-                verifiedTokenClaims.username(),
+                userInfo.nickname(),
                 verifiedTokenClaims.email(),
                 verifiedTokenClaims.provider(),
                 verifiedTokenClaims.roles()

@@ -22,15 +22,10 @@ public class FaqReqDto {
     @Sanitize(groups = Step1.class)
     private String question;
 
-    @Schema(description = "FAQ 타입" , example = "ALL")
-    @EnumValidation(enumClass = FaqType.class, message = "{qna.type}", groups = Step2.class)
-    private String faqType;
-
     @Override
     public String toString() {
         return "FaqReqDto{" +
                 "question='" + question + '\'' +
-                ", faqType=" + faqType +
                 '}';
     }
 

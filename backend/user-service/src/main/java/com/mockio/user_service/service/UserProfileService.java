@@ -71,6 +71,7 @@ public class UserProfileService {
         log.info("userProfile={}", userProfile);
         return new UserIdResponse(
                 userProfile.getId(),
+                userProfile.getNickname(),
                 userProfile.getKeycloakId()
         );
     }

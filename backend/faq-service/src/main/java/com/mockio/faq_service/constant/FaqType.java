@@ -6,10 +6,12 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum FaqType {
-    ALL("전체"),
-    ACCOUNT("계정") ,
-    SERVICE("서비스"),
-    ;
+    ACCOUNT("계정"),
+    INTERVIEW("면접 이용"),
+    FEEDBACK("AI 피드백"),
+    PAYMENT("결제"),
+    TECHNICAL("기술 문제"),
+    ETC("기타");
 
     private final String label;
 

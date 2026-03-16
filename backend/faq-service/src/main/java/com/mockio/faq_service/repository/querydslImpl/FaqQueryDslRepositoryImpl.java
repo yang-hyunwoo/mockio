@@ -31,25 +31,18 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
      * @return faq 페이지 객체
      */
     @Override
-    public Page<FaqBoard> findFaqListPage(Pageable pageable,
-                                          FaqReqDto faqReqDto
+    public List<FaqBoard> findFaqList(FaqReqDto faqReqDto
     ) {
         BooleanBuilder builder = new BooleanBuilder();
         faqCondition(faqReqDto, builder);
 
-        List<FaqBoard> faqList = queryFactory.selectFrom(f)
+
+
+        return queryFactory.selectFrom(f)
                 .where(builder)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
                 .orderBy(f.sort.asc())
                 .fetch();
 
-        Long count = queryFactory.select(f.count())
-                .from(f)
-                .where(builder)
-                .fetchOne();
-
-        return new PageImpl<>(faqList, pageable, count);
     }
 
     private void faqCondition(FaqReqDto faqReqDto,
@@ -58,14 +51,14 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
         builder.and(f.visible.isTrue());
         builder.and(f.deleted.isFalse());
 
-        if (faqReqDto.getFaqType() != null && !faqReqDto.getFaqType().equals(FaqType.ALL.name())) {
-            FaqType typeEnum = FaqType.valueOf(faqReqDto.getFaqType());
-            builder.and(f.faqType.eq(typeEnum));
-        }
+//        if (faqReqDto.getFaqType() != null) {
+//            FaqType typeEnum = FaqType.valueOf(faqReqDto.getFaqType());
+//            builder.and(f.faqType.eq(typeEnum));
+//        }
 
-        if (faqReqDto.getQuestion() != null && !faqReqDto.getQuestion().isBlank()) {
-            builder.and(f.question.value.containsIgnoreCase(faqReqDto.getQuestion()));
-        }
+//        if (faqReqDto.getQuestion() != null && !faqReqDto.getQuestion().isBlank()) {
+//            builder.and(f.question.value.containsIgnoreCase(faqReqDto.getQuestion()));
+//        }
     }
 
 }

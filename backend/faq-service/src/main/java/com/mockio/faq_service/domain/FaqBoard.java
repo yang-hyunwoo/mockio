@@ -25,7 +25,9 @@ public class FaqBoard extends BaseEntity {
 
     private String userId;
 
-    @Column(length = 200)
+    @Embedded
+    @AttributeOverride(name = "value",
+            column = @Column(name = "question", length = 200, nullable = false))
     private BoardTitle question;
 
     @Embedded

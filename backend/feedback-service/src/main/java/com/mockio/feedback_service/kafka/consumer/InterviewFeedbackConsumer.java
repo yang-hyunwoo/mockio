@@ -80,7 +80,7 @@ public class InterviewFeedbackConsumer {
         InterviewAnswerSubmittedPayload payload = parser.payloadAs(event, InterviewAnswerSubmittedPayload.class);
 
         //피드백 생성
-        InterviewFeedback interviewFeedback = feedbackTxService.ensurePending(payload.answerId());
+        InterviewFeedback interviewFeedback = feedbackTxService.ensurePending(payload.answerId(), payload.interviewId());
         if(interviewFeedback.successChk()) {
             return;
         }
@@ -101,7 +101,7 @@ public class InterviewFeedbackConsumer {
         InterviewAnswerSkippedPayload payload = parser.payloadAs(event, InterviewAnswerSkippedPayload.class);
 
         //피드백 값 SKIPEED 변경
-        InterviewFeedback interviewFeedback = feedbackTxService.ensurePending(payload.answerId());
+        InterviewFeedback interviewFeedback = feedbackTxService.ensurePending(payload.answerId(),payload.interviewId());
         feedbackTxService.markSkipped(interviewFeedback.getAnswerId());
 
     }

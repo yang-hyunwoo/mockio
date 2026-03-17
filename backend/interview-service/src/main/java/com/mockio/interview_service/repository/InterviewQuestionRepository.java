@@ -34,4 +34,5 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
         where q.id = :questionId
     """)
     Optional<InterviewQuestion> findByIdWithInterview(@Param("questionId") Long questionId);
+
 }

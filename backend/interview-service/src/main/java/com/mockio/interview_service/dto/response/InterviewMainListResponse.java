@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public record InterviewListResponse (
+public record InterviewMainListResponse (
         List<Item> interviews
 ){
     public record Item(

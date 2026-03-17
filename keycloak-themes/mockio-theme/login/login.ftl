@@ -47,7 +47,7 @@
                                            name="rememberMe"
                                            type="checkbox"
                                            class="mok-remember-checkbox"
-                                           <#if login.rememberMe?? && login.rememberMe>checked</#if> />
+                                           <#if login.rememberMe??>checked</#if> />
 
                                     <span class="mok-remember-custom"></span>
                                     로그인 상태 유지

@@ -102,7 +102,8 @@ public class InterviewAnswerService {
         try {
             interviewAnswerRepository.unsetCurrentByQuestionId(interviewAnswerRequest.questionId());
             interviewAnswerRepository.save(answer);
-            interviewRepository.incrementAnswered(interview.getId());
+            interview.incrementAnswered();
+           // interviewRepository.incrementAnswered(interview.getId());
         } catch (DataIntegrityViolationException e) {
             interviewAnswerRepository
                     .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey())

@@ -2,6 +2,7 @@ package com.mockio.interview_service.config;
 
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.dto.response.FeedbackDetailResponse;
+import com.mockio.interview_service.dto.response.FeedbackTotalDetailResponse;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -50,6 +51,27 @@ public class FeedbackServiceClient {
                                 ))
                 )
                 .bodyToMono(FeedbackDetailResponse.class)
+                .timeout(Duration.ofSeconds(3))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(200))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(1)))
+                .block();
+    }
+
+    public FeedbackTotalDetailResponse getInterviewHistoryDetail(Long interviewId) {
+        return feedbackWebClient.get()
+                .uri("/api/feedback/v1/internal/history/{interviewId}",interviewId)
+                .header("X-Internal-Token", internalToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class)
+                                .map(msg -> new CustomApiException(
+                                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                        ILLEGALSTATE,
+                                        "feedback-service error: " + msg
+                                ))
+                )
+                .bodyToMono(FeedbackTotalDetailResponse.class)
                 .timeout(Duration.ofSeconds(3))
                 .retryWhen(Retry.backoff(1, Duration.ofMillis(200))
                         .filter(this::isRetryable)

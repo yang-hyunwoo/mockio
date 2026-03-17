@@ -3,11 +3,13 @@ package com.mockio.interview_service.repository;
 import com.mockio.common_ai_contractor.constant.InterviewStatus;
 import com.mockio.interview_service.domain.Interview;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,5 +36,20 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     @Modifying
     @Query("update Interview i set i.totalCount = i.totalCount + 1 where i.id = :id")
     void incrementTotalCount(@Param("id") Long id);
+
+    @Query("""
+            SELECT i
+            FROM Interview i
+            WHERE i.userId = :userId
+              AND i.status <> :status
+            ORDER BY
+              CASE WHEN i.status = 'ACTIVE' THEN 0 ELSE 1 END,
+              i.createdAt DESC
+            """)
+    Page<Interview> findByUserIdOrderByActiveFirst(
+            @Param("userId") Long userId,
+            @Param("status") InterviewStatus status,
+            Pageable pageable
+    );
 
 }

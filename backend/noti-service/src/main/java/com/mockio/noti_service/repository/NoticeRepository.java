@@ -1,6 +1,5 @@
 package com.mockio.noti_service.repository;
 
-import com.mockio.noti_service.constant.NoticePinSort;
 import com.mockio.noti_service.domain.NoticeBoard;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

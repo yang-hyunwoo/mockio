@@ -7,16 +7,17 @@ package com.mockio.interview_service.service;
  */
 
 import com.mockio.common_ai_contractor.constant.InterviewStatus;
+import com.mockio.common_jpa.dto.PageDto;
 import com.mockio.interview_service.Mapper.InterviewMapper;
-import com.mockio.interview_service.domain.Interview;
-import com.mockio.interview_service.dto.response.InterviewListResponse;
+import com.mockio.interview_service.dto.response.InterviewPageResponse;
+import com.mockio.interview_service.dto.response.InterviewMainListResponse;
 import com.mockio.interview_service.repository.InterviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +27,15 @@ public class InterviewService {
 
     private final InterviewRepository interviewRepository;
 
-    public InterviewListResponse getInterviewList(Long userId) {
-        List<Interview> byinterview = interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE);
-        return InterviewMapper.fromList(byinterview);
+
+    public InterviewMainListResponse getInterviewMainList(Long userId) {
+        return InterviewMapper.fromMainList(interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE));
     }
+
+    public PageDto<InterviewPageResponse> getInterviewList(Long userId, Pageable pageable) {
+        return PageDto.of(interviewRepository.findByUserIdOrderByActiveFirst(userId,InterviewStatus.FAILED ,pageable),InterviewMapper::fromItem);
+    }
+
+
 
 }

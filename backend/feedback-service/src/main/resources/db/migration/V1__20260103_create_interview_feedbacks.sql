@@ -1,6 +1,7 @@
 CREATE TABLE interview_feedbacks (
      id BIGSERIAL PRIMARY KEY,
      answer_id BIGINT NOT NULL,
+     interview_id BIGINT NOT NULL,
      status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
      fail_count INT NOT NULL DEFAULT 0,
      last_error TEXT NULL,
@@ -21,6 +22,9 @@ CREATE TABLE interview_feedbacks (
 
 CREATE UNIQUE INDEX ux_interview_feedbacks_answer_id
     ON interview_feedbacks (answer_id);
+
+CREATE INDEX idx_interview_feedbacks_interview_id
+    ON interview_feedbacks (interview_id);
 
 CREATE INDEX idx_interview_feedbacks_answer_created_at
     ON interview_feedbacks (answer_id, created_at DESC);

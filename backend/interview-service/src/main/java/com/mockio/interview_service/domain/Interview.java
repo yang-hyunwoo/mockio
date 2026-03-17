@@ -204,6 +204,10 @@ public class Interview extends BaseTimeEntity {
         this.endedAt = (this.endedAt == null) ? now : this.endedAt;
     }
 
+    public void incrementAnswered() {
+        this.answeredQuestions++;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

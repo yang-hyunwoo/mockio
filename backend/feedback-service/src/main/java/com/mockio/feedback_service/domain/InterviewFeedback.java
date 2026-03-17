@@ -26,6 +26,9 @@ public class InterviewFeedback extends BaseTimeEntity {
     @Column(name = "answer_id", nullable = false)
     private Long answerId;
 
+    @Column(name = "interview_id", nullable = false)
+    private Long interviewId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 30)
     private Status status;
@@ -60,6 +63,7 @@ public class InterviewFeedback extends BaseTimeEntity {
     private InterviewFeedback(
             Long id,
             Long answerId,
+            Long interviewId,
             Status status,
             int failCount,
             String feedbackText,
@@ -72,6 +76,7 @@ public class InterviewFeedback extends BaseTimeEntity {
     ) {
         this.id = id;
         this.answerId = answerId;
+        this.interviewId = interviewId;
         this.status = status;
         this.failCount = failCount;
         this.feedbackText = feedbackText;
@@ -86,10 +91,12 @@ public class InterviewFeedback extends BaseTimeEntity {
 
 
     public static InterviewFeedback create(
-            Long answerId
+            Long answerId,
+            Long interviewId
     ) {
         return InterviewFeedback.builder()
                 .answerId(answerId)
+                .interviewId(interviewId)
                 .status(Status.PENDING)
                 .failCount(0)
                 .score(0)

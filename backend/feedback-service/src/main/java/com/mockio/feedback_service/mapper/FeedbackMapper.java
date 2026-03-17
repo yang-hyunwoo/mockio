@@ -10,6 +10,7 @@ public class FeedbackMapper {
     public static FeedbackDetailResponse from(InterviewFeedback interviewFeedback, FeedbackText feedbackText) {
         return new FeedbackDetailResponse(
                 interviewFeedback.getId(),
+                interviewFeedback.getAnswerId(),
                 interviewFeedback.getScore(),
                 feedbackText.summary(),
                 feedbackText.strengths(),

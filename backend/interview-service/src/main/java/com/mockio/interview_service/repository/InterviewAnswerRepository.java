@@ -45,6 +45,6 @@ public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer
 
     Optional<InterviewAnswer> findByQuestionId(Long questionId);
 
-
+    List<InterviewAnswer> findAllByQuestionIdInOrderByIdAsc(List<Long> questionId);
 
 }

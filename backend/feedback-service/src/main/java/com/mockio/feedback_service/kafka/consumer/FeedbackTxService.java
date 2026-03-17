@@ -20,10 +20,10 @@ public class FeedbackTxService {
     private final FeedbackRepository interviewFeedbackRepository;
 
     @Transactional
-    public InterviewFeedback ensurePending(Long answerId) {
+    public InterviewFeedback ensurePending(Long answerId , Long interviewId) {
         try {
             return interviewFeedbackRepository.findByAnswerId(answerId)
-                    .orElseGet(() -> interviewFeedbackRepository.save(InterviewFeedback.create(answerId)));
+                    .orElseGet(() -> interviewFeedbackRepository.save(InterviewFeedback.create(answerId,interviewId)));
         } catch (DataIntegrityViolationException e) {
             return interviewFeedbackRepository.findByAnswerId(answerId)
                     .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));

@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum InterviewStatus {
-    ACTIVE("사용중"),
+    ACTIVE("진행중"),
     ENDED("완료"),
     FAILED("실패")
     ;

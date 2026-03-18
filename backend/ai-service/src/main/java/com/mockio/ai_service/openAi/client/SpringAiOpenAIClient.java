@@ -1,6 +1,6 @@
 package com.mockio.ai_service.openAi.client;
 
-import com.mockio.ai_service.constant.AIErrorEnum;
+import com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.ai_service.util.AIChatClient;
 import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +42,8 @@ public class SpringAiOpenAIClient implements AIChatClient {
             if (content == null || content.isBlank()) {
                 throw new CustomApiException(
                         500,
-                        AIErrorEnum.ILLEGALSTATE,
-                        AIErrorEnum.ILLEGALSTATE.getMessage()
+                        AIErrorCodeEnum.ILLEGALSTATE,
+                        AIErrorCodeEnum.ILLEGALSTATE.getMessage()
                 );
             }
             return content;
@@ -61,28 +61,28 @@ public class SpringAiOpenAIClient implements AIChatClient {
 
         // 429 rate limit
         if (msg.contains("429") || msg.toLowerCase().contains("rate limit")) {
-            return new CustomApiException(429, AIErrorEnum.RATE_LIMIT, AIErrorEnum.RATE_LIMIT.getMessage());
+            return new CustomApiException(429, AIErrorCodeEnum.RATE_LIMIT, AIErrorCodeEnum.RATE_LIMIT.getMessage());
         }
         // 401/403
         if (msg.contains("401") || msg.contains("403")) {
-            return new CustomApiException(401, AIErrorEnum.UNAUTHORIZED, AIErrorEnum.UNAUTHORIZED.getMessage());
+            return new CustomApiException(401, AIErrorCodeEnum.UNAUTHORIZED, AIErrorCodeEnum.UNAUTHORIZED.getMessage());
         }
         // 400
         if (msg.contains("400")) {
-            return new CustomApiException(400, AIErrorEnum.BAD_REQUEST, AIErrorEnum.BAD_REQUEST.getMessage());
+            return new CustomApiException(400, AIErrorCodeEnum.BAD_REQUEST, AIErrorCodeEnum.BAD_REQUEST.getMessage());
         }
 
         // timeout
         if (isTimeout(t)) {
             return new CustomApiException(
                     500,
-                    AIErrorEnum.ILLEGALSTATE,
+                    AIErrorCodeEnum.ILLEGALSTATE,
                     "외부 AI 서버 응답이 지연되었습니다."
             );
         }
 
         log.warn("Spring AI(OpenAI) unexpected error: {}", t.toString());
-        return new CustomApiException(500, AIErrorEnum.ILLEGALSTATE, AIErrorEnum.ILLEGALSTATE.getMessage());
+        return new CustomApiException(500, AIErrorCodeEnum.ILLEGALSTATE, AIErrorCodeEnum.ILLEGALSTATE.getMessage());
     }
 
     private boolean isTimeout(Throwable t) {

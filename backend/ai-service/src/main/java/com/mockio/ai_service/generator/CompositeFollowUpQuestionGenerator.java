@@ -2,12 +2,11 @@ package com.mockio.ai_service.generator;
 
 
 
-import com.mockio.ai_service.constant.AIErrorEnum;
+import com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
-import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
 import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,8 +87,8 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
 
     private boolean isFallbackable(Throwable ex) {
         if (ex instanceof CustomApiException cae) {
-            return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
-                    || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
+            return cae.getErrorEnum() == AIErrorCodeEnum.RATE_LIMIT
+                    || cae.getErrorEnum() == AIErrorCodeEnum.TEMPORARY_ERROR;
         }
         return true;
     }

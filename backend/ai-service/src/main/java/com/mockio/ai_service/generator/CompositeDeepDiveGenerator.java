@@ -11,7 +11,7 @@ package com.mockio.ai_service.generator;
  * 서비스 연속성을 보장하기 위한 책임을 가진다.</p>
  */
 
-import com.mockio.ai_service.constant.AIErrorEnum;
+import com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.deepdive.*;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
@@ -91,8 +91,8 @@ public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
 
     private boolean isFallbackable(Throwable ex) {
         if (ex instanceof CustomApiException cae) {
-            return cae.getErrorEnum() == AIErrorEnum.RATE_LIMIT
-                    || cae.getErrorEnum() == AIErrorEnum.TEMPORARY_ERROR;
+            return cae.getErrorEnum() == AIErrorCodeEnum.RATE_LIMIT
+                    || cae.getErrorEnum() == AIErrorCodeEnum.TEMPORARY_ERROR;
         }
         return true;
     }

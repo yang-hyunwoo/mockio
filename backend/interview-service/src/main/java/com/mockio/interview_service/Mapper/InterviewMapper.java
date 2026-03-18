@@ -113,7 +113,14 @@ public class InterviewMapper {
                             question.getQuestionText(),
                             answer != null ? answer.getAnswerText() : null,
                             feedback != null ? feedback.summary() : null,
-                            feedback != null ? feedback.score() : null
+                            feedback != null ? feedback.score() : null,
+                            EnumResponse.of(
+                                    question.getType().name(),
+                                    question.getType().getLabel()
+                            ),
+                            feedback != null ? feedback.strengths() : null,
+                            feedback != null ? feedback.improvements() : null,
+                            feedback != null ? feedback.modelAnswer() : null
                     );
                 })
                 .toList();

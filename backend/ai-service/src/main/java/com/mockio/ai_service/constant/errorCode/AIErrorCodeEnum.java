@@ -1,4 +1,4 @@
-package com.mockio.ai_service.constant;
+package com.mockio.ai_service.constant.errorCode;
 
 /**
  * AI 서비스에서 발생하는 오류를 표준화하여 정의한 에러 코드 Enum.
@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 @Getter
-public enum AIErrorEnum implements ErrorCode {
+public enum AIErrorCodeEnum implements ErrorCode {
 
     ILLEGALSTATE(HttpStatus.INTERNAL_SERVER_ERROR.value(), "AI_INTERNAL_ERROR", "AI 처리 중 알 수 없는 오류가 발생했습니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "AI_BAD_REQUEST", "AI 요청 형식이 올바르지 않습니다."),

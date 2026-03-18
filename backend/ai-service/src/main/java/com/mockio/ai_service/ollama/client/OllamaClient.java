@@ -13,7 +13,7 @@ package com.mockio.ai_service.ollama.client;
  * 응답 구조가 비정상적인 경우 내부 오류로 처리한다.</p>
  */
 
-import com.mockio.ai_service.constant.AIErrorEnum;
+import com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.ai_service.ollama.dto.request.OllamaChatRequest;
 import com.mockio.ai_service.ollama.dto.response.OllamaChatResponse;
 import com.mockio.ai_service.util.AIChatClient;
@@ -32,7 +32,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import static com.mockio.ai_service.constant.AIErrorEnum.ILLEGALSTATE;
+import static com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum.ILLEGALSTATE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Component
@@ -88,11 +88,11 @@ public class OllamaClient implements AIChatClient {
     }
 
     private CustomApiException toCustomApiException(int code, String body) {
-        AIErrorEnum err = switch (code) {
-            case 400 -> AIErrorEnum.BAD_REQUEST;
-            case 401, 403 -> AIErrorEnum.UNAUTHORIZED;
-            case 429 -> AIErrorEnum.RATE_LIMIT;
-            default -> AIErrorEnum.ILLEGALSTATE;
+        AIErrorCodeEnum err = switch (code) {
+            case 400 -> AIErrorCodeEnum.BAD_REQUEST;
+            case 401, 403 -> AIErrorCodeEnum.UNAUTHORIZED;
+            case 429 -> AIErrorCodeEnum.RATE_LIMIT;
+            default -> AIErrorCodeEnum.ILLEGALSTATE;
         };
 
         String shortBody = body == null ? "" :

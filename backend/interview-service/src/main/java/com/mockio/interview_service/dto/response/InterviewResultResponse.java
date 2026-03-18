@@ -32,7 +32,11 @@ public record InterviewResultResponse(
                 String question,
                 String answer,
                 String feedback,
-                Integer score
+                Integer score,
+                EnumResponse type,
+                List<String> strengths,
+                List<String> improvements,
+                String modelAnswer
         ) {
         }
 }

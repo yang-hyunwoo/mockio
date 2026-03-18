@@ -9,6 +9,9 @@ import com.mockio.auth_service.util.AuthSessionStore;
 import com.mockio.auth_service.util.JwtClaimUtil;
 import com.mockio.auth_service.util.PkceStore;
 import com.mockio.auth_service.util.PkceUtil;
+import com.mockio.common_core.constant.CommonErrorEnum;
+import com.mockio.common_core.exception.CustomApiException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -152,6 +152,75 @@ public class AuthLoginController {
         ));
         // 4) 프론트로 redirect
         response.sendRedirect("http://localhost:3000/");
+    }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String sessionId = extractSessionId(request);
+
+        if (sessionId != null) {
+            AuthSession session = authSessionStore.find(sessionId)
+                    .orElseThrow(() -> new CustomApiException(CommonErrorEnum.ERR_004.getHttpStatus(), CommonErrorEnum.ERR_004,CommonErrorEnum.ERR_004.getMessage()));
+
+
+            if (session != null && session.refreshToken() != null && !session.refreshToken().isBlank()) {
+                logoutFromKeycloak(session.refreshToken());
+            }
+
+            authSessionStore.delete(sessionId);
+        }
+
+        expireSessionCookie(response);
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+    }
+
+    private void logoutFromKeycloak(String refreshToken) {
+        String logoutEndpoint = issuer + "/protocol/openid-connect/logout";
+
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("refresh_token", refreshToken);
+
+        if (clientSecret != null && !clientSecret.isBlank()) {
+            form.add("client_secret", clientSecret);
+        }
+
+        try {
+            restClient.post()
+                    .uri(logoutEndpoint)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(form)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception ignored) {
+            // Keycloak 로그아웃 실패여도 로컬 세션은 정리
+        }
+    }
+
+    private String extractSessionId(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+            if ("MOCKIO_SESSION".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void expireSessionCookie(HttpServletResponse response) {
+        ResponseCookie expiredCookie = ResponseCookie.from("MOCKIO_SESSION", "")
+                .httpOnly(true)
+                .secure(false) // 운영에서는 true
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
     }
 
 }

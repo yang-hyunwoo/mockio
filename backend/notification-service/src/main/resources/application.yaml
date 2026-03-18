@@ -10,8 +10,9 @@ spring:
   application:
     name: feedback-service
 
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/${USER_DB_NAME}
+    url: jdbc:postgresql://localhost:5433/${USER_DB_NAME}
     username: ${DB_USER}
     password: ${DB_PASS}
   jpa:

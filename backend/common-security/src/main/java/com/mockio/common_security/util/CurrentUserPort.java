@@ -7,5 +7,5 @@ import java.util.Optional;
  * user-service가 UserProfileRepository로 구현한다.
  */
 public interface CurrentUserPort<T> {
-    Optional<T> findByKeycloakId(String keycloakId);
+    Optional<T> findById(Long userId);
 }

@@ -49,11 +49,10 @@ public class UserInterviewSettingController {
 
     /**
      * 면접 설정 수정
-     * @param keycloakId
      * @param updateRequest
      * @return
      */
-    @PatchMapping("/me/update-preference")
+    @PatchMapping("/mypage/update-preference")
     public ResponseEntity<Response<Void>> updatePreference(@CurrentSubject Long userId ,
                                                            @RequestBody UserInterviewSettingUpdateRequest updateRequest) {
         userInterviewSettingService.updatePreference(userId, updateRequest);

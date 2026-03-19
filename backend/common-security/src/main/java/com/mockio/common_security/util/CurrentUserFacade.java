@@ -33,15 +33,17 @@ public class CurrentUserFacade<T> {
             return null;
         }
 
-        String keycloakId = jwt.getSubject();
-        if (keycloakId == null || keycloakId.isBlank()) {
+
+//        String keycloakId = jwt.getClaims().get("keycloakUserId").toString();
+        String userId = jwt.getSubject();
+        if (userId == null || userId.isBlank()) {
             if (required) {
                 throw new UnauthorizedException("MISSING_SUBJECT");
             }
             return null;
         }
 
-        return currentUserPort.findByKeycloakId(keycloakId)
+        return currentUserPort.findById(Long.valueOf(userId))
                 .orElseGet(() -> {
                     if (required) {
                         throw new UnauthorizedException("USER_NOT_FOUND");

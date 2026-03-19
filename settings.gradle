@@ -47,6 +47,8 @@ project(":inquiry-service").projectDir = file("backend/inquiry-service")
 include "faq-service"
 project(":faq-service").projectDir = file("backend/faq-service")
 
+include "file-service"
+project(":file-service").projectDir = file("backend/file-service")
 
 include "common-core"
 project(":common-core").projectDir = file("backend/common-core")

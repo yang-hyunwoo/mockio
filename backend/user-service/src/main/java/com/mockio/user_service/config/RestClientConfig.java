@@ -1,5 +1,6 @@
 package com.mockio.user_service.config;
 
+import com.mockio.user_service.properties.FileServiceClientProperties;
 import com.mockio.user_service.properties.InterviewServiceClientProperties;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -13,22 +14,23 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableConfigurationProperties(InterviewServiceClientProperties.class)
+@EnableConfigurationProperties({
+        InterviewServiceClientProperties.class,
+        FileServiceClientProperties.class
+})
 public class RestClientConfig {
 
     private final String internalToken;
-    private final InterviewServiceClientProperties properties;
 
-    public RestClientConfig(
-            @Value("${internal.auth.token}") String internalToken,
-            InterviewServiceClientProperties properties
-    ) {
+    public RestClientConfig(@Value("${internal.auth.token}") String internalToken) {
         this.internalToken = internalToken;
-        this.properties = properties;
     }
 
     @Bean
-    public RestClient interviewRestClient(HttpComponentsClientHttpRequestFactory requestFactory) {
+    public RestClient interviewRestClient(
+            HttpComponentsClientHttpRequestFactory requestFactory,
+            InterviewServiceClientProperties properties
+    ) {
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
                 .defaultHeader("X-Internal-Token", internalToken)
@@ -36,18 +38,15 @@ public class RestClientConfig {
                 .build();
     }
 
-
     @Bean
-    public HttpComponentsClientHttpRequestFactory interviewRequestFactory() {
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofMilliseconds(properties.connectTimeoutMs()))
-                .setResponseTimeout(Timeout.ofMilliseconds(properties.readTimeoutMs()))
+    public RestClient fileServiceRestClient(
+            HttpComponentsClientHttpRequestFactory requestFactory,
+            FileServiceClientProperties properties
+    ) {
+        return RestClient.builder()
+                .baseUrl(properties.baseUrl())
+                .defaultHeader("X-Internal-Token", internalToken)
+                .requestFactory(requestFactory)
                 .build();
-
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .build();
-
-        return new HttpComponentsClientHttpRequestFactory(httpClient);
     }
 }

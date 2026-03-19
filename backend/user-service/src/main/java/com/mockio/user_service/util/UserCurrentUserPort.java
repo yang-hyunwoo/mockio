@@ -14,8 +14,8 @@ public class UserCurrentUserPort implements CurrentUserPort<UserProfile> {
     private final UserProfileRepository userProfileRepository;
 
     @Override
-    public Optional<UserProfile> findByKeycloakId(String keycloakId) {
-        return userProfileRepository.findByKeycloakId(keycloakId);
+    public Optional<UserProfile> findById(Long userId) {
+        return userProfileRepository.findById(userId);
     }
 
 }

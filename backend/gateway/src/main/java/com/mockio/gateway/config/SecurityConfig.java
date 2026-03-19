@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/api/feedback/v1/public/**",
                                 "/api/noti/v1/public/**",
                                 "/api/inquiry/v1/public/**",
+                                "/api/file/v1/public/**",
                                 "/api/faq/v1/public/**").permitAll()
                         .anyExchange().permitAll()
                 )

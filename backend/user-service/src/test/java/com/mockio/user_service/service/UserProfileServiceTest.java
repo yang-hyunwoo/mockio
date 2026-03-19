@@ -4,6 +4,7 @@ import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.ProfileVisibility;
 import com.mockio.user_service.domain.UserProfile;
+import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.repository.UserProfileRepository;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -67,7 +69,14 @@ class UserProfileServiceTest {
                 .willReturn(Optional.of(existing));
 
         // when
-        UserProfileResponse result = userProfileService.loadOrCreateFromToken(jwt);
+        ProfileSyncRequest profileSyncRequest = new ProfileSyncRequest(
+                "kc-123",
+                "NORMAL",
+                "홍길동",
+                "a@b.com",
+                "asd"
+        );
+        UserProfileResponse result = userProfileService.loadOrCreateFromToken(profileSyncRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -99,7 +108,14 @@ class UserProfileServiceTest {
                 .willReturn(saved);
 
         // when
-        UserProfileResponse result = userProfileService.loadOrCreateFromToken(jwt);
+        ProfileSyncRequest profileSyncRequest = new ProfileSyncRequest(
+                "kc-123",
+                "NORMAL",
+                "홍길동",
+                "a@b.com",
+                "asd"
+        );
+        UserProfileResponse result = userProfileService.loadOrCreateFromToken(profileSyncRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -131,7 +147,14 @@ class UserProfileServiceTest {
                 .willReturn(saved);
 
         // when
-        UserProfileResponse result = userProfileService.loadOrCreateFromToken(jwt);
+        ProfileSyncRequest profileSyncRequest = new ProfileSyncRequest(
+                "kc-123",
+                "NORMAL",
+                "홍길동",
+                "a@b.com",
+                "asd"
+        );
+        UserProfileResponse result = userProfileService.loadOrCreateFromToken(profileSyncRequest);
 
         // then
         assertThat(result).isNotNull();
@@ -155,10 +178,11 @@ class UserProfileServiceTest {
                 .willReturn(Optional.of(foundProfile));
 
         // when
-        userProfileService.updateMyProfile(currentUser, req);
+        MultipartFile multipartFile=null;
+        userProfileService.updateMyProfile(currentUser.getId(), "newNick",multipartFile);
 
         // then
-        then(foundProfile).should().applyPatch("newNick", 1L ,"안녕하세요", ProfileVisibility.PUBLIC);
+        then(foundProfile).should().applyPatch("newNick", 1L );
         then(userRepository).should(never()).save(any());
     }
 
@@ -176,7 +200,8 @@ class UserProfileServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> userProfileService.updateMyProfile(currentUser, req))
+        MultipartFile multipartFile = null;
+        assertThatThrownBy(() -> userProfileService.updateMyProfile(currentUser.getId(), "newNick",multipartFile))
                 .isInstanceOf(CustomApiException.class);
 
         then(userRepository).should().findByKeycloakId("kc-404");

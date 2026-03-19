@@ -13,13 +13,16 @@ import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
 import com.mockio.user_service.dto.response.UserIdResponse;
+import com.mockio.user_service.dto.response.UserProfileDetailResponse;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/users/v1")
@@ -46,17 +49,21 @@ public class UserProfileController {
 
     /**
      * 유저 프로필 변경
-     *
      * @param user
-     * @param userProfileUpdateRequest
+     * @param username
+     * @param profileImage
      * @return
      */
-    @PatchMapping("/me/update-profile")
-    public ResponseEntity<Response<Void>> updateMyProfile(@CurrentUser UserProfile user,
-                                                          @RequestBody UserProfileUpdateRequest userProfileUpdateRequest) {
-        userProfileService.updateMyProfile(user, userProfileUpdateRequest);
+    @PatchMapping(value = "/mypage/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<Void>> updateProfile(
+            @CurrentUser UserProfile user,
+            @RequestPart("nickname") String nickname,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+    ) {
+        userProfileService.updateMyProfile(user.getId(), nickname, profileImage);
         return Response.update(messageUtil.getMessage("response.update"));
     }
+
 
     /**
      * 유저 탈퇴
@@ -67,6 +74,17 @@ public class UserProfileController {
     public ResponseEntity<Response<Void>> deleteProfile(@CurrentUser UserProfile user) {
         userProfileService.deleteProfile(user);
         return Response.update(messageUtil.getMessage("response.update"));
+    }
+
+
+    /**
+     * 유저 세팅 정보 조회
+     * @param user
+     * @return
+     */
+    @GetMapping("/mypage/setting")
+    public ResponseEntity<Response<UserProfileDetailResponse>> getUserProfileDetail(@CurrentUser UserProfile user) {
+        return Response.ok(messageUtil.getMessage("response.read"), userProfileService.getUserProfileDetail(user.getId()));
     }
 
     @GetMapping("/public/me/public-page")

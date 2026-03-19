@@ -16,6 +16,8 @@ public record UserProfileResponse(
         String email,
         @Schema(description = "유저_프로필", example = "1")
         Long profileImageId,
+        @Schema(description = "유저_프로필_URL", example = "")
+        String profileImageUrl,
         @Schema(description = "유저_설명", example = "안녕하세요")
         String bio,
         @Schema(description = "유저_프로필_공개여부", example = "PUBLIC")
@@ -24,4 +26,7 @@ public record UserProfileResponse(
         EnumResponse  status,
         @Schema(description = "유저_마지막_로그인", example = "")
         OffsetDateTime lastLoginAt
+
+
+
 ) {}

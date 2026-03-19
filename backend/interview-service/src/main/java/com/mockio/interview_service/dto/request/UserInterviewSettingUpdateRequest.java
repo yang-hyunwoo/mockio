@@ -15,5 +15,5 @@ public record UserInterviewSettingUpdateRequest(
         @Schema(description = "면접_답변_시간", example = "90" )
         Integer answerTimeSeconds,
         @Schema(description="면접_질문_갯수",example = "5")
-        int interviewQuestionCount
+        int questionCount
 ) {}

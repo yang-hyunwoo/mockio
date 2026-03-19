@@ -2,11 +2,14 @@ package com.mockio.user_service.client;
 
 import com.mockio.user_service.dto.request.EnsureInterviewSettingRequest;
 import com.mockio.user_service.dto.response.EnsureInterviewSettingResponse;
+import com.mockio.user_service.dto.response.UserInterviewSettingReadResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -27,6 +30,18 @@ public class InterviewServiceClient {
                     .body(EnsureInterviewSettingResponse.class);
         } catch (RestClientException ex) {
             log.error("interview-service ensureInterviewSetting 호출 실패. keycloakId={}", userId, ex);
+            throw new IllegalStateException("interview-service 호출 실패", ex);
+        }
+    }
+
+    public UserInterviewSettingReadResponse interviewSetting(Long userId) {
+        try {
+            return interviewRestClient.get()
+                    .uri("/api/interview/v1/internal/setting/{userId}",userId)
+                    .retrieve()
+                    .body(UserInterviewSettingReadResponse.class);
+        } catch (RestClientException ex) {
+            log.error("interview-service ensureInterviewSetting 호출 실패. userId={}", userId, ex);
             throw new IllegalStateException("interview-service 호출 실패", ex);
         }
     }

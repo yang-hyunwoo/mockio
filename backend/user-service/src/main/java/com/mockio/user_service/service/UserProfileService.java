@@ -9,6 +9,8 @@ package com.mockio.user_service.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.user_service.client.FileServiceClient;
+import com.mockio.user_service.dto.response.*;
 import com.mockio.user_service.mapper.UserProfileMapper;
 import com.mockio.user_service.client.InterviewServiceClient;
 import com.mockio.user_service.constant.UserStatus;
@@ -16,18 +18,21 @@ import com.mockio.user_service.domain.UserProfile;
 import com.mockio.user_service.dto.UserDeletedEvent;
 import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.request.UserProfileUpdateRequest;
-import com.mockio.user_service.dto.response.UserIdResponse;
-import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.kafka.domain.OutboxUserEvent;
 import com.mockio.user_service.kafka.repository.OutboxUserEventRepository;
 import com.mockio.user_service.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.hc.client5.http.entity.mime.MultipartPart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
@@ -40,6 +45,7 @@ public class UserProfileService {
     private final UserProfileRepository userRepository;
     private final InterviewServiceClient interviewServiceClient;
     private final OutboxUserEventRepository outboxRepository;
+    private final FileServiceClient fileServiceClient;
     private final ObjectMapper objectMapper;
 
     private final String NAVER_NAME = "naver";
@@ -78,16 +84,25 @@ public class UserProfileService {
 
     /**
      * 유저 프로필 변경
-     * @param userProfile
-     * @param userProfileUpdateRequest
+     * @param userId
+     * @param nickname
+     * @param profileImage
      */
-    public void updateMyProfile(UserProfile userProfile, UserProfileUpdateRequest userProfileUpdateRequest) {
-        findByKeycloakId(userProfile.getKeycloakId()).applyPatch(
-                userProfileUpdateRequest.nickname(),
-                userProfileUpdateRequest.profileImageId(),
-                userProfileUpdateRequest.bio(),
-                userProfileUpdateRequest.visibility()
-        );
+    public void updateMyProfile(Long userId , String nickname , MultipartFile profileImage) {
+        Long profileImageId = null;
+        UserProfile byId = findById(userId);
+
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                FileUploadResponse upload = fileServiceClient.upload(profileImage, byId.getProfileImageId(), userId);
+                profileImageId = upload.fileGroupId();
+            } catch (IOException e) {
+                throw new CustomApiException(ERR_500.getHttpStatus(), ERR_500, ERR_500.getMessage());
+            }
+        }
+        byId.applyPatch(nickname, profileImageId);
+
     }
 
     /**
@@ -99,6 +114,25 @@ public class UserProfileService {
         UserDeletedEvent event = UserDeletedEvent.of(userProfile.getId(), userProfile.getKeycloakId());
         JsonNode jsonNode = objectMapper.valueToTree(event);
         outboxRepository.save(OutboxUserEvent.createNew(event.eventId(), userProfile.getId(), event.eventType(), jsonNode));
+    }
+
+    /**
+     * 유저 프로필 조회
+     * @param
+     * @return
+     */
+    public UserProfileDetailResponse getUserProfileDetail(Long userId) {
+        UserProfile userProfile = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
+
+        UserInterviewSettingReadResponse userInterviewSettingReadResponse = interviewServiceClient.interviewSetting(userId);
+        UserProfileImageResponse userProfileImageResponse = null;
+        if(userProfile.getProfileImageId()!= null) {
+            userProfileImageResponse = fileServiceClient.getProfileImage(userId, userProfile.getProfileImageId());
+        }
+
+        return UserProfileMapper.fromDetail(userProfile,userInterviewSettingReadResponse,userProfileImageResponse);
+
 
     }
 
@@ -147,6 +181,16 @@ public class UserProfileService {
      */
     private UserProfile findByKeycloakId(String keycloakId) {
         return userRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
+    }
+
+    /**
+     * 유저 정보 유무 조회
+     * @param userId
+     * @return
+     */
+    private UserProfile findById(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
     }
 

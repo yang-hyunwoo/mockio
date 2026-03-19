@@ -45,6 +45,7 @@ public class SessionAuthFilter implements GlobalFilter, Ordered {
             "/api/noti/v1/public/**",
             "/api/inquiry/v1/public/**",
             "/api/faq/v1/public/**",
+            "/api/file/v1/public/**",
             "/.well-known/jwks.json"
     );
 

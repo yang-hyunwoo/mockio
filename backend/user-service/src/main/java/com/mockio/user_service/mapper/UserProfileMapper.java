@@ -9,7 +9,7 @@ package com.mockio.user_service.mapper;
 
 import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.user_service.domain.UserProfile;
-import com.mockio.user_service.dto.response.UserProfileResponse;
+import com.mockio.user_service.dto.response.*;
 
 public class UserProfileMapper {
 
@@ -20,6 +20,7 @@ public class UserProfileMapper {
                 userProfile.getName(),
                 userProfile.getEmail(),
                 userProfile.getProfileImageId(),
+                null,
                 userProfile.getBio(),
                 EnumResponse.of(
                         userProfile.getVisibility().name(),
@@ -31,6 +32,19 @@ public class UserProfileMapper {
                 ),
                 userProfile.getLastLoginAt()
         );
+    }
+
+    public static UserProfileDetailResponse fromDetail(UserProfile userProfile,
+                                                       UserInterviewSettingReadResponse userInterviewSettingReadResponse,
+                                                       UserProfileImageResponse userProfileImageResponse) {
+
+        MyPageProfileDetailResponse myPageProfileDetailResponse = new MyPageProfileDetailResponse(
+                userProfile.getNickname(),
+                userProfile.getEmail(),
+                userProfile.getProfileImageId(),
+                userProfileImageResponse == null ? null : userProfileImageResponse.fileUrl()
+        );
+        return new UserProfileDetailResponse(myPageProfileDetailResponse, userInterviewSettingReadResponse);
     }
 
 }

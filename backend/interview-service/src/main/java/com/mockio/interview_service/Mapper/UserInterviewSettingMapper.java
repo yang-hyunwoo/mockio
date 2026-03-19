@@ -25,7 +25,8 @@ public class UserInterviewSettingMapper {
                         userInterviewSetting.getInterviewMode().name(),
                         userInterviewSetting.getInterviewMode().getLabel()
                 ),
-                userInterviewSetting.getAnswerTimeSeconds()
+                userInterviewSetting.getAnswerTimeSeconds(),
+                userInterviewSetting.getInterviewQuestionCount()
         );
     }
 

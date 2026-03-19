@@ -8,6 +8,7 @@ package com.mockio.user_service.repository;
  */
 
 
+import com.mockio.user_service.constant.UserStatus;
 import com.mockio.user_service.domain.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -24,6 +25,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     Optional<UserProfile> findByKeycloakId(String keycloakId);
 
     boolean existsByNickname(String nickname);
+
+    Optional<UserProfile> findByIdAndStatus(Long userId, UserStatus userStatus);
 
 
 

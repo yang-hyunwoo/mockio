@@ -15,5 +15,7 @@ public record UserInterviewSettingReadResponse(
     @Schema(description = "면접_모드", example = "TEXT")
     EnumResponse interviewMode,
     @Schema(description = "면접_답변_시간", example = "90")
-    Integer answerTimeSeconds
+    Integer answerTimeSeconds,
+    @Schema(description = "면접_답변_갯수", example = "90")
+    int questionCount
 ) {}

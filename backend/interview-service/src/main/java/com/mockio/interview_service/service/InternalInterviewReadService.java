@@ -1,7 +1,10 @@
 package com.mockio.interview_service.service;
 
 import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.interview_service.Mapper.UserInterviewSettingMapper;
 import com.mockio.interview_service.domain.InterviewAnswer;
+import com.mockio.interview_service.domain.UserInterviewSetting;
+import com.mockio.interview_service.dto.response.UserInterviewSettingReadResponse;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.interview_service.repository.InterviewAnswerRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +45,5 @@ public class InternalInterviewReadService {
     public List<InterviewAnswerDetailResponse> getInterviewList(Long interviewId) {
         return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
     }
-
-
 
 }

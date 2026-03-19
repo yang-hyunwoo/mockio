@@ -3,6 +3,7 @@ package com.mockio.common_jpa.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -26,6 +27,10 @@ public abstract class BaseTimeEntity {
     public void prePersist() {
         if (createdAt == null) this.createdAt = OffsetDateTime.now();
         if (updatedAt == null) this.updatedAt = OffsetDateTime.now();
+    }
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = OffsetDateTime.now();
     }
 
 }

@@ -116,14 +116,10 @@ public class UserProfile extends BaseTimeEntity {
 
     /** 프로필 수정 */
     public void applyPatch(String nickname,
-                           Long profileImageId,
-                           String bio,
-                           ProfileVisibility visibility) {
+                           Long profileImageId) {
 
         ofNullable(nickname).filter(s -> !s.isBlank()).ifPresent(this::changeNickname);
         ofNullable(profileImageId).ifPresent(this::changeProfileImage);
-        ofNullable(bio).ifPresent(this::changeBio);
-        ofNullable(visibility).ifPresent(this::changeVisibility);
 
     }
 

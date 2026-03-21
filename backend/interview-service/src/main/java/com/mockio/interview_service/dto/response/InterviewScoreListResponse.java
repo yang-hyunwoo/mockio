@@ -8,6 +8,9 @@ public record InterviewScoreListResponse(
 ) {
     public record Item(
             Long interviewId,
-            int score
+            int score,
+            int structure,
+            int clarity,
+            int specificity
     ) {}
 }

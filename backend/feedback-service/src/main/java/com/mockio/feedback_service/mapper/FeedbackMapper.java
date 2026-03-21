@@ -12,14 +12,17 @@ public class FeedbackMapper {
                 interviewFeedback.getId(),
                 interviewFeedback.getAnswerId(),
                 interviewFeedback.getScore(),
-                feedbackText.summary(),
-                feedbackText.strengths(),
-                feedbackText.improvements(),
-                feedbackText.modelAnswer(),
+                feedbackText != null ? feedbackText.summary() : null,
+                feedbackText != null ? feedbackText.strengths() : null,
+                feedbackText != null ? feedbackText.improvements() : null,
+                feedbackText != null ? feedbackText.modelAnswer() : null,
                 EnumResponse.of(
                         interviewFeedback.getStatus().name(),
                         interviewFeedback.getStatus().getLabel()
-                )
+                ),
+                feedbackText != null ? feedbackText.dimensions() : null,
+                feedbackText != null ? feedbackText.headline() : null,
+                feedbackText != null ? feedbackText.improvementTags() : null
         );
     }
 

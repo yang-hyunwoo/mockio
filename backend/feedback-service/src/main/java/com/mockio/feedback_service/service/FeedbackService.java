@@ -8,10 +8,7 @@ import com.mockio.common_spring.constant.Status;
 import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.feedback_service.domain.InterviewFeedback;
 import com.mockio.feedback_service.domain.InterviewSummaryFeedback;
-import com.mockio.feedback_service.dto.response.FeedbackDetailResponse;
-import com.mockio.feedback_service.dto.response.FeedbackText;
-import com.mockio.feedback_service.dto.response.FeedbackTotalDetailResponse;
-import com.mockio.feedback_service.dto.response.SummaryFeedbackText;
+import com.mockio.feedback_service.dto.response.*;
 import com.mockio.feedback_service.mapper.FeedbackMapper;
 import com.mockio.feedback_service.mapper.SummaryFeedbackMapper;
 import com.mockio.feedback_service.repository.FeedbackRepository;
@@ -58,7 +55,10 @@ public class FeedbackService {
                     EnumResponse.of(
                             interviewFeedback.getStatus().name(),
                             interviewFeedback.getStatus().getLabel()
-                    )
+                    ),
+                    null,
+                    null,
+                    List.of()
             );
         }
 
@@ -85,12 +85,18 @@ public class FeedbackService {
         List<FeedbackDetailResponse> responses = feedbacks.stream()
                 .map(interviewFeedback -> {
                     try {
-                        FeedbackText feedbackText = objectMapper.readValue(
-                                interviewFeedback.getFeedbackText(),
-                                FeedbackText.class
-                        );
+                        if (interviewFeedback.getFeedbackText() != null )
+                                 {
 
-                        return FeedbackMapper.from(interviewFeedback, feedbackText);
+                            FeedbackText feedbackText = objectMapper.readValue(
+                                    interviewFeedback.getFeedbackText(),
+                                    FeedbackText.class
+                            );
+
+                            return FeedbackMapper.from(interviewFeedback, feedbackText);
+                        } else {
+                           return FeedbackMapper.from(interviewFeedback, null);
+                        }
                     } catch (Exception e) {
                         log.error("feedback parse failed. feedbackId={}", interviewFeedback.getId(), e);
                         throw new CustomApiException(
@@ -101,40 +107,44 @@ public class FeedbackService {
                     }
                 })
                 .toList();
+
         InterviewSummaryFeedback interviewSummaryFeedback =
                 summaryFeedbackRepository.findByInterviewId(interviewId)
-                        .orElseThrow(() -> new CustomApiException(
-                                SUMMARY_NOT_FOUND.getHttpStatus(),
-                                SUMMARY_NOT_FOUND,
-                                SUMMARY_NOT_FOUND.getMessage()
-                        ));
+                        .orElse(null);
 
         SummaryFeedback summaryFeedback = null;
+        if(interviewSummaryFeedback == null) {
+            summaryFeedback = null;
+        } else {
+            if (interviewSummaryFeedback.getStatus() == Status.SUCCEEDED ||
+                    interviewSummaryFeedback.getStatus() == Status.SKIPPED) {
+                try {
 
-        if (interviewSummaryFeedback.getStatus() == Status.SUCCEEDED ||
-                interviewSummaryFeedback.getStatus() == Status.SKIPPED) {
-            try {
+                    SummaryFeedbackText summaryFeedbackText = objectMapper.readValue(
+                            interviewSummaryFeedback.getSummaryFeedbackText(),
+                            SummaryFeedbackText.class
+                    );
 
-                SummaryFeedbackText summaryFeedbackText = objectMapper.readValue(
-                        interviewSummaryFeedback.getSummaryFeedbackText(),
-                        SummaryFeedbackText.class
-                );
+                    summaryFeedback = SummaryFeedbackMapper.from(
+                            interviewSummaryFeedback,
+                            summaryFeedbackText
+                    );
 
-                summaryFeedback = SummaryFeedbackMapper.from(
-                        interviewSummaryFeedback,
-                        summaryFeedbackText
-                );
-
-            } catch (Exception e) {
-                log.error("summaryfeedback parse failed. feedbackId={}", interviewSummaryFeedback.getId(), e);
-                throw new CustomApiException(
-                        FEEDBACK_NOT_CREATED.getHttpStatus(),
-                        FEEDBACK_NOT_CREATED,
-                        FEEDBACK_NOT_CREATED.getMessage()
-                );
+                } catch (Exception e) {
+                    log.error("summaryfeedback parse failed. feedbackId={}", interviewSummaryFeedback.getId(), e);
+                    throw new CustomApiException(
+                            FEEDBACK_NOT_CREATED.getHttpStatus(),
+                            FEEDBACK_NOT_CREATED,
+                            FEEDBACK_NOT_CREATED.getMessage()
+                    );
+                }
             }
         }
         return new FeedbackTotalDetailResponse(summaryFeedback,responses);
+    }
+
+    public InterviewScoreListResponse getScoreHistory(List<Long> interviewIds) {
+        return SummaryFeedbackMapper.fromScoreList(summaryFeedbackRepository.findByInterviewIdIn(interviewIds));
     }
 
 }

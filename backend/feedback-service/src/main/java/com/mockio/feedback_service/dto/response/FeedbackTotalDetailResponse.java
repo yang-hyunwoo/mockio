@@ -16,6 +16,8 @@ public record FeedbackTotalDetailResponse(
             String summaryText,
             List<String> strengths,
             List<String> improvements,
-            EnumResponse status
+            EnumResponse status,
+            FeedbackDimensions feedbackDimensions
+
     ) {}
 }

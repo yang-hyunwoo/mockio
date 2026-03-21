@@ -29,9 +29,6 @@ project(":ai-service").projectDir = file("backend/ai-service")
 include "interview-service"
 project(":interview-service").projectDir = file("backend/interview-service")
 
-include "chat-service"
-project(":chat-service").projectDir = file("backend/chat-service")
-
 include "feedback-service"
 project(":feedback-service").projectDir = file("backend/feedback-service")
 

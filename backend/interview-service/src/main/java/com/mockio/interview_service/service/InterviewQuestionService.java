@@ -4,9 +4,11 @@ import com.mockio.common_ai_contractor.generator.question.GenerateQuestionComman
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.Mapper.InterviewQuestionMapper;
+import com.mockio.interview_service.constant.QuestionType;
 import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.domain.UserInterviewSetting;
+import com.mockio.interview_service.dto.request.RetryInterviewRequest;
 import com.mockio.interview_service.dto.request.StartInterviewRequest;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.forward.ai.AIServiceClient;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
@@ -29,6 +32,7 @@ import static java.time.OffsetDateTime.now;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class InterviewQuestionService {
 
     private final InterviewRepository interviewRepository;
@@ -36,12 +40,37 @@ public class InterviewQuestionService {
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final AIServiceClient aiServiceClient;
 
-    @Transactional
+
     public InterviewQuestionReadResponse startInterview(Long userId, StartInterviewRequest request) {
         return generateAndSaveQuestions(generateInterview(userId,request), userId);
     }
 
-    @Transactional
+    public InterviewQuestionReadResponse retryInterview(Long userId, RetryInterviewRequest request) {
+        validateNoActiveInterview(userId);
+
+        Interview sourceInterview = getRetrySourceInterview(userId, request.interviewId());
+        Interview savedRetryInterview = createRetryInterview(userId, request.idempotencyKey(), sourceInterview);
+        Interview lockedRetryInterview = getRetryInterviewForUpdate(userId, savedRetryInterview.getId());
+
+        validateRetryInterviewStatus(lockedRetryInterview);
+
+        if (lockedRetryInterview.isQuestionGenerated()) {
+            return getQuestions(lockedRetryInterview.getId(), userId);
+        }
+
+        lockedRetryInterview.markGenerating();
+
+        List<InterviewQuestion> baseQuestions = getBaseQuestions(sourceInterview.getId());
+        List<InterviewQuestion> copiedQuestions = copyBaseQuestions(lockedRetryInterview, baseQuestions);
+
+        interviewQuestionRepository.saveAll(copiedQuestions);
+        lockedRetryInterview.markGenerated();
+
+        return getQuestions(lockedRetryInterview.getId(), userId);
+    }
+
+
+
     public Long generateInterview(Long userId, StartInterviewRequest request) {
         //1.유저 인터뷰 세팅을 조회 한다.
         UserInterviewSetting userInterviewSetting = userInterviewSettingRepository.findByUserId(userId)
@@ -82,7 +111,6 @@ public class InterviewQuestionService {
         }
     }
 
-    @Transactional
     public InterviewQuestionReadResponse generateAndSaveQuestions(Long interviewId, Long userId) {
         Interview interview = interviewRepository.findByIdAndUserIdForUpdate(interviewId, userId)
                 .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(), INTERVIEW_NOT_FOUND, INTERVIEW_NOT_FOUND.getMessage()));
@@ -148,6 +176,82 @@ public class InterviewQuestionService {
         } else {
             throw new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(), INTERVIEW_FORBIDDEN, INTERVIEW_FORBIDDEN.getMessage());
         }
+    }
+
+    private void validateNoActiveInterview(Long userId) {
+        if (interviewRepository.existsByUserIdAndStatus(userId, ACTIVE)) {
+            throw new CustomApiException(
+                    INTERVIEW_ALREADY_ACTIVE.getHttpStatus(),
+                    INTERVIEW_ALREADY_ACTIVE,
+                    INTERVIEW_ALREADY_ACTIVE.getMessage()
+            );
+        }
+    }
+
+    private Interview getRetrySourceInterview(Long userId, Long interviewId) {
+        return interviewRepository.findByIdAndUserId(interviewId, userId)
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_FORBIDDEN.getHttpStatus(),
+                        INTERVIEW_FORBIDDEN,
+                        INTERVIEW_FORBIDDEN.getMessage()
+                ));
+    }
+
+    private Interview createRetryInterview(Long userId, String idempotencyKey, Interview sourceInterview) {
+        Interview retryInterview = Interview.reInterviewCreate(
+                idempotencyKey,
+                userId,
+                sourceInterview
+        );
+
+        return interviewRepository.save(retryInterview);
+    }
+
+    private Interview getRetryInterviewForUpdate(Long userId, Long interviewId) {
+        return interviewRepository.findByIdAndUserIdForUpdate(interviewId, userId)
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_NOT_FOUND.getHttpStatus(),
+                        INTERVIEW_NOT_FOUND,
+                        INTERVIEW_NOT_FOUND.getMessage()
+                ));
+    }
+
+    private void validateRetryInterviewStatus(Interview interview) {
+        if (interview.getStatus() != ACTIVE) {
+            throw new CustomApiException(
+                    INVALID_INTERVIEW_STATUS.getHttpStatus(),
+                    INVALID_INTERVIEW_STATUS,
+                    INVALID_INTERVIEW_STATUS.getMessage()
+            );
+        }
+    }
+
+    private List<InterviewQuestion> getBaseQuestions(Long interviewId) {
+        return interviewQuestionRepository.findByInterviewIdAndTypeOrderBySeqAsc(interviewId, QuestionType.BASE);
+    }
+
+    private List<InterviewQuestion> copyBaseQuestions(
+            Interview retryInterview,
+            List<InterviewQuestion> sourceQuestions
+    ) {
+        OffsetDateTime now = now();
+
+        return sourceQuestions.stream()
+                .map(source -> InterviewQuestion.createInterviewQuestion(
+                        retryInterview,
+                        source.getSeq(),
+                        source.getTitle(),
+                        source.getTags() == null
+                                ? new LinkedHashSet<>()
+                                : new LinkedHashSet<>(source.getTags()),
+                        source.getQuestionText(),
+                        source.getProvider(),
+                        source.getModel(),
+                        source.getPromptVersion(),
+                        source.getTemperature(),
+                        now
+                ))
+                .toList();
     }
 
 }

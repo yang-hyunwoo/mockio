@@ -1,6 +1,8 @@
 package com.mockio.interview_service.repository;
 
+import com.mockio.common_ai_contractor.constant.InterviewEndReason;
 import com.mockio.common_ai_contractor.constant.InterviewStatus;
+import com.mockio.common_ai_contractor.constant.InterviewTrack;
 import com.mockio.interview_service.domain.Interview;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
@@ -52,4 +54,33 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             Pageable pageable
     );
 
+    boolean existsByUserIdAndStatus(Long userId , InterviewStatus status);
+
+    List<Interview> findByUserIdAndStatusAndEndReason(
+            Long userId,
+            InterviewStatus status,
+            InterviewEndReason endReason,
+            Pageable pageable
+    );
+
+    List<Interview> findByUserIdAndStatusAndEndReasonAndTrack(
+            Long userId,
+            InterviewStatus status,
+            InterviewEndReason endReason,
+            InterviewTrack track,
+            Pageable pageable
+    );
+
+    Page<Interview> findByUserIdAndStatus(
+            Long userId,
+            InterviewStatus status,
+            Pageable pageable
+    );
+
+    Page<Interview> findByUserIdAndStatusAndTrack(
+            Long userId,
+            InterviewStatus status,
+            InterviewTrack track,
+            Pageable pageable
+    );
 }

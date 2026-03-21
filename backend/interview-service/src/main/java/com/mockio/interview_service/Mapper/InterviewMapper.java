@@ -5,6 +5,7 @@ import com.mockio.interview_service.domain.Interview;
 import com.mockio.interview_service.domain.InterviewAnswer;
 import com.mockio.interview_service.domain.InterviewQuestion;
 import com.mockio.interview_service.dto.response.*;
+import org.springframework.data.domain.Page;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,6 +71,10 @@ public class InterviewMapper {
                 EnumResponse.of(
                         interview.getFeedbackStyle().name(),
                         interview.getFeedbackStyle().getLabel()
+                ),
+                EnumResponse.of(
+                        interview.getEndReason() == null ? null : interview.getEndReason().name(),
+                        interview.getEndReason() == null ? null : interview.getEndReason().getLabel()
                 )
         );
     }
@@ -120,7 +125,10 @@ public class InterviewMapper {
                             ),
                             feedback != null ? feedback.strengths() : null,
                             feedback != null ? feedback.improvements() : null,
-                            feedback != null ? feedback.modelAnswer() : null
+                            feedback != null ? feedback.modelAnswer() : null,
+                            feedback != null ? feedback.dimensions() : null,
+                            feedback != null ? feedback.headline() : null,
+                            feedback != null ? feedback.improvementTags() : null
                     );
                 })
                 .toList();
@@ -128,6 +136,7 @@ public class InterviewMapper {
                 feedbackTotalDetailResponse == null ? null : feedbackTotalDetailResponse.summaryFeedback();
         Integer totalScore = summary != null ? summary.totalScore() : null;
         String summaryText = summary != null ? summary.summaryText() : null;
+        FeedbackDimensions feedbackDimensions = summary != null ? summary.feedbackDimensions() : null;
         List<String> strengths = summary != null ? summary.strengths() : List.of();
         List<String> improvements = summary != null ? summary.improvements() : List.of();
         return new InterviewResultResponse(
@@ -158,9 +167,85 @@ public class InterviewMapper {
                 summaryText,
                 strengths,
                 improvements,
-                questionItems
+                questionItems,
+                feedbackDimensions,
+                EnumResponse.of(
+                        interview.getEndReason().name(),
+                        interview.getEndReason().getLabel()
+                )
         );
     }
 
 
+    public static InterviewScoreHistoryResponse.Item fromScoreHistory(
+            Interview interview,
+            Map<Long, Integer> scoreMap
+    ) {
+        int score = scoreMap.getOrDefault(interview.getId(), 0);
+
+        return new InterviewScoreHistoryResponse.Item(
+                interview.getId(),
+                interview.getTrack().getLabel() + " (" + interview.getDifficulty().getLabel() + ")",
+                EnumResponse.of(
+                        interview.getTrack().name(),
+                        interview.getTrack().getLabel()
+                ),
+                score,
+                interview.getEndedAt()
+        );
+    }
+
+    /** 엔티티 리스트 → Response */
+    public static InterviewScoreHistoryResponse fromScoreHistoryList(
+            List<Interview> interviews,
+            Map<Long, Integer> scoreMap
+    ) {
+        return new InterviewScoreHistoryResponse(
+                interviews.stream()
+                        .map(interview -> fromScoreHistory(interview, scoreMap))
+                        .toList()
+        );
+    }
+
+    public static InterviewHistoryResponse fromHistoryList(
+            List<Interview> interviews,
+            Map<Long , Integer> scoreMap
+    ) {
+        return new InterviewHistoryResponse(
+                interviews.stream()
+                        .map(interview -> fromHistory(interview, scoreMap))
+                        .toList()
+        );
+    }
+
+    public static InterviewHistoryResponse.Item fromHistory(
+            Interview interview,
+            Map<Long, Integer> scoreMap
+    ) {
+        int score = scoreMap.getOrDefault(interview.getId(), 0);
+
+        return new InterviewHistoryResponse.Item(
+                interview.getId(),
+                interview.getTrack().getLabel() + " (" + interview.getDifficulty().getLabel() + ")",
+                EnumResponse.of(
+                        interview.getTrack().name(),
+                        interview.getTrack().getLabel()
+                ),
+                score,
+                interview.getCreatedAt()
+        );
+    }
+
+    public static InterviewHistoryPageResponse fromHistoryResponse(InterviewScoreHistoryResponse scoreResponse,
+                                                                   InterviewHistoryResponse historyResponse,
+                                                                   Page<Interview> interviewPage
+    ) {
+        return new InterviewHistoryPageResponse(
+                scoreResponse,
+                historyResponse,
+                interviewPage.getNumber(),
+                interviewPage.getTotalPages(),
+                interviewPage.getTotalElements()
+        );
+    }
 }

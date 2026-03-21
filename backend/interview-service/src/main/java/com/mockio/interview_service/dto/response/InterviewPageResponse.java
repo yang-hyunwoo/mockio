@@ -16,7 +16,8 @@ public record InterviewPageResponse(
         EnumResponse status,
         EnumResponse track,
         EnumResponse difficulty,
-        EnumResponse feedbackStyle
+        EnumResponse feedbackStyle,
+        EnumResponse endReason
 ){
 
 }

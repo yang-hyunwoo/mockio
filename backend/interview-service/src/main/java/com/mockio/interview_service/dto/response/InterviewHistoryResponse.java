@@ -7,14 +7,17 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public record InterviewHistoryResponse(
-       List<Item> scoreHistory
+       List<Item> historyItems
 ) {
     public record Item(
             Long interviewId,
             String title,
+            int questionCount,
+            EnumResponse status,
+            EnumResponse endReason,
             EnumResponse track,
             int score,
-            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM.dd")
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
             OffsetDateTime createdAt
     ) {}
 

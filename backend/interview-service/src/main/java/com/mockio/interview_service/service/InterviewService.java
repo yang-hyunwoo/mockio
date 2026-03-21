@@ -69,7 +69,7 @@ public class InterviewService {
     }
 
     public InterviewHistoryPageResponse getInterviewHistory(Long userId, InterviewTrack track, Pageable pageable) {
-        Pageable scorePageable = PageRequest.of(0, 7, Sort.by(Sort.Direction.DESC, "endAt"));
+        Pageable scorePageable = PageRequest.of(0, 7, Sort.by(Sort.Direction.DESC, "endedAt"));
 
         List<Interview> scoreInterview;
         Page<Interview> historyInterview;
@@ -112,20 +112,38 @@ public class InterviewService {
 
         Collections.reverse(scoreInterview); // 차트용 asc
 
+        if (scoreInterview.isEmpty()) {
+            InterviewScoreHistoryResponse scoreHistory =
+                    InterviewMapper.fromScoreHistoryList(List.of(), Map.of());
+
+            InterviewHistoryResponse interviewHistoryResponse =
+                    InterviewMapper.fromHistoryList(historyInterview.getContent(), Map.of());
+
+            return InterviewMapper.fromHistoryResponse(
+                    scoreHistory,
+                    interviewHistoryResponse,
+                    historyInterview,
+                    null
+            );
+        }
+
+
         //피드백 서비스 호출
         InterviewScoreListResponse interviewScoreList = feedbackServiceClient.getInterviewScoreList(new ArrayList<>(interviewIds));
 
-        Map<Long, Integer> scoreMap = interviewScoreList.scoreList().stream()
-                .collect(Collectors.toMap(
-                        InterviewScoreListResponse.Item::interviewId,
-                        InterviewScoreListResponse.Item::score
-                ));
+        Map<Long, InterviewScoreListResponse.Item> scoreMap =
+                interviewScoreList.scoreList().stream()
+                        .collect(Collectors.toMap(
+                                InterviewScoreListResponse.Item::interviewId,
+                                item -> item
+                        ));
 
         InterviewScoreHistoryResponse scoreHistory =InterviewMapper.fromScoreHistoryList(scoreInterview, scoreMap);
 
         InterviewHistoryResponse interviewHistoryResponse = InterviewMapper.fromHistoryList(historyInterview.getContent(), scoreMap);
+        WeakPointResponse weakPointResponse = InterviewMapper.fromWeakPoint(interviewScoreList.scoreList());
 
-        return InterviewMapper.fromHistoryResponse(scoreHistory,interviewHistoryResponse,historyInterview);
+        return InterviewMapper.fromHistoryResponse(scoreHistory,interviewHistoryResponse,historyInterview,weakPointResponse);
 
     }
 }

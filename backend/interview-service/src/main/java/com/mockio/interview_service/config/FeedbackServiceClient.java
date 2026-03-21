@@ -5,6 +5,7 @@ import com.mockio.interview_service.dto.response.FeedbackDetailResponse;
 import com.mockio.interview_service.dto.response.FeedbackTotalDetailResponse;
 import com.mockio.interview_service.dto.response.InterviewScoreListResponse;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.util.UriBuilder;
 import reactor.util.retry.Retry;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 import static com.mockio.common_core.constant.CommonErrorEnum.ILLEGALSTATE;
 
 @Service
+@Slf4j
 public class FeedbackServiceClient {
 
     private final WebClient feedbackWebClient;
@@ -81,13 +84,18 @@ public class FeedbackServiceClient {
                 .block();
     }
 
-    public InterviewScoreListResponse getInterviewScoreList(List<Long> interviewId) {
+    public InterviewScoreListResponse getInterviewScoreList(List<Long> interviewIds) {
         return feedbackWebClient.get()
                 .uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/api/feedback/v1/internal/score-history");
-                    interviewId.forEach(id -> builder.queryParam("ids", id));
-                    return builder.build();
+                    URI uri = uriBuilder
+                            .path("/api/feedback/v1/internal/score-history")
+                            .queryParam("ids", interviewIds.toArray())
+
+                            .build();
+                    log.info("request uri={}", uri);
+                    return uri;
                 })
+                .header("X-Internal-Token", internalToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, r ->
                         r.bodyToMono(String.class)
@@ -97,8 +105,11 @@ public class FeedbackServiceClient {
                                         "feedback-service error: " + msg
                                 ))
                 )
+
                 .bodyToMono(InterviewScoreListResponse.class)
                 .timeout(Duration.ofSeconds(3))
+                .doOnSuccess(res -> log.info("feedback-service success: {}", res))
+                .doOnError(e -> log.error("feedback-service call failed", e))
                 .retryWhen(Retry.backoff(1, Duration.ofMillis(200))
                         .filter(this::isRetryable)
                         .maxBackoff(Duration.ofSeconds(1)))

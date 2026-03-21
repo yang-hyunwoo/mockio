@@ -15,7 +15,7 @@ public record InterviewScoreHistoryResponse(
             EnumResponse track,
             int score,
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM.dd")
-            OffsetDateTime endAt
+            OffsetDateTime endedAt
     ) {}
 
 }

@@ -1,7 +1,9 @@
 package com.mockio.user_service.controller;
 
 import com.mockio.common_spring.util.MessageUtil;
+import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.user_service.TestSecurityPermitAllConfig;
+import com.mockio.user_service.dto.request.ProfileSyncRequest;
 import com.mockio.user_service.dto.response.UserProfileResponse;
 import com.mockio.user_service.service.UserProfileService;
 import com.mockio.user_service.config.CurrentUserWiringConfig;
@@ -62,10 +64,15 @@ class UserProfileControllerTest {
                 null,
                 null,
                 null,
+                EnumResponse.of(
+                        "",
+                        ""
+                ),
                 OffsetDateTime.now()
         );
-
-        given(userProfileService.loadOrCreateFromToken(any(Jwt.class))).willReturn(response);
+        ProfileSyncRequest profileSyncRequest = new ProfileSyncRequest("kc-123", "normal"
+                , "키키", "a@b.com", "gg");
+        given(userProfileService.loadOrCreateFromToken(any(profileSyncRequest.getClass()))).willReturn(response);
 
         // when & then
         mockMvc.perform(post("/api/users/v1/me/sync")
@@ -92,7 +99,7 @@ class UserProfileControllerTest {
 
         // (선택) 컨트롤러가 Jwt를 서비스로 전달했는지까지 검증
         ArgumentCaptor<Jwt> captor = ArgumentCaptor.forClass(Jwt.class);
-        then(userProfileService).should().loadOrCreateFromToken(captor.capture());
+        then(userProfileService).should().loadOrCreateFromToken(profileSyncRequest);
         assertThat(captor.getValue().getSubject()).isEqualTo("kc-123");
     }
 

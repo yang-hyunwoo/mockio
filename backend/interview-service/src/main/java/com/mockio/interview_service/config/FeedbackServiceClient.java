@@ -3,6 +3,7 @@ package com.mockio.interview_service.config;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.interview_service.dto.response.FeedbackDetailResponse;
 import com.mockio.interview_service.dto.response.FeedbackTotalDetailResponse;
+import com.mockio.interview_service.dto.response.InterviewScoreListResponse;
 import com.mockio.interview_service.kafka.dto.response.InterviewAnswerDetailResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.util.UriBuilder;
 import reactor.util.retry.Retry;
 
 import java.io.IOException;
@@ -77,6 +79,31 @@ public class FeedbackServiceClient {
                         .filter(this::isRetryable)
                         .maxBackoff(Duration.ofSeconds(1)))
                 .block();
+    }
+
+    public InterviewScoreListResponse getInterviewScoreList(List<Long> interviewId) {
+        return feedbackWebClient.get()
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder.path("/api/feedback/v1/internal/score-history");
+                    interviewId.forEach(id -> builder.queryParam("ids", id));
+                    return builder.build();
+                })
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class)
+                                .map(msg -> new CustomApiException(
+                                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                        ILLEGALSTATE,
+                                        "feedback-service error: " + msg
+                                ))
+                )
+                .bodyToMono(InterviewScoreListResponse.class)
+                .timeout(Duration.ofSeconds(3))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(200))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(1)))
+                .block();
+
     }
 
 

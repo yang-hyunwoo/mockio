@@ -2,13 +2,13 @@ package com.mockio.feedback_service.controller.internal;
 
 import com.mockio.feedback_service.dto.response.FeedbackDetailResponse;
 import com.mockio.feedback_service.dto.response.FeedbackTotalDetailResponse;
+import com.mockio.feedback_service.dto.response.InterviewScoreListResponse;
 import com.mockio.feedback_service.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +29,11 @@ public class InternalFeedbackController {
     public FeedbackTotalDetailResponse getFeedbackDetail(@PathVariable Long interviewId) {
         log.info("InternalFeedbackController called. interviewId={}", interviewId);
         return feedbackService.getFeedbackDetail(interviewId);
+    }
+
+    @GetMapping("/score-history")
+    public InterviewScoreListResponse getScoreHistory(@RequestParam List<Long> ids) {
+        return feedbackService.getScoreHistory(ids);
     }
 
 }

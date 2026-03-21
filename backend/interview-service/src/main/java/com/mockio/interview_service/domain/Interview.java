@@ -49,6 +49,10 @@ public class Interview extends BaseTimeEntity {
     @Column(name = "interview_mode", nullable = false, length = 30)
     private InterviewMode interviewMode;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_interview_id")
+    private Interview sourceInterview;
+
     @Column(name = "answer_time_seconds", nullable = false)
     private Integer answerTimeSeconds;
 
@@ -99,6 +103,7 @@ public class Interview extends BaseTimeEntity {
                       InterviewDifficulty difficulty,
                       InterviewFeedbackStyle feedbackStyle,
                       InterviewMode interviewMode,
+                      Interview sourceInterview,
                       Integer answerTimeSeconds,
                       QuestionGenerationStatus questionGenStatus,
                       OffsetDateTime questionGenStartedAt,
@@ -117,6 +122,7 @@ public class Interview extends BaseTimeEntity {
         this.difficulty = difficulty;
         this.feedbackStyle = feedbackStyle;
         this.interviewMode = interviewMode;
+        this.sourceInterview = sourceInterview;
         this.answerTimeSeconds = answerTimeSeconds;
         this.questionGenStatus = questionGenStatus;
         this.questionGenStartedAt = questionGenStartedAt;
@@ -158,6 +164,36 @@ public class Interview extends BaseTimeEntity {
                 .build();
     }
 
+    /**
+     * 면접 다시 시험 시
+     * @param idempotencyKey
+     * @param userId
+     * @param sourceInterview
+     * @return
+     */
+    public static Interview reInterviewCreate(
+            String idempotencyKey,
+            Long userId,
+            Interview sourceInterview
+    ) {
+        return Interview.builder()
+                .idempotencyKey(idempotencyKey)
+                .userId(userId)
+                .track(sourceInterview.getTrack())
+                .difficulty(sourceInterview.getDifficulty())
+                .feedbackStyle(sourceInterview.getFeedbackStyle())
+                .answerTimeSeconds(sourceInterview.getAnswerTimeSeconds())
+                .interviewMode(sourceInterview.interviewMode)
+                .answerTimeSeconds(sourceInterview.getAnswerTimeSeconds())
+                .questionGenStatus(QuestionGenerationStatus.NONE)
+                .status(InterviewStatus.ACTIVE)
+                .feedbackStatus(InterviewFeedbackStatus.NONE)
+                .count(sourceInterview.getCount())
+                .sourceInterview(sourceInterview)
+                .startedAt(now())
+                .build();
+    }
+
     public boolean isQuestionGenerated() {
         return this.questionGenStatus == QuestionGenerationStatus.DONE;
     }
@@ -187,14 +223,16 @@ public class Interview extends BaseTimeEntity {
         this.questionGenError = error;
     }
 
-    public void complete() {
+    public void complete(InterviewEndReason interviewEndReason) {
         if (status == InterviewStatus.ENDED) return; // 멱등
         if (status != InterviewStatus.ACTIVE) {
             throw new CustomApiException(INTERNAL_SERVER_ERROR.value(), CommonErrorEnum.ILLEGALSTATE, "Interview can be completed only from IN_PROGRESS status.");
         }
         this.status = InterviewStatus.ENDED;
         this.endedAt = now();
+        this.endReason = interviewEndReason;
     }
+
 
     public void fail(OffsetDateTime now) {
         if (this.status == InterviewStatus.ENDED) {

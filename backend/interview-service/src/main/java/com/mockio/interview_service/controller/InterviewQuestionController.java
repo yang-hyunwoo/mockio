@@ -3,6 +3,7 @@ package com.mockio.interview_service.controller;
 import com.mockio.common_security.annotation.CurrentSubject;
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
+import com.mockio.interview_service.dto.request.RetryInterviewRequest;
 import com.mockio.interview_service.dto.request.StartInterviewRequest;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.service.InterviewQuestionService;
@@ -51,5 +52,12 @@ public class InterviewQuestionController {
                 interviewQuestionService.getQuestions(interviewId,userId)
         );
     }
+
+    @PostMapping("/interviews/retry-interview")
+    public ResponseEntity<Response<InterviewQuestionReadResponse>> retryInterview(@CurrentSubject Long userId,
+                                                                                  @RequestBody RetryInterviewRequest request) {
+       return Response.ok(messageUtil.getMessage("response.read"),interviewQuestionService.retryInterview(userId,request));
+    }
+
 
 }

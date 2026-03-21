@@ -6,7 +6,7 @@ CREATE TABLE interviews (
     difficulty VARCHAR(30) NOT NULL,
     feedback_style VARCHAR(30) NOT NULL,
     interview_mode VARCHAR(30) NOT NULL,
-
+    source_interview_id BIGINT NULL,
     question_gen_status VARCHAR(20) NOT NULL DEFAULT 'NONE',
     question_gen_started_at TIMESTAMPTZ NULL,
     question_gen_ended_at TIMESTAMPTZ NULL,

@@ -53,7 +53,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
 
         // when / then
         assertThatThrownBy(() ->
-                interviewQuestionService.generateAndSaveQuestions(notExistId, "user-1")
+                interviewQuestionService.generateAndSaveQuestions(notExistId, 1L)
         ).isInstanceOf(CustomApiException.class)
                 .hasMessageContaining(INTERVIEW_NOT_FOUND.getMessage());
     }
@@ -64,7 +64,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
         Interview interview = interviewRepository.save(createInterview("owner-1"));
 
         assertThatThrownBy(() ->
-                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "other-user")
+                interviewQuestionService.generateAndSaveQuestions(interview.getId(), 2L)
         ).isInstanceOf(CustomApiException.class)
                 .hasMessageContaining(INTERVIEW_NOT_FOUND.getMessage());
     }
@@ -96,7 +96,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
 
 // when
         InterviewQuestionReadResponse response =
-                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "user-1");
+                interviewQuestionService.generateAndSaveQuestions(interview.getId(), 1L);
 
 // then
         assertThat(response.questions()).hasSize(1);
@@ -117,7 +117,7 @@ class InterviewQuestionServiceTest extends PostgresDataJpaTest {
 
         // when
         InterviewQuestionReadResponse response =
-                interviewQuestionService.generateAndSaveQuestions(interview.getId(), "user-1");
+                interviewQuestionService.generateAndSaveQuestions(interview.getId(), 1L);
 
         // then (응답 검증)
         assertThat(response).isNotNull();

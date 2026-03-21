@@ -12,5 +12,9 @@ public record FeedbackDetailResponse(
         List<String> strengths,
         List<String> improvements,
         String modelAnswer,
-        EnumResponse status
+        EnumResponse status,
+        FeedbackDimensions dimensions,
+        String headline,
+        List<String> improvementTags
 ) {}
+

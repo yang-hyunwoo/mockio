@@ -80,9 +80,9 @@ public class UserInterviewSetting extends BaseTimeEntity {
                 .userId(userId)
                 .track(InterviewTrack.GENERAL)
                 .difficulty(InterviewDifficulty.MEDIUM)
-                .feedbackStyle(InterviewFeedbackStyle.COACHING)
+                .feedbackStyle(InterviewFeedbackStyle.FRIENDLY)
                 .interviewMode(InterviewMode.TEXT)
-                .answerTimeSeconds(90)
+                .answerTimeSeconds(120)
                 .interviewQuestionCount(3)
                 .build();
     }

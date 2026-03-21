@@ -11,7 +11,7 @@ public enum InterviewErrorCode implements ErrorCode {
     INTERVIEW_NOT_FOUND(404, "INTERVIEW_NOT_FOUND", "면접이 존재하지 않습니다."),
     INTERVIEW_FORBIDDEN(403, "INTERVIEW_FORBIDDEN", "해당 면접에 접근 권한이 없습니다."),
     INTERVIEW_NOT_END(403, "INTERVIEW_NOT_END", "해당 면접이 종료되지 않았습니다."),
-
+    INTERVIEW_ALREADY_ACTIVE(409,"INTERVIEW_ALREADY_ACTIVE","면접이 이미 사용중에 있습니다."),
     QUESTIONS_ALREADY_DONE(409, "QUESTIONS_ALREADY_DONE", "이미 질문이 생성된 면접입니다."),
     QUESTIONS_MAX_COUNT(409, "QUESTIONS_MAX_COUNT", "최대 질문 생성 갯수에 도달 하였습니다."),
     QUESTIONS_ALREADY_GENERATED(409, "QUESTIONS_ALREADY_GENERATED", "이미 질문이 생성된 면접입니다."),

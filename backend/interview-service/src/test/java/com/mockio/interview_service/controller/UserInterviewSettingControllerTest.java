@@ -65,7 +65,7 @@ class UserInterviewSettingControllerTest {
     void ensureInterviewSettingSave() throws Exception {
         when(messageUtil.getMessage("response.create")).thenReturn("created");
 
-        EnsureInterviewSettingRequest req = new EnsureInterviewSettingRequest("kc-any");
+        EnsureInterviewSettingRequest req = new EnsureInterviewSettingRequest(1L);
 
         mockMvc.perform(post("/api/interview/v1/interview-setting/ensure")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,12 +80,12 @@ class UserInterviewSettingControllerTest {
         when(messageUtil.getMessage("response.read")).thenReturn("read");
 
         UserInterviewSettingReadResponse resp = mock(UserInterviewSettingReadResponse.class);
-        when(service.getPreference("kc-test-1")).thenReturn(resp);
+        when(service.getPreference(1L)).thenReturn(resp);
 
         mockMvc.perform(get("/api/interview/v1/me/get-preference"))
                 .andExpect(status().isOk());
 
-        verify(service).getPreference("kc-test-1");
+        verify(service).getPreference(1L);
     }
 
     @Test
@@ -100,6 +100,6 @@ class UserInterviewSettingControllerTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isNoContent());
 
-        verify(service).updatePreference(eq("kc-test-1"), any(UserInterviewSettingUpdateRequest.class));
+        verify(service).updatePreference(eq(1L), any(UserInterviewSettingUpdateRequest.class));
     }
 }

@@ -10,9 +10,9 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum InterviewFeedbackStyle {
-    STRICT("엄격"),
-    COACHING("조언"),
-    FRIENDLY("친근")
+    STRICT("직설적으로"),
+    COACHING("균형 있게"),
+    FRIENDLY("부드럽게")
     ;
 
     private final String label;

@@ -2,6 +2,7 @@ package com.mockio.interview_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_spring.util.MessageUtil;
+import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.interview_service.dto.request.GenerateInterviewQuestionsRequest;
 import com.mockio.interview_service.dto.response.InterviewQuestionReadResponse;
 import com.mockio.interview_service.service.InterviewQuestionService;
@@ -44,15 +45,18 @@ class InterviewQuestionControllerTest {
     void generateQuestions_withBody() throws Exception {
         // given
         Long interviewId = 10L;
-        String userId = "user-1";
+        Long userId = 1L;
 
         given(messageUtil.getMessage("response.read")).willReturn("read ok");
 
         InterviewQuestionReadResponse response = new InterviewQuestionReadResponse(
                 List.of(
-                        new InterviewQuestionReadResponse.Item(1L, 1L, 1,"T1","A1", Set.of()),
-                        new InterviewQuestionReadResponse.Item(2L, 2L, 2,"T1","A1", Set.of())
-                )
+                        new InterviewQuestionReadResponse.Item(1L, 1L, 1,"T1","A1", Set.of(),EnumResponse.of("1","1")),
+                        new InterviewQuestionReadResponse.Item(2L, 2L, 2,"T1","A1", Set.of(),EnumResponse.of("1","1"))
+                ),
+                1L,
+                true,
+                0
         );
 
         given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId)))
@@ -63,7 +67,7 @@ class InterviewQuestionControllerTest {
         // when / then
         mockMvc.perform(
                         post("/api/interview/v1/interviews/{interviewId}/questions:generate", interviewId)
-                                .with(jwt().jwt(j -> j.subject(userId)))
+                                .with(jwt().jwt(j -> j.subject(String.valueOf(userId))))
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(req))
@@ -80,12 +84,16 @@ class InterviewQuestionControllerTest {
     void generateQuestions_withoutBody() throws Exception {
         // given
         Long interviewId = 10L;
-        String userId = "user-1";
+        Long userId = 1L;
 
         given(messageUtil.getMessage("response.read")).willReturn("read ok");
 
         InterviewQuestionReadResponse response = new InterviewQuestionReadResponse(
-                List.of(new InterviewQuestionReadResponse.Item(1L, 1L, 15, "TITLE", "ANSWER", Set.of()))
+                List.of(new InterviewQuestionReadResponse.Item(1L, 1L, 15, "TITLE", "ANSWER", Set.of(),EnumResponse.of("1","1"))
+                ),
+                1L,
+                true,
+                0
         );
 
         given(interviewQuestionService.generateAndSaveQuestions(eq(interviewId), eq(userId)))
@@ -94,7 +102,7 @@ class InterviewQuestionControllerTest {
         // when / then
         mockMvc.perform(
                         post("/api/interview/v1/interviews/{interviewId}/questions:generate", interviewId)
-                                .with(jwt().jwt(j -> j.subject(userId)))
+                                .with(jwt().jwt(j -> j.subject(String.valueOf(userId))))
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -111,15 +119,18 @@ class InterviewQuestionControllerTest {
     void getQuestions_success() throws Exception {
         // given
         Long interviewId = 10L;
-        String userId = "user-1";
+        Long userId = 1L;
 
         given(messageUtil.getMessage("response.read")).willReturn("read ok");
 
         InterviewQuestionReadResponse response = new InterviewQuestionReadResponse(
                 List.of(
-                        new InterviewQuestionReadResponse.Item(1L, 1L, 15, "Q1", "QUESTION", Set.of()),
-                        new InterviewQuestionReadResponse.Item(2L, 2L, 15, "Q2", "QUESTION", Set.of())
-                )
+                        new InterviewQuestionReadResponse.Item(1L, 1L, 15, "Q1", "QUESTION", Set.of(), EnumResponse.of("1","2")),
+                        new InterviewQuestionReadResponse.Item(2L, 2L, 15, "Q2", "QUESTION", Set.of(),EnumResponse.of("1","2"))
+                ),
+                1L,
+                true,
+                0
         );
 
         given(interviewQuestionService.getQuestions(interviewId,userId)).willReturn(response);
@@ -127,7 +138,7 @@ class InterviewQuestionControllerTest {
         // when / then
         mockMvc.perform(
                         get("/api/interview/v1/interviews/{interviewId}/questions", interviewId)
-                                .with(jwt().jwt(j -> j.subject(userId)))
+                                .with(jwt().jwt(j -> j.subject(String.valueOf(userId))))
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));

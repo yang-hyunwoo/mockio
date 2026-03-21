@@ -2,6 +2,7 @@ package com.mockio.interview_service.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.common_ai_contractor.constant.InterviewEndReason;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
@@ -349,7 +350,7 @@ public class InterviewAnswerService {
                 )
                 .map(q -> InterviewQuestionMapper.fromList(List.of(q), false, interview))
                 .orElseGet(() -> {
-                    interview.complete();
+                    interview.complete(InterviewEndReason.COMPLETED);
 
                     InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
                             interview.getUserId(),

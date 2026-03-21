@@ -8,9 +8,6 @@ import com.mockio.faq_service.repository.FaqQueryDslRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,7 +23,6 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
     /**
      * faq 페이징 조회
      *
-     * @param pageable  페이징 정보
      * @param faqReqDto 검색 조건
      * @return faq 페이지 객체
      */

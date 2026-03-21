@@ -35,4 +35,6 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
     """)
     Optional<InterviewQuestion> findByIdWithInterview(@Param("questionId") Long questionId);
 
+    List<InterviewQuestion> findByInterviewIdAndTypeOrderBySeqAsc(Long interviewId , QuestionType type);
+
 }

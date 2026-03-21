@@ -24,7 +24,9 @@ public record InterviewResultResponse(
         String summary,
         List<String> strengths,
         List<String> improvements,
-        List<QuestionItem> questions
+        List<QuestionItem> questions,
+        FeedbackDimensions feedbackDimensions,
+        EnumResponse endReason
 ) {
         public record QuestionItem(
                 Long id,
@@ -36,7 +38,10 @@ public record InterviewResultResponse(
                 EnumResponse type,
                 List<String> strengths,
                 List<String> improvements,
-                String modelAnswer
+                String modelAnswer,
+                FeedbackDimensions dimensions,
+                String headline,
+                List<String> improvementTags
         ) {
         }
 }

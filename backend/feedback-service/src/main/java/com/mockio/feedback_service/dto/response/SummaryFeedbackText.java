@@ -6,5 +6,6 @@ public record SummaryFeedbackText(
         Integer totalScore,
         String summaryText,
         List<String> strengths,
-        List<String> improvements
+        List<String> improvements,
+        FeedbackDimensions dimensions
 ) {}

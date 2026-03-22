@@ -96,6 +96,9 @@ public class Response<T> {
     public static <T> ResponseEntity<Response<T>> create(String message, T data) {
         return ResponseEntity.status(HttpStatus.CREATED).body(successCreate(message, data));
     }
+    public static <T> ResponseEntity<Response<T>> create(String headerValues , String message, T data) {
+        return ResponseEntity.status(HttpStatus.CREATED).header(SET_COOKIE,headerValues).body(successCreate(message, data));
+    }
 
     public static <T> ResponseEntity<Response<T>> update(String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(successUpdate(message, data));

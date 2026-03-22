@@ -41,9 +41,9 @@ public class SpringAiOpenAIClient implements AIChatClient {
 
             if (content == null || content.isBlank()) {
                 throw new CustomApiException(
-                        500,
-                        AIErrorCodeEnum.ILLEGALSTATE,
-                        AIErrorCodeEnum.ILLEGALSTATE.getMessage()
+                        AIErrorCodeEnum.ILLEGAL_STATE.getHttpStatus(),
+                        AIErrorCodeEnum.ILLEGAL_STATE,
+                        AIErrorCodeEnum.ILLEGAL_STATE.getMessage()
                 );
             }
             return content;
@@ -76,13 +76,13 @@ public class SpringAiOpenAIClient implements AIChatClient {
         if (isTimeout(t)) {
             return new CustomApiException(
                     500,
-                    AIErrorCodeEnum.ILLEGALSTATE,
+                    AIErrorCodeEnum.ILLEGAL_STATE,
                     "외부 AI 서버 응답이 지연되었습니다."
             );
         }
 
         log.warn("Spring AI(OpenAI) unexpected error: {}", t.toString());
-        return new CustomApiException(500, AIErrorCodeEnum.ILLEGALSTATE, AIErrorCodeEnum.ILLEGALSTATE.getMessage());
+        return new CustomApiException(500, AIErrorCodeEnum.ILLEGAL_STATE, AIErrorCodeEnum.ILLEGAL_STATE.getMessage());
     }
 
     private boolean isTimeout(Throwable t) {

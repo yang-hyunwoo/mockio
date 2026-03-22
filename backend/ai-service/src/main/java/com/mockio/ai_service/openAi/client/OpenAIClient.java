@@ -32,7 +32,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import static com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum.ILLEGALSTATE;
+import static com.mockio.ai_service.constant.errorCode.AIErrorCodeEnum.ILLEGAL_STATE;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Component
@@ -70,8 +70,8 @@ public class OpenAIClient implements AIChatClient {
                 || res.choices().getFirst().message().content() == null) {
             throw new CustomApiException(
                     INTERNAL_SERVER_ERROR.value(),
-                    ILLEGALSTATE,
-                    ILLEGALSTATE.getMessage()
+                    ILLEGAL_STATE,
+                    ILLEGAL_STATE.getMessage()
             );
         }
 
@@ -93,7 +93,7 @@ public class OpenAIClient implements AIChatClient {
             case 400 -> AIErrorCodeEnum.BAD_REQUEST;
             case 401, 403 -> AIErrorCodeEnum.UNAUTHORIZED;
             case 429 -> AIErrorCodeEnum.RATE_LIMIT;
-            default -> AIErrorCodeEnum.ILLEGALSTATE;
+            default -> AIErrorCodeEnum.ILLEGAL_STATE;
         };
 
         String shortBody = body == null ? "" :
@@ -117,7 +117,7 @@ public class OpenAIClient implements AIChatClient {
             log.warn("OpenAI request error: {}", t.toString());
             return new CustomApiException(
                     INTERNAL_SERVER_ERROR.value(),
-                    ILLEGALSTATE,
+                    ILLEGAL_STATE,
                     "외부 AI 서버 연결에 실패했습니다."
             );
         }
@@ -127,7 +127,7 @@ public class OpenAIClient implements AIChatClient {
             log.warn("OpenAI timeout: {}", t.toString());
             return new CustomApiException(
                     INTERNAL_SERVER_ERROR.value(),
-                    ILLEGALSTATE,
+                    ILLEGAL_STATE,
                     "외부 AI 서버 응답이 지연되었습니다."
             );
         }
@@ -136,8 +136,8 @@ public class OpenAIClient implements AIChatClient {
         log.warn("OpenAI unexpected error: {}", t.toString());
         return new CustomApiException(
                 INTERNAL_SERVER_ERROR.value(),
-                ILLEGALSTATE,
-                ILLEGALSTATE.getMessage()
+                ILLEGAL_STATE,
+                ILLEGAL_STATE.getMessage()
         );
     }
 

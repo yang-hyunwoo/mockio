@@ -48,6 +48,8 @@ public class Response<T> {
 
     private static final String ERROR_CODE = "ERROR";
 
+
+
     /**
      * 일반적인 에러
      * @param httpStatus

@@ -1,67 +1,101 @@
 package com.mockio.auth_service.config;
 
+import com.mockio.auth_service.dto.LoginUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret-key}")
-    private String SECRET_KEY;
+    @Value("${jwt.private-key}")
+    private String privateKeyPem;
+
+    @Value("${jwt.public-key}")
+    private String publicKeyPem;
+
     @Value("${jwt.access-token-expire-time}")
-    private long ACCESS_TOKEN_EXPIRE;
+    private long accessTokenExpire;
+
     @Value("${jwt.refresh-token-expire-time}")
-    private long REFRESH_TOKEN_EXPIRE;
+    private long refreshTokenExpire;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    private PrivateKey getPrivateKey() {
+        try {
+            String key = privateKeyPem
+                    .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                    .replace("-----END RSA PRIVATE KEY-----", "")
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+
+            byte[] decoded = Base64.getDecoder().decode(key);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
+            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("Private key 로딩 실패", e);
+        }
     }
 
-    // Access Token 생성
-    public String createAccessToken(Long userId, String email, String role) {
+    private PublicKey getPublicKey() {
+        try {
+            String key = publicKeyPem
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s", "");
+
+            byte[] decoded = Base64.getDecoder().decode(key);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("Public key 로딩 실패", e);
+        }
+    }
+
+    public String createAccessToken(Long userId) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE);
+        Date expiry = new Date(now.getTime() + accessTokenExpire);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
-                .claim("email", email)
-                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setHeaderParam("kid", "mockio-auth-key")
+                .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
-    // Refresh Token 생성
-    public String createRefreshToken(Long userId) {
+    public String createRefreshToken(LoginUser loginUser) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE);
+        Date expiry = new Date(now.getTime() + refreshTokenExpire);
 
         return Jwts.builder()
-                .setSubject(String.valueOf(userId))
+                .setSubject(String.valueOf(loginUser.getUserId()))
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setHeaderParam("kid", "mockio-auth-key")
+                .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
-    // 토큰에서 userId 추출
     public Long getUserId(String token) {
         Claims claims = parseClaims(token);
         return Long.parseLong(claims.getSubject());
     }
 
-    // 토큰 검증
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
@@ -73,7 +107,7 @@ public class JwtTokenProvider {
 
     private Claims parseClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(getPublicKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();

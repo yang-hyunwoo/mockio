@@ -10,6 +10,7 @@ import static org.springframework.http.HttpStatus.*;
 @Getter
 @AllArgsConstructor
 public enum UserErrorEnum implements ErrorCode {
+    USER_NOT_FOUND(NOT_FOUND.value(), "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     DUPLICATE_EMAIL(CONFLICT.value(), "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
     DUPLICATE_NICKNAME(CONFLICT.value(), "DUPLICATE_NICKNAME", "이미 사용 중인 닉네임입니다."),
     RECAPTCHA_ERROR(BAD_REQUEST.value(), "RECAPTCHA_ERROR", "리캡차 오류가 발생 하였습니다."),

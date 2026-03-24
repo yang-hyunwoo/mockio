@@ -1,12 +1,15 @@
 package com.mockio.auth_service.client;
 
-import com.mockio.auth_service.dto.request.ProfileSyncRequest;
-import com.mockio.auth_service.dto.response.UserIdResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mockio.auth_service.dto.UserInfoResponse;
+import com.mockio.auth_service.dto.request.LoginFailureRequest;
+import com.mockio.auth_service.dto.request.LoginSuccessRequest;
+import com.mockio.auth_service.dto.response.UserAuthInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 
 @Slf4j
 @Component
@@ -15,29 +18,47 @@ public class UserProfileClient {
 
     private final RestClient userRestClient;
 
-    public void syncProfile(ProfileSyncRequest request) {
-        userRestClient.post()
-                .uri("/api/users/v1/internal/me/sync")
-                .body(request)
+
+    public UserAuthInfoResponse getUserAuthInfo(String email) {
+        return userRestClient.get()
+                .uri("/api/users/v1/internal/login/{email}", email)
                 .retrieve()
+                .onStatus(
+                        status -> status.value() == 404,
+                        (request, response) -> {
+                            throw new UsernameNotFoundException("아이디 또는 비밀번호가 올바르지 않습니다.");
+                        }
+                )
+                .body(UserAuthInfoResponse.class);
+    }
+
+    public UserInfoResponse userDetail(Long userId) {
+        return userRestClient.get()
+                .uri("/api/users/v1/internal/user-info/{userId}",userId)
+                .retrieve()
+                .body(UserInfoResponse.class);
+    }
+
+    public void resetFailCount(Long userId) {
+        userRestClient.patch()
+                .uri("/api/users/v1/internal/login-success")
+                .body(new LoginSuccessRequest(userId))
+                .retrieve()
+                .onStatus(status -> status.isError(), (req, res) -> {
+                    throw new RuntimeException("user-service 호출 실패");
+                })
                 .toBodilessEntity();
     }
 
-    public UserIdResponse getUserId(String keycloakUserId) {
-        try {
-            UserIdResponse response  = userRestClient.get()
-                    .uri("/api/users/v1/internal/by-keycloak-id/{keycloakUserId}", keycloakUserId)
-                    .retrieve()
-                    .body(UserIdResponse.class);
-            if (response == null) {
-                log.error("user-service 응답 본문이 null 입니다. keycloakUserId={}", keycloakUserId);
-                throw new IllegalStateException("user-service 응답이 비어 있습니다.");
-            }
-            return response;
-        } catch (RestClientException ex) {
-            log.error("user-service userId 조회 실패. keycloakUserId={}", keycloakUserId, ex);
-            throw new IllegalStateException("user-service 호출 실패", ex);
-        }
+    public void loginFailure(String email) {
+        userRestClient.patch()
+                .uri("/api/users/v1/internal/login-failure")
+                .body(new LoginFailureRequest(email))
+                .retrieve()
+                .onStatus(status -> status.isError(), (req, res) -> {
+                    throw new RuntimeException("user-service 호출 실패");
+                })
+                .toBodilessEntity();
     }
 
 }

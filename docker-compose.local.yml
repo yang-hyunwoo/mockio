@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${AUTH_DB_NAME}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d
       - ./db/data:/var/lib/postgresql/data
@@ -20,28 +20,6 @@ services:
       retries: 10
       start_period: 10s
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.4.7
-    container_name: keycloak-local
-    command:
-      - start-dev
-      - --features=account:v3,account-api:v1
-    environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${KEYCLOAK_DB_NAME}
-      KC_DB_USERNAME: ${DB_USER}
-      KC_DB_PASSWORD: ${DB_PASSWORD}
-      KC_FEATURES: "account:v3,account-api:v1"
-    ports:
-      - "8084:8080"
-    volumes:
-      - C:/project/mockio/keycloak-themes/mockio-theme:/opt/keycloak/themes/mockio-theme
-    restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0

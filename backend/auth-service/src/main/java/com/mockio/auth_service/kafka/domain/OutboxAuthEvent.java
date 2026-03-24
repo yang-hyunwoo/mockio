@@ -3,7 +3,6 @@ package com.mockio.auth_service.kafka.domain;
 /**
  * Auth Service에서 사용하는 Outbox 이벤트 엔티티.
  *
- * <p>외부 인증 시스템(Keycloak 등)과의 연동 작업을
  * 트랜잭션 경계 밖에서 안정적으로 처리하기 위해
  * Outbox 패턴을 적용한 이벤트 저장소 역할을 한다.</p>
  *

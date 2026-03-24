@@ -6,13 +6,6 @@ services:
     networks:
       - backend
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.4.7
-    networks:
-      - backend
-    environment:
-      KC_LOG_LEVEL: debug
-      KC_LOG_CONSOLE_COLOR: true
 networks:
   backend:
     driver: bridge

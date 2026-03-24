@@ -12,31 +12,55 @@ import java.util.Map;
 @Getter
 public class LoginUser implements UserDetails , OAuth2User {
 
-    private final Member member;
+    private final Long userId;
+    private final String email;
+    private final String password;
+    private final String role;
     private Map<String , Object> attributes;
+    private final int failLoginCount;
+    private final String status;
 
     /**
      * 일반 로그인
-     * @param member
      */
-    public LoginUser(Member member) {
-        this.member = member;
+    public LoginUser(Long userId,
+                     String email,
+                     String password,
+                     int failLoginCount,
+                     String status,
+                     String role) {
+        this.userId = userId;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.status = status;
+        this.failLoginCount = failLoginCount;
     }
 
     /**
      * OAuth 로그인
-     * @param member
      * @param attributes
      */
-    public LoginUser(Member member, Map<String, Object> attributes) {
-        this.member = member;
+    public LoginUser(Long userId,
+                     String email,
+                     String password,
+                     String role,
+                     int failLoginCount,
+                     String status,
+                     Map<String, Object> attributes) {
+        this.userId = userId;
+        this.email = email;
+        this.password = password;
+        this.failLoginCount = failLoginCount;
+        this.status = status;
+        this.role = role;
         this.attributes = attributes;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(() -> "ROLE_" + member.getRole());
+        authorities.add(() -> "ROLE_" + role);
         return authorities;
     }
 
@@ -47,12 +71,12 @@ public class LoginUser implements UserDetails , OAuth2User {
 
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return member.getName();
+        return null;
     }
 
     /**
@@ -71,7 +95,7 @@ public class LoginUser implements UserDetails , OAuth2User {
      */
     @Override
     public boolean isAccountNonLocked() {
-        return member.getFailLoginCount() <=4;
+        return this.failLoginCount <=4;
     }
 
     /**
@@ -89,7 +113,7 @@ public class LoginUser implements UserDetails , OAuth2User {
      */
     @Override
     public boolean isEnabled() {
-        return !member.isDeleted();
+        return this.status != "ACTIVE";
     }
 
     @Override

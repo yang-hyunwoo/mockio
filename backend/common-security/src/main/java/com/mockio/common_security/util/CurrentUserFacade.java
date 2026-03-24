@@ -34,7 +34,6 @@ public class CurrentUserFacade<T> {
         }
 
 
-//        String keycloakId = jwt.getClaims().get("keycloakUserId").toString();
         String userId = jwt.getSubject();
         if (userId == null || userId.isBlank()) {
             if (required) {

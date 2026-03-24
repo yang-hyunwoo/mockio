@@ -1,0 +1,16 @@
+CREATE TABLE users (
+   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+   email VARCHAR(255) NOT NULL,
+   password VARCHAR(255) NOT NULL,
+   fail_login_count BIGINT NOT NULL DEFAULT 0,
+   role VARCHAR(30) NOT NULL DEFAULT 'USER',
+   status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+   provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
+   last_login_at TIMESTAMPTZ NULL,
+   created_at TIMESTAMPTZ NOT NULL,
+   updated_at TIMESTAMPTZ NOT NULL,
+
+   CONSTRAINT uk_users_email UNIQUE (email),
+   CONSTRAINT ck_users_status CHECK (status IN ('ACTIVE', 'SUSPENDED', 'DELETED')),
+   CONSTRAINT ck_users_role CHECK (role IN ('USER', 'ADMIN'))
+);

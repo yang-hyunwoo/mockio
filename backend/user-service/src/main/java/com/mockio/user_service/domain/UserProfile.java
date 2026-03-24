@@ -31,14 +31,13 @@ public class UserProfile extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "keycloak_id", nullable = false, length = 128)
-    private String keycloakId;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_user_profiles_user"))
+    private User user;
 
     @Column(name = "profile_image_id")
     private Long profileImageId;
-
-    @Column(name = "email", length = 255)
-    private String email;
 
     @Column(name = "name", length = 100)
     private String name;
@@ -53,140 +52,83 @@ public class UserProfile extends BaseTimeEntity {
     @Column(name = "visibility", nullable = false, length = 20)
     private ProfileVisibility visibility;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private UserStatus status;
-
-    @Column(name = "last_login_at")
-    private OffsetDateTime lastLoginAt;
-
     @Builder
     private UserProfile(Long id,
-                        String keycloakId,
+                        User user,
                         Long profileImageId,
-                        String email,
                         String name,
                         String nickname,
                         String bio,
-                        ProfileVisibility visibility,
-                        UserStatus status,
-                        OffsetDateTime lastLoginAt
-    ) {
-
+                        ProfileVisibility visibility) {
         this.id = id;
-        this.keycloakId = keycloakId;
+        this.user = user;
         this.profileImageId = profileImageId;
-        this.email = email;
         this.name = name;
         this.nickname = nickname;
         this.bio = bio;
         this.visibility = visibility != null ? visibility : ProfileVisibility.PUBLIC;
-        this.status = status != null ? status : UserStatus.ACTIVE;
-        this.lastLoginAt = lastLoginAt;
     }
 
-    /**
-     * 유저 프로필 생성 메서드
-     * @param keycloakId
-     * @param email
-     * @param name
-     * @param nickname
-     * @return
-     */
-    public static UserProfile createUserProfile( String keycloakId,
-                                                String email,
+    public static UserProfile createUserProfile(User user,
                                                 String name,
-                                                String nickname
-    ) {
-        return UserProfile.builder()
-                .keycloakId(keycloakId)
-                .email(email)
+                                                String nickname) {
+        UserProfile profile = UserProfile.builder()
+                .user(user)
                 .name(name)
                 .nickname(nickname)
                 .visibility(ProfileVisibility.PUBLIC)
-                .status(UserStatus.ACTIVE)
                 .build();
+
+        if (user != null) {
+            user.assignProfile(profile);
+        }
+
+        return profile;
     }
 
-
-    /** 로그인 시점 갱신 */
-    public void updateLastLoginAt() {
-        this.lastLoginAt = OffsetDateTime.now();
+    public void assignUser(User user) {
+        this.user = user;
+        if (user != null && user.getProfile() != this) {
+            user.assignProfile(this);
+        }
     }
 
-    /** 프로필 수정 */
     public void applyPatch(String nickname,
                            Long profileImageId) {
-
         ofNullable(nickname).filter(s -> !s.isBlank()).ifPresent(this::changeNickname);
         ofNullable(profileImageId).ifPresent(this::changeProfileImage);
-
     }
 
-    /**
-     * 닉네임 변경
-     * @param nickname
-     */
     public void changeNickname(String nickname) {
         this.nickname = nickname;
     }
 
-    /**
-     * 프로필 이미지 id 변경
-     * @param profileImageId
-     */
     public void changeProfileImage(Long profileImageId) {
         this.profileImageId = profileImageId;
     }
 
-    /**
-     * 자기소개 변경
-     * @param bio
-     */
     public void changeBio(String bio) {
         this.bio = bio;
     }
 
-    /**
-     * 공개 여부 변경
-     * @param visibility
-     */
+    public void changeName(String name) {
+        this.name = name;
+    }
+
     public void changeVisibility(ProfileVisibility visibility) {
         this.visibility = visibility;
     }
 
-    /** 상태 변경 (정지/탈퇴 등) */
-    public void changeStatus(UserStatus status) {
-        this.status = status;
-    }
-
-
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        UserProfile that = (UserProfile) o;
-        return Objects.equals(id, that.id) && Objects.equals(keycloakId, that.keycloakId);
+        if (this == o) return true;
+        if (!(o instanceof UserProfile that)) return false;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, keycloakId);
-    }
-
-    @Override
-    public String toString() {
-        return "UserProfile{" +
-                "id=" + id +
-                ", keycloakId='" + keycloakId + '\'' +
-                ", profileImageId=" + profileImageId +
-                ", email='" + email + '\'' +
-                ", name='" + name + '\'' +
-                ", nickname='" + nickname + '\'' +
-                ", bio='" + bio + '\'' +
-                ", visibility=" + visibility +
-                ", status=" + status +
-                ", lastLoginAt=" + lastLoginAt +
-                '}';
+        return Objects.hashCode(id);
     }
 
 }

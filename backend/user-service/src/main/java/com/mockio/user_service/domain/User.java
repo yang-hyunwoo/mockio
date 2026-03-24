@@ -25,15 +25,15 @@ public class User extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ===== 로그인 정보 =====
+    // ===== 로그인 / 계정 정보 =====
     @Column(nullable = false, length = 255)
     private String email;
 
-    @Column(nullable = false, length = 20)
-    private String nickname;
-
     @Column(nullable = false, length = 255)
     private String password;
+
+    @Column(name = "fail_login_count", nullable = false)
+    private int failLoginCount;
 
     // ===== 권한 =====
     @Enumerated(EnumType.STRING)
@@ -45,66 +45,92 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private UserStatus status;
 
-    // ===== 소셜 로그인용 =====
+    // ===== 로그인 제공자 =====
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     private AuthProviderEnum provider;
 
+    @Column(name = "last_login_at")
     private OffsetDateTime lastLoginAt;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserProfile profile;
 
     @Builder
     protected User(Long id,
                    String email,
-                   String nickname,
                    String password,
+                   int failLoginCount,
                    UserRole role,
                    UserStatus status,
                    AuthProviderEnum provider,
-                   OffsetDateTime lastLoginAt
-    ) {
+                   OffsetDateTime lastLoginAt) {
         this.id = id;
         this.email = email;
-        this.nickname = nickname;
         this.password = password;
+        this.failLoginCount = failLoginCount;
         this.role = role;
         this.status = status;
         this.provider = provider;
         this.lastLoginAt = lastLoginAt;
     }
 
-    public static User createUser(String email,
-                                  String password,
-                                  String nickname
-
-    ) {
+    public static User createUser(String email, String password) {
         return User.builder()
                 .email(email)
                 .password(password)
-                .nickname(nickname)
-                .status(UserStatus.ACTIVE)
+                .failLoginCount(0)
                 .role(UserRole.USER)
+                .status(UserStatus.ACTIVE)
                 .provider(AuthProviderEnum.NORMAL)
                 .build();
     }
 
+    public void assignProfile(UserProfile profile) {
+        this.profile = profile;
+        if (profile != null && profile.getUser() != this) {
+            profile.assignUser(this);
+        }
+    }
 
     public void updateLastLogin() {
         this.lastLoginAt = OffsetDateTime.now();
+        this.failLoginCount = 0;
+    }
+
+    public void increaseFailLoginCount() {
+        this.failLoginCount++;
+    }
+
+    public void resetFailLoginCount() {
+        this.failLoginCount = 0;
     }
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
 
+    public void changeStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public void changeRole(UserRole role) {
+        this.role = role;
+    }
+
     public void deactivate() {
         this.status = UserStatus.DELETED;
     }
 
+    public boolean isActive() {
+        return this.status == UserStatus.ACTIVE;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id);
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return id != null && Objects.equals(id, user.id);
     }
 
     @Override

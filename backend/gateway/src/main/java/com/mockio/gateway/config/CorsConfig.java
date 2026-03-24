@@ -5,30 +5,32 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 
 @Configuration
 public class CorsConfig {
 
     @Bean
-    public CorsWebFilter corsWebFilter() {
-
+    public CorsConfigurationSource corsConfigurationSource() {
         final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000");
-        final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE","PATCH");
-        final List<String> ALLOWED_HEADERS = List.of("Authorization", "Content-Type");
+        final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
+        final List<String> ALLOWED_HEADERS = List.of("*");
         final List<String> EXPOSED_HEADERS = List.of("Authorization", "refresh-token");
+//        final List<String> ALLOWED_HEADERS = List.of("Authorization", "Content-Type");
 
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(ALLOWED_ORIGINS);
+        config.setAllowedOrigins(ALLOWED_ORIGINS);
         config.setAllowedHeaders(ALLOWED_HEADERS);
         config.setAllowedMethods(ALLOWED_METHODS);
+        config.setExposedHeaders(EXPOSED_HEADERS);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
-        return new CorsWebFilter(source);
+        return source;
     }
-
 }
+

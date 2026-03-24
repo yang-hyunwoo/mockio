@@ -65,4 +65,3 @@ project(":common-kafka").projectDir = file("backend/common-kafka")
 include "common-ai-contractor"
 project(":common-ai-contractor").projectDir = file("backend/common-ai-contractor")
 
-include "naver-keycloak-spi"

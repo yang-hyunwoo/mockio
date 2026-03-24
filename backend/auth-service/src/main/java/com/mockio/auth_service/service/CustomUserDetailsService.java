@@ -1,0 +1,40 @@
+package com.mockio.auth_service.service;
+
+import com.mockio.auth_service.client.UserProfileClient;
+import com.mockio.auth_service.dto.LoginUser;
+import com.mockio.auth_service.dto.response.UserAuthInfoResponse;
+import com.mockio.common_core.constant.CommonErrorEnum;
+import com.mockio.common_core.exception.CustomApiException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_000;
+
+@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserProfileClient userClient;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        UserAuthInfoResponse user = userClient.getUserAuthInfo(email);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("사용자가 존재하지 않습니다.");
+        }
+
+        return new LoginUser(
+               user.id(),
+                user.email(),
+                user.password(),
+                user.failLoginCount(),
+                user.status(),
+                user.role()
+        );
+    }
+}

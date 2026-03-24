@@ -74,6 +74,7 @@ public class SecurityConfig {
                                 "/api/auth/v1/public/**").permitAll()
                         .anyRequest().authenticated()
 
+
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt());
 

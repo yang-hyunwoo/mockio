@@ -13,17 +13,11 @@ spring:
           uri: http://localhost:9080
           predicates:
             - Path=/api/auth/v1/**
-        - id: user-service
+        - id: core-service
           uri: http://localhost:9081
           predicates:
             - Path=/api/users/v1/**
-        - id: interview-service
-          uri: http://localhost:9082
-          predicates:
             - Path=/api/interview/v1/**
-        - id: feedback-service
-          uri: http://localhost:9083
-          predicates:
             - Path=/api/feedback/v1/**
         - id: noti-service
           uri: http://localhost:9084

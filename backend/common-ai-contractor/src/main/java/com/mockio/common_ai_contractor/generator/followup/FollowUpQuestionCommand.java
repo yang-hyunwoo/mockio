@@ -4,7 +4,6 @@ import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
 import com.mockio.common_ai_contractor.constant.InterviewFeedbackStyle;
 import com.mockio.common_ai_contractor.constant.InterviewTrack;
 
-
 public record FollowUpQuestionCommand(
         InterviewTrack interviewTrack,
         InterviewDifficulty interviewDifficulty,

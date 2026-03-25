@@ -103,7 +103,6 @@ public class InterviewAnswerService {
             interviewAnswerRepository.unsetCurrentByQuestionId(interviewAnswerRequest.questionId());
             interviewAnswerRepository.save(answer);
             interview.incrementAnswered();
-           // interviewRepository.incrementAnswered(interview.getId());
         } catch (DataIntegrityViolationException e) {
             interviewAnswerRepository
                     .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey())
@@ -136,7 +135,6 @@ public class InterviewAnswerService {
                             payloadJsonNode
                     )
             );
-
             return moveNextOrComplete(interview, interviewQuestion);
         }
 
@@ -298,7 +296,6 @@ public class InterviewAnswerService {
                 }
             }
         }
-
         return moveNextOrComplete(interview, interviewQuestion);
     }
 
@@ -397,4 +394,5 @@ public class InterviewAnswerService {
     public List<InternalInterviewAnswerDetailResponse> getInterviewList(Long interviewId) {
         return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
     }
+
 }

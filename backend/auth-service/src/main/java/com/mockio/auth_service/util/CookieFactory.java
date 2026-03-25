@@ -75,8 +75,5 @@ public class CookieFactory {
         return responseCookieBuilder.build();
     }
 
-    public String refreshCookieName() {
-        return refreshName;
-    }
 
 }

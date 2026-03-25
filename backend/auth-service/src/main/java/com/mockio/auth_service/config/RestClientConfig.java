@@ -10,7 +10,6 @@ package com.mockio.auth_service.config;
  */
 
 import com.mockio.auth_service.properties.UserServiceClientProperties;
-import lombok.NonNull;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -30,8 +29,8 @@ public class RestClientConfig {
     private final UserServiceClientProperties properties;
 
     public RestClientConfig(
-            @Value("${internal.auth.token}") String internalToken
-            , UserServiceClientProperties properties
+            @Value("${internal.auth.token}") String internalToken,
+            UserServiceClientProperties properties
     ) {
         this.internalToken = internalToken;
         this.properties = properties;

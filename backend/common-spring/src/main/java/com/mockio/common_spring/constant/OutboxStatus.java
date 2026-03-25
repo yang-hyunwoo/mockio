@@ -11,7 +11,8 @@ public enum OutboxStatus  {
     PROCESSING("실행중"),
     SENT("완료"),
     FAILED("실패(재시도 가능)"),
-    DEAD("실패");
+    DEAD("실패")
+    ;
 
     private final String label;
 

@@ -44,7 +44,6 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final FeedbackService feedbackService;
 
-
     public InterviewMainListResponse getInterviewMainList(Long userId) {
         return InterviewMapper.fromMainList(interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE));
     }
@@ -128,7 +127,6 @@ public class InterviewService {
             );
         }
 
-
         //피드백 서비스 호출
         InternalInterviewScoreListResponse scoreHistory1 = feedbackService.getScoreHistory(new ArrayList<>(interviewIds));
         InterviewScoreListResponse interviewScoreList = InternalMapper.fromInterviewScoreList(scoreHistory1);
@@ -146,6 +144,6 @@ public class InterviewService {
         WeakPointResponse weakPointResponse = InterviewMapper.fromWeakPoint(interviewScoreList.scoreList());
 
         return InterviewMapper.fromHistoryResponse(scoreHistory,interviewHistoryResponse,historyInterview,weakPointResponse);
-
     }
+
 }

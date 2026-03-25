@@ -135,7 +135,6 @@ public class Interview extends BaseTimeEntity {
         this.answeredQuestions = 0;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
-
     }
 
     public static Interview create(
@@ -215,8 +214,6 @@ public class Interview extends BaseTimeEntity {
         this.questionGenEndedAt = now();
     }
 
-
-
     public void markGenerateFailed(String error) {
         this.questionGenStatus = QuestionGenerationStatus.FAILED;
         this.questionGenEndedAt = now();
@@ -232,7 +229,6 @@ public class Interview extends BaseTimeEntity {
         this.endedAt = now();
         this.endReason = interviewEndReason;
     }
-
 
     public void fail(OffsetDateTime now) {
         if (this.status == InterviewStatus.ENDED) {

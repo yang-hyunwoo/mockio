@@ -21,14 +21,14 @@ public interface UserInterviewSettingRepository extends JpaRepository<UserInterv
 
     @Modifying
     @Query(value = """
-        INSERT INTO user_interview_settings
-        (user_id, track, difficulty, interview_feedback_style, interview_mode,
-         answer_time_seconds, interview_question_count)
-        VALUES
-        (:userId, :track, :difficulty, :feedbackStyle, :interviewMode,
-         :answerTimeSeconds, :interviewQuestionCount)
-        ON CONFLICT (user_id) DO NOTHING
-        """, nativeQuery = true)
+            INSERT INTO user_interview_settings
+            (user_id, track, difficulty, interview_feedback_style, interview_mode,
+             answer_time_seconds, interview_question_count)
+            VALUES
+            (:userId, :track, :difficulty, :feedbackStyle, :interviewMode,
+             :answerTimeSeconds, :interviewQuestionCount)
+            ON CONFLICT (user_id) DO NOTHING
+            """, nativeQuery = true)
     int insertIfAbsent(
             @Param("userId") Long userId,
             @Param("track") String track,
@@ -38,4 +38,5 @@ public interface UserInterviewSettingRepository extends JpaRepository<UserInterv
             @Param("answerTimeSeconds") int answerTimeSeconds,
             @Param("interviewQuestionCount") int interviewQuestionCount
     );
+
 }

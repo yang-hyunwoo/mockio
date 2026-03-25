@@ -88,8 +88,6 @@ public class InterviewFeedback extends BaseTimeEntity {
         this.generatedAt = generatedAt;
     }
 
-
-
     public static InterviewFeedback create(
             Long answerId,
             Long interviewId

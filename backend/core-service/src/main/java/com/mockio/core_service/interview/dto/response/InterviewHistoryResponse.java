@@ -20,5 +20,4 @@ public record InterviewHistoryResponse(
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
             OffsetDateTime createdAt
     ) {}
-
 }

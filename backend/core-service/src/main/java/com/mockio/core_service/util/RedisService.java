@@ -31,4 +31,5 @@ public class RedisService {
         // 1분 동안 key 생성
         redisTemplate.opsForValue().set(key, "1", Duration.ofMinutes(1));
     }
+
 }

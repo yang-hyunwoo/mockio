@@ -53,7 +53,6 @@ public class PasswordResetToken extends BaseTimeEntity {
         this.usedAt = usedAt;
     }
 
-
     public static PasswordResetToken createPwdResetToken(
             Long userId,
             String token

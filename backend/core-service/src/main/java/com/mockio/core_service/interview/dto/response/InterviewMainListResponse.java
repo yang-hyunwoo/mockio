@@ -14,7 +14,5 @@ public record InterviewMainListResponse (
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
             OffsetDateTime createdAt,
             int progress
-    ) {
-
-    }
+    ) {}
 }

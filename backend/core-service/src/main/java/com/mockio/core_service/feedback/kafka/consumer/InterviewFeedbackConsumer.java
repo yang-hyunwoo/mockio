@@ -98,6 +98,7 @@ public class InterviewFeedbackConsumer {
         );
         feedbackTxService.markSucceeded(interviewFeedback.getAnswerId(), result);
     }
+
     private void handleInterviewNoAnswerSkipped(InterviewLifecycleEvent event) {
         InterviewAnswerSkippedPayload payload = parser.payloadAs(event, InterviewAnswerSkippedPayload.class);
 

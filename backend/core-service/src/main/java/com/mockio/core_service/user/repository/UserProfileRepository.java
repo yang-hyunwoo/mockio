@@ -7,10 +7,8 @@ package com.mockio.core_service.user.repository;
  * Spring Data JPA를 기반으로 구현됩니다.
  */
 
-
 import com.mockio.core_service.user.domain.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 

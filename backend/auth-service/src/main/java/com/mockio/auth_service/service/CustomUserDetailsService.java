@@ -35,4 +35,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.role()
         );
     }
+
 }

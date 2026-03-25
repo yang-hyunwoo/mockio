@@ -62,6 +62,7 @@ public class User extends BaseTimeEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
 
+
     @Builder
     protected User(Long id,
                    String email,
@@ -103,7 +104,6 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
-
     public void assignProfile(UserProfile profile) {
         this.profile = profile;
         if (profile != null && profile.getUser() != this) {
@@ -122,10 +122,6 @@ public class User extends BaseTimeEntity {
 
     public void resetFailLoginCount() {
         this.failLoginCount = 0;
-    }
-
-    public void changeStatus(UserStatus status) {
-        this.status = status;
     }
 
     public void withdraw() {

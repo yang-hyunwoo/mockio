@@ -14,5 +14,4 @@ public record MypagePasswordChangeRequest(
         @NotBlank(message = "{password.notBlank}",groups = Step3.class)
         @Password(message = "{password.pattern}", groups = Step3.class)
         String confirmPassword
-) {
-}
+) {}

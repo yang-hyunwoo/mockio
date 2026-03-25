@@ -62,15 +62,6 @@ public class InternalMapper {
         );
     }
 
-    private static List<FeedbackDimensions> fromFeedbackDimensionsList(
-            List<InternalFeedbackDimensions> response
-    ) {
-        return response.stream()
-                .map(InternalMapper::fromFeedbackDimensions)
-                .toList();
-    }
-
-
     public static FeedbackDetailResponse fromInternalFeedbackDetail(
             InternalFeedbackDetailResponse response
     ) {

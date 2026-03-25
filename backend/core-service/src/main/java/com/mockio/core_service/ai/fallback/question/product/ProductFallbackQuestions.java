@@ -173,7 +173,6 @@ public final class ProductFallbackQuestions {
                         Set.of("Pivot", "Signal", "ProductStrategy")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

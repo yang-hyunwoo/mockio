@@ -27,8 +27,8 @@ public class InterviewHistoryController {
     @GetMapping("/score-list")
     public ResponseEntity<Response<InterviewHistoryPageResponse>> getHistory(@CurrentSubject Long userId,
                                                                              @RequestParam(required = false) InterviewTrack track,
-                                                                             @PageableDefault(size = 10, page = 0) Pageable pageable) {
-
+                                                                             @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewService.getInterviewHistory(userId, track,pageable));
     }
 

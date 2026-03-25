@@ -13,5 +13,4 @@ public record PasswordChangeRequest(
         @NotBlank(message = "{password.notBlank}",groups = ValidationGroups.Step2.class)
         @Password(message = "{password.pattern}", groups = ValidationGroups.Step2.class)
         String confirmPassword
-) {
-}
+) {}

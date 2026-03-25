@@ -6,5 +6,4 @@ public record InterviewScoreListItem(
         int structure,
         int clarity,
         int specificity
-) {
-}
+) {}

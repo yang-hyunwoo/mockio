@@ -121,5 +121,4 @@ public class LoginUser implements UserDetails , OAuth2User {
         return this.status != "ACTIVE";
     }
 
-
 }

@@ -125,7 +125,6 @@ public class OllamaAIDeepDiveGenerator implements DeepDiveGenerator {
         return new GeneratedDeepDiveBundle(decision, question);
     }
 
-
     private String safeTitle(String title) {
         if (title == null) return "후속 질문";
         String t = title.trim().replaceAll("^\"|\"$", "").trim();

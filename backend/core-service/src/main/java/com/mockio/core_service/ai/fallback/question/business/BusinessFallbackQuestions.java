@@ -174,7 +174,6 @@ public final class BusinessFallbackQuestions {
                         Set.of("Execution", "ChangeManagement", "Leadership")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

@@ -20,13 +20,12 @@ public interface PasswordResetTokenRepository extends JpaRepository<PasswordRese
             """)
     void invalidateAll(Long userId);
 
-
     @Query("""
-    SELECT t
-    FROM PasswordResetToken t
-    WHERE t.token = :token
-      AND t.used = false
-      AND t.expiredAt > CURRENT_TIMESTAMP
-""")
+                SELECT t
+                FROM PasswordResetToken t
+                WHERE t.token = :token
+                  AND t.used = false
+                  AND t.expiredAt > CURRENT_TIMESTAMP
+            """)
     Optional<PasswordResetToken> findValidToken(@Param("token") String token);
 }

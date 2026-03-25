@@ -173,7 +173,6 @@ public class FrontEndEngineerFallbackQuestions {
                         Set.of("UX", "Analytics", "Metrics")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

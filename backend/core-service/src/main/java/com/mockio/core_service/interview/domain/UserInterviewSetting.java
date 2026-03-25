@@ -111,7 +111,6 @@ public class UserInterviewSetting extends BaseTimeEntity {
         ofNullable(interviewMode).ifPresent(this::changeInterviewMode);
         ofNullable(answerTimeSeconds).ifPresent(this::changeAnswerTimeSeconds);
         changeInterviewQuestionCount(interviewQuestionCount);
-
     }
 
     /**

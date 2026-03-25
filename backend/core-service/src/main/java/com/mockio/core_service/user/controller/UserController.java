@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/users/v1")
 @RequiredArgsConstructor
@@ -85,6 +84,5 @@ public class UserController {
        userService.updatePasswordChange(user,request);
         return Response.ok(messageUtil.getMessage("response.read"), null);
     }
-
 
 }

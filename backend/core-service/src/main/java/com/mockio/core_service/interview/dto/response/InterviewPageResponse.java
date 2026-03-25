@@ -18,6 +18,4 @@ public record InterviewPageResponse(
         EnumResponse difficulty,
         EnumResponse feedbackStyle,
         EnumResponse endReason
-){
-
-}
+){}

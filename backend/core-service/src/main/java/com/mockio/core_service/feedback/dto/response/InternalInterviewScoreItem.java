@@ -6,5 +6,4 @@ public record InternalInterviewScoreItem(
         int structure,
         int clarity,
         int specificity
-) {
-}
+) {}

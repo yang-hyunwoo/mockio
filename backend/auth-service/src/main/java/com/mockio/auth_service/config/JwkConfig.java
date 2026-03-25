@@ -50,4 +50,5 @@ public class JwkConfig {
             throw new RuntimeException("Public key 로딩 실패", e);
         }
     }
+
 }

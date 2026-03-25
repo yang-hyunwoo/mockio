@@ -12,8 +12,6 @@ import com.mockio.core_service.user.dto.response.UserProfileImageResponse;
  * DTO / Domain 변환  Mapper.
  *
  */
-
-
 public class UserProfileMapper {
 
 

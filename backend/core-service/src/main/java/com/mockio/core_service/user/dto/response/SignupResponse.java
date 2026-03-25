@@ -4,7 +4,6 @@ import com.mockio.core_service.user.constant.AuthProviderEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record SignupResponse(
-
         @Schema(description = "사용자pk", example = "1")
         Long id,
 
@@ -13,6 +12,4 @@ public record SignupResponse(
 
         @Schema(description = "소셜타입", example = "NORMAL")
         AuthProviderEnum provider
-) {
-
-}
+) {}

@@ -14,4 +14,5 @@ public enum AuthProviderEnum {
     ;
 
     private final String label;
+
 }

@@ -7,7 +7,6 @@ import com.mockio.core_service.interview.dto.response.InterviewQuestionReadRespo
 
 import java.util.List;
 
-
 public class InterviewQuestionMapper {
 
     private InterviewQuestionMapper() {

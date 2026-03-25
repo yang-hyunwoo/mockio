@@ -8,5 +8,4 @@ public record UserAuthInfoResponse(
         String role,
         int failLoginCount,
         String status
-) {
-}
+) {}

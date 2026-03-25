@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import static com.mockio.common_core.annotation.otherValidator.ValidationGroups.Step1;
 
-
 @Getter
 @Setter
 @NoArgsConstructor

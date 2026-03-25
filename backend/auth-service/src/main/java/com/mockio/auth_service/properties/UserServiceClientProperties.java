@@ -7,5 +7,4 @@ public record UserServiceClientProperties(
         String baseUrl,
         int connectTimeoutMs,
         int readTimeoutMs
-) {
-}
+) {}

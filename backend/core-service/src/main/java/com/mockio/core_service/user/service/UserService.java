@@ -15,6 +15,7 @@ import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.user.mapper.UserMapper;
 import com.mockio.core_service.user.repository.UserProfileRepository;
 import com.mockio.core_service.user.repository.UserRepository;
+import com.mockio.core_service.util.RedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
@@ -44,6 +45,7 @@ public class UserService {
     private final UserProfileRepository userProfileRepository;
     private final UserInterviewSettingService userInterviewSettingService;
     private final PasswordResetTokenService passwordResetTokenService;
+    private final RedisService redisService;
 
 
     public SignupResponse join(SignupRequest signupRequest) {
@@ -70,7 +72,6 @@ public class UserService {
         userProfileRepository.save(userProfile);
         userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(save.getId())));
         return UserMapper.from(save);
-
     }
 
     public UserAuthInfoResponse getUserAuthInfo(String email) {
@@ -121,7 +122,6 @@ public class UserService {
         } else {
             user = User.createOautUser(oauthUserRequest);
 
-
             userRepository.save(user);
 
             UserProfile userProfile = UserProfile.createUserProfile(
@@ -131,12 +131,11 @@ public class UserService {
             );
             userProfileRepository.save(userProfile);
             userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(user.getId())));
-
         }
+
         String name = user.getProfile() != null && user.getProfile().getName() != null
                 ? user.getProfile().getName()
                 : oauthUserRequest.name();
-
 
         return new UserAuthInfoResponse(
                 user.getId(),
@@ -153,6 +152,8 @@ public class UserService {
         User user = userRepository.findByEmailAndProviderAndStatus(email, AuthProviderEnum.NORMAL, UserStatus.ACTIVE)
                 .orElse(null);
         if(userNotNull(user)) {
+            //redis 검증
+            redisService.checkRateLimit(email);
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = null;
             try {
@@ -176,7 +177,6 @@ public class UserService {
                         MAIL_SEND_FAIL,
                         MAIL_SEND_FAIL.getMessage());
             }
-
         }
 
     }
@@ -202,7 +202,6 @@ public class UserService {
         ));
 
         passwordMatchCheck(request, findUser);
-
         findUser.withdraw();
         expireRefreshCookie(response);
     }

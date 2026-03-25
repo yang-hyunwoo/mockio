@@ -173,7 +173,6 @@ public final class SalesFallbackQuestions {
                         Set.of("LostDeal", "PostMortem", "Improvement")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

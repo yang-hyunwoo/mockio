@@ -33,38 +33,6 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh-token-expire-time}")
     private long refreshTokenExpire;
 
-    private PrivateKey getPrivateKey() {
-        try {
-            String key = privateKeyPem
-                    .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                    .replace("-----END RSA PRIVATE KEY-----", "")
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
-
-            byte[] decoded = Base64.getDecoder().decode(key);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
-            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
-        } catch (Exception e) {
-            throw new RuntimeException("Private key 로딩 실패", e);
-        }
-    }
-
-    private PublicKey getPublicKey() {
-        try {
-            String key = publicKeyPem
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replaceAll("\\s", "");
-
-            byte[] decoded = Base64.getDecoder().decode(key);
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
-        } catch (Exception e) {
-            throw new RuntimeException("Public key 로딩 실패", e);
-        }
-    }
-
     public String createAccessToken(Long userId) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpire);
@@ -105,14 +73,6 @@ public class JwtTokenProvider {
         }
     }
 
-    private Claims parseClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getPublicKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
     public Long ignoreTokenValid(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getPublicKey())
@@ -122,4 +82,45 @@ public class JwtTokenProvider {
 
         return Long.valueOf(claims.getSubject());
     }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getPublicKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    private PublicKey getPublicKey() {
+        try {
+            String key = publicKeyPem
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s", "");
+
+            byte[] decoded = Base64.getDecoder().decode(key);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("Public key 로딩 실패", e);
+        }
+    }
+
+    private PrivateKey getPrivateKey() {
+        try {
+            String key = privateKeyPem
+                    .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                    .replace("-----END RSA PRIVATE KEY-----", "")
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+
+            byte[] decoded = Base64.getDecoder().decode(key);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
+            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("Private key 로딩 실패", e);
+        }
+    }
+
 }

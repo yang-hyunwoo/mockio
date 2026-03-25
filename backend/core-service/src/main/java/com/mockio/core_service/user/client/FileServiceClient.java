@@ -57,4 +57,5 @@ public class FileServiceClient {
             throw new IllegalStateException("file-service 호출 실패", ex);
         }
     }
+
 }

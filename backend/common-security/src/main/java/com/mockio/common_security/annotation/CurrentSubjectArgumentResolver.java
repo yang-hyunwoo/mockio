@@ -1,6 +1,5 @@
 package com.mockio.common_security.annotation;
 
-import com.mockio.common_security.annotation.CurrentSubject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -100,4 +99,5 @@ public class CurrentSubjectArgumentResolver implements HandlerMethodArgumentReso
             super(message);
         }
     }
+
 }

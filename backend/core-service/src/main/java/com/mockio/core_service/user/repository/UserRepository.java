@@ -23,9 +23,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                                 AuthProviderEnum providerEnum
     );
 
-    Optional<User> findByIdAndStatusAndProviderAndPassword(Long id,
-                                                           UserStatus userStatus,
-                                                           AuthProviderEnum providerEnum,
-                                                           String password
-    );
 }

@@ -26,4 +26,5 @@ public class OpenAIConfig {
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
+
 }

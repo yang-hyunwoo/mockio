@@ -5,5 +5,4 @@ public record LoginResponse(
         String email,
         String accessToken
 
-) {
-}
+) {}

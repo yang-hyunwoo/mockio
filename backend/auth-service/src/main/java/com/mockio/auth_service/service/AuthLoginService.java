@@ -4,14 +4,10 @@ import com.mockio.auth_service.client.UserProfileClient;
 import com.mockio.auth_service.config.JwtTokenProvider;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.dto.UserInfoResponse;
-import com.mockio.auth_service.dto.request.OauthUserRequest;
 import com.mockio.auth_service.dto.request.UserLoginRequest;
 import com.mockio.auth_service.dto.response.LoginResponse;
 import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.CustomApiException;
-import com.mockio.common_security.annotation.CurrentSubjectArgumentResolver;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -67,15 +62,10 @@ public class AuthLoginService {
                     accessToken
             );
         } catch (BadCredentialsException e) {
-
-            // 실패
             userProfileClient.loginFailure(request.email());
-
             throw e;
         }
     }
-
-
 
     public LoginResponse refresh(HttpServletRequest request){
         String refreshToken = extractRefreshToken(request);
@@ -108,7 +98,6 @@ public class AuthLoginService {
 
     public UserInfoResponse userDetail(Long userId) {
         return userProfileClient.userDetail(userId);
-
     }
 
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -143,7 +132,6 @@ public class AuthLoginService {
         return null;
     }
 
-
     private void expireRefreshCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
@@ -152,8 +140,5 @@ public class AuthLoginService {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
-
-
-
 
 }

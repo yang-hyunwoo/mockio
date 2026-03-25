@@ -42,6 +42,5 @@ public record InterviewResultResponse(
                 FeedbackDimensions dimensions,
                 String headline,
                 List<String> improvementTags
-        ) {
-        }
+        ) {}
 }

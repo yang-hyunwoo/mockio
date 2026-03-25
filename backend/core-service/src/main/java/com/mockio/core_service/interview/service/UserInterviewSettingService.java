@@ -63,8 +63,6 @@ public class UserInterviewSettingService {
         return setting;
     }
 
-
-
     /**
      * 면접 설정 조회
      * @param userId

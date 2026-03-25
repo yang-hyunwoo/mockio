@@ -1,11 +1,9 @@
 package com.mockio.auth_service.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.auth_service.dto.UserInfoResponse;
 import com.mockio.auth_service.dto.request.LoginFailureRequest;
 import com.mockio.auth_service.dto.request.LoginSuccessRequest;
 import com.mockio.auth_service.dto.request.OauthUserRequest;
-import com.mockio.auth_service.dto.response.LoginResponse;
 import com.mockio.auth_service.dto.response.UserAuthInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +18,6 @@ import org.springframework.web.client.RestClient;
 public class UserProfileClient {
 
     private final RestClient userRestClient;
-
 
     public UserAuthInfoResponse getUserAuthInfo(String email) {
         return userRestClient.get()
@@ -83,7 +80,5 @@ public class UserProfileClient {
                 })
                 .toBodilessEntity();
     }
-
-
 
 }

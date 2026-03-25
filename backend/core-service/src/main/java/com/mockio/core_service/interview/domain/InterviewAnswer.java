@@ -50,6 +50,7 @@ public class InterviewAnswer extends BaseTimeEntity {
 
     private OffsetDateTime followupAt;
 
+
     @Builder
     private InterviewAnswer(
             Long id,
@@ -92,7 +93,6 @@ public class InterviewAnswer extends BaseTimeEntity {
     public void followupUpdate(String followupReason) {
         this.followupReason = followupReason;
         this.followupAt = OffsetDateTime.now();
-
     }
 
     public void updateAnswer(String idempotencyKey) {

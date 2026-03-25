@@ -141,8 +141,6 @@ public class FeedbackService {
 
     public InternalInterviewScoreListResponse getScoreHistory(List<Long> interviewIds) {
         List<InterviewSummaryFeedback> byInterviewIdIn = summaryFeedbackRepository.findByInterviewIdIn(interviewIds);
-
-
         return SummaryFeedbackMapper.fromScoreList(byInterviewIdIn);
     }
 

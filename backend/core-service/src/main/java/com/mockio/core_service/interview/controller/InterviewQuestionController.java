@@ -21,10 +21,11 @@ public class InterviewQuestionController {
     private final MessageUtil messageUtil;
 
     @PostMapping("/interviews/start-interview")
-    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject Long userId ,
-                                                                                  @RequestBody StartInterviewRequest request) {
+    public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject Long userId,
+                                                                                  @RequestBody StartInterviewRequest request
+    ) {
         return Response.ok(messageUtil.getMessage("response.read"),
-                interviewQuestionService.startInterview(userId,request));
+                interviewQuestionService.startInterview(userId, request));
     }
 
     @PostMapping("/interviews/{interviewId}/questions:generate")
@@ -48,9 +49,9 @@ public class InterviewQuestionController {
 
     @PostMapping("/interviews/retry-interview")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> retryInterview(@CurrentSubject Long userId,
-                                                                                  @RequestBody RetryInterviewRequest request) {
+                                                                                  @RequestBody RetryInterviewRequest request
+    ) {
        return Response.ok(messageUtil.getMessage("response.read"),interviewQuestionService.retryInterview(userId,request));
     }
-
 
 }

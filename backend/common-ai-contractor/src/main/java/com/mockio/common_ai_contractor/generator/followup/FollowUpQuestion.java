@@ -1,6 +1,5 @@
 package com.mockio.common_ai_contractor.generator.followup;
 
-
 import java.util.Set;
 
 public record FollowUpQuestion(

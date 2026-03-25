@@ -46,4 +46,5 @@ public class NoticeDetailResDto {
 
     @Schema(description = "공지사항 다음글 제목",example = "안녕")
     private String nextTitle;
+
 }

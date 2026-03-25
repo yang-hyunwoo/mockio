@@ -14,7 +14,6 @@ public class FileController {
 
     private final FileService fileService;
 
-
     @PostMapping("/files")
     public FileUploadResponse upload(
             @RequestPart("file") MultipartFile file,

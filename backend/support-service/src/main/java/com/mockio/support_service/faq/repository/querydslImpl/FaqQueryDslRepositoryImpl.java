@@ -29,9 +29,7 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
     public List<FaqBoard> findFaqList(FaqReqDto faqReqDto
     ) {
         BooleanBuilder builder = new BooleanBuilder();
-        faqCondition(faqReqDto, builder);
-
-
+        faqCondition(builder);
 
         return queryFactory.selectFrom(f)
                 .where(builder)
@@ -40,20 +38,11 @@ public class FaqQueryDslRepositoryImpl implements FaqQueryDslRepository {
 
     }
 
-    private void faqCondition(FaqReqDto faqReqDto,
-                              BooleanBuilder builder
+    private void faqCondition(BooleanBuilder builder
     ) {
         builder.and(f.visible.isTrue());
         builder.and(f.deleted.isFalse());
 
-//        if (faqReqDto.getFaqType() != null) {
-//            FaqType typeEnum = FaqType.valueOf(faqReqDto.getFaqType());
-//            builder.and(f.faqType.eq(typeEnum));
-//        }
-
-//        if (faqReqDto.getQuestion() != null && !faqReqDto.getQuestion().isBlank()) {
-//            builder.and(f.question.value.containsIgnoreCase(faqReqDto.getQuestion()));
-//        }
     }
 
 }

@@ -21,7 +21,7 @@ public class GatewayAuthenticationEntryPoint  implements ServerAuthenticationEnt
 
     @Override
     public Mono<Void> commence(ServerWebExchange exchange, AuthenticationException ex) {
-        var errorEnum = classify(ex); // ERR_TOKEN_*
+        var errorEnum = classify(ex);
 
         return writer.write(exchange, HttpStatus.UNAUTHORIZED, errorEnum.getMessage(), errorEnum);
     }

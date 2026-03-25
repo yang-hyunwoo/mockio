@@ -51,4 +51,5 @@ public class CloudflareR2Config {
                 .endpointOverride(URI.create(endpoint))
                 .build();
     }
+
 }

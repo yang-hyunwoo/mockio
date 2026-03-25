@@ -19,14 +19,12 @@ import java.util.UUID;
 
 import static com.mockio.support_service.notification.constant.NotificationErrorCode.NOTIFICATION_FORBIDDEN;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-
 
     @Transactional(readOnly = true)
     public NotificationListResponseDto getNotificationList(Long userId) {
@@ -65,7 +63,6 @@ public class NotificationService {
                     "INTERVIEW",
                     payload.interviewId()
             );
-
             notificationRepository.save(notification);
         } catch (DataIntegrityViolationException e) {
             notificationRepository

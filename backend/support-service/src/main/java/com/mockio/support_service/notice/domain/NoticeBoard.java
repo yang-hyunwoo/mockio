@@ -23,10 +23,6 @@ public class NoticeBoard extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "thumbnail_file_id")
-//    private Files thumbnailFile;
-
     @Column(nullable = false)
     private String userId;
 

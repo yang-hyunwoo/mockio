@@ -52,6 +52,7 @@ public class Notification extends BaseTimeEntity {
     @Column(name = "reference_id", nullable = false)
     private Long referenceId;
 
+
     @Builder
     private Notification(Long id,
                          Long userId,

@@ -9,7 +9,6 @@ import lombok.Getter;
 public enum NotificationErrorCode implements ErrorCode {
 
     NOTIFICATION_FORBIDDEN(403, "NOTIFICATION_FORBIDDEN", "해당 알림에 접근 권한이 없습니다."),
-
     ;
 
     private final int httpStatus;

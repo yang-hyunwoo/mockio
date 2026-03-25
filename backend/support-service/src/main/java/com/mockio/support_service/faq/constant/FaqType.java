@@ -11,7 +11,8 @@ public enum FaqType {
     FEEDBACK("AI 피드백"),
     PAYMENT("결제"),
     TECHNICAL("기술 문제"),
-    ETC("기타");
+    ETC("기타")
+    ;
 
     private final String label;
 

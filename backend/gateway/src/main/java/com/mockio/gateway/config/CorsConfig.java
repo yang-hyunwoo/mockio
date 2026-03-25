@@ -17,7 +17,6 @@ public class CorsConfig {
         final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
         final List<String> ALLOWED_HEADERS = List.of("*");
         final List<String> EXPOSED_HEADERS = List.of("Authorization", "refresh-token");
-//        final List<String> ALLOWED_HEADERS = List.of("Authorization", "Content-Type");
 
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
@@ -32,5 +31,6 @@ public class CorsConfig {
 
         return source;
     }
+
 }
 

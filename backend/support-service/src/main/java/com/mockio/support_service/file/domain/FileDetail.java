@@ -48,6 +48,7 @@ public class FileDetail extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted;
 
+
     @Builder
     protected FileDetail(String originalFileName,
                          String storedFileName,
@@ -128,4 +129,5 @@ public class FileDetail extends BaseEntity {
                 ", deleted=" + deleted +
                 '}';
     }
+
 }

@@ -50,6 +50,7 @@ public class FaqBoard extends BaseEntity {
 
     private OffsetDateTime deletedAt;
 
+
     @Builder
     protected FaqBoard(String userId,
                        BoardTitle question,

@@ -13,7 +13,6 @@ public class NotificationMapper {
             int unreadCount,
             boolean hasNext
     ) {
-
         List<NotificationListResponseDto.Item> items =
                 notifications.stream()
                         .map(NotificationMapper::from)
@@ -27,7 +26,6 @@ public class NotificationMapper {
     }
 
     public static NotificationListResponseDto.Item from(Notification notification) {
-
         return new NotificationListResponseDto.Item(
                 notification.getId(),
                 EnumResponse.of(
@@ -41,4 +39,5 @@ public class NotificationMapper {
                 notification.getCreatedAt()
         );
     }
+
 }

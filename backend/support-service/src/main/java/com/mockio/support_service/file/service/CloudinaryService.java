@@ -15,7 +15,6 @@ import java.util.Map;
 import static com.mockio.support_service.file.constant.FileErrorCode.CLOUDINARY_ERROR;
 import static com.mockio.support_service.file.constant.FileErrorCode.CLOUDINARY_NOT_CONNECT;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -67,4 +66,5 @@ public class CloudinaryService {
     public Cloudinary connectCloudinary() {
         return cloudinary;
     }
+
 }

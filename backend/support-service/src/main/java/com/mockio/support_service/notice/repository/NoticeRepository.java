@@ -29,14 +29,12 @@ public interface NoticeRepository extends JpaRepository<NoticeBoard, Long> {
                         id DESC
                     """,
             countQuery = """
-                      SELECT COUNT(*)
-                      FROM notice_board
-                      WHERE visible = true
-                        AND deleted = false
-                          """,
-            nativeQuery = true
-    )
-    Page<NoticeBoard> findByPageNative(Pageable pageable , @Param("noticePinSort") String noticePinSort);
+                    SELECT COUNT(*)
+                    FROM notice_board
+                    WHERE visible = true
+                      AND deleted = false
+                    """, nativeQuery = true)
+    Page<NoticeBoard> findByPageNative(Pageable pageable, @Param("noticePinSort") String noticePinSort);
 
     @Query(value = """
             SELECT *
@@ -61,7 +59,7 @@ public interface NoticeRepository extends JpaRepository<NoticeBoard, Long> {
               WHERE id = :id
                AND visible = true
                AND deleted = false
-                    """, nativeQuery = true)
+            """, nativeQuery = true)
     Optional<NoticeBoard> findNoticeNative(@Param("id") Long id);
 
     /**
@@ -78,8 +76,8 @@ public interface NoticeRepository extends JpaRepository<NoticeBoard, Long> {
               AND deleted = false
               AND notice_pin_sort = :noticePinSort
                ORDER BY sort DESC LIMIT 1
-                    """, nativeQuery = true)
-    Optional<NoticeBoard> findPrevNoticeNative(@Param("sort") int currentSort , @Param("noticePinSort") String noticePinSort);
+            """, nativeQuery = true)
+    Optional<NoticeBoard> findPrevNoticeNative(@Param("sort") int currentSort, @Param("noticePinSort") String noticePinSort);
 
     /**
      * 공지 사항 다음 id 조회
@@ -95,8 +93,8 @@ public interface NoticeRepository extends JpaRepository<NoticeBoard, Long> {
                AND deleted = false
                AND notice_pin_sort = :noticePinSort
                 ORDER BY sort ASC LIMIT 1
-                    """, nativeQuery = true)
-    Optional<NoticeBoard> findNextNoticeNative(@Param("sort") int currentSort , @Param("noticePinSort") String noticePinSort);
+            """, nativeQuery = true)
+    Optional<NoticeBoard> findNextNoticeNative(@Param("sort") int currentSort, @Param("noticePinSort") String noticePinSort);
 
     /**
      * 공지 사항 메인 조회

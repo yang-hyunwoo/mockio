@@ -29,8 +29,6 @@ public class NoticeMapper {
                 .toList();
     }
 
-
-
     public static NoticeDetailResDto from(NoticeBoard noticeBoard,
                                           @Nullable NoticeBoard prevNoticeBoard,
                                           @Nullable NoticeBoard nextNoticeBoard

@@ -18,6 +18,5 @@ public record NotificationListResponseDto(
             String link,
             boolean isRead,
             OffsetDateTime createdAt
-    ) {
-    }
+    ) {}
 }

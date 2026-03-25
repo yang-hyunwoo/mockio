@@ -11,7 +11,9 @@ public enum FileErrorCode implements ErrorCode {
     CLOUDINARY_ERROR(500, "CLOUDINARY_ERROR", "cloudinary 서버 오류가 발생했습니다."),
     FILE_NOT_FOUND(400, "FILE_NOT_FOUND", "파일을 찾을 수 없습니다."),
     ;
+
     private final int httpStatus;
     private final String code;
     private final String message;
+
 }

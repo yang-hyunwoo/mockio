@@ -93,4 +93,5 @@ public class FileGroup extends BaseEntity {
                 ", fileDetails=" + fileDetails +
                 '}';
     }
+
 }

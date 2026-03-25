@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface FileDetailRepository extends JpaRepository<FileDetail , Long> {
 
     Optional<FileDetail> findTopByFileGroupIdAndDeletedFalseOrderByIdDesc(Long fileGroupId);
+
 }

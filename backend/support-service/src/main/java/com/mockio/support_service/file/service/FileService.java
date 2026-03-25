@@ -1,6 +1,5 @@
 package com.mockio.support_service.file.service;
 
-
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.mockio.common_core.exception.CustomApiException;
@@ -161,8 +160,6 @@ public class FileService {
      */
     public void deleteFileDetail(List<Long> delFileDetailsId
     ) {
-//        fileGroupRepository.findByIdAndDomainIdAndDomainType(fileId, domainId,domainType)
-//                .orElseThrow(() -> new CustomApiException(FILE_NOT_FOUND.getHttpStatus(), FILE_NOT_FOUND, FILE_NOT_FOUND.getMessage()));
         for (Long fileDetailId : delFileDetailsId) {
             fileDetailRepository.findById(fileDetailId).ifPresent(FileDetail::updateFileDeleted);
         }
@@ -199,4 +196,5 @@ public class FileService {
         int lastSlash = key.lastIndexOf("/");
         return (lastSlash != -1) ? key.substring(lastSlash + 1) : key;
     }
+
 }

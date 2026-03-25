@@ -10,4 +10,5 @@ public interface FileGroupRepository extends JpaRepository<FileGroup, Long> {
     Optional<FileGroup> findByIdAndDomainIdAndDomainType(Long fileId,
                                                          Long domainId,
                                                          String domainType);
+
 }

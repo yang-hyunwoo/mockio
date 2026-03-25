@@ -8,6 +8,7 @@ import com.mockio.core_service.user.domain.User;
 import com.mockio.core_service.user.domain.UserProfile;
 import com.mockio.core_service.user.dto.UserAuthInfoResponse;
 import com.mockio.core_service.user.dto.request.EnsureInterviewSettingRequest;
+import com.mockio.core_service.user.dto.request.OauthUserRequest;
 import com.mockio.core_service.user.dto.request.SignupRequest;
 import com.mockio.core_service.user.dto.response.SignupResponse;
 import com.mockio.core_service.user.dto.response.UserInfoResponse;
@@ -67,6 +68,7 @@ public class UserService {
 
         return new UserAuthInfoResponse(
                 user.getId(),
+                user.getProfile().getName(),
                 user.getEmail(),
                 user.getPassword(),
                 user.getRole().name(),
@@ -97,6 +99,43 @@ public class UserService {
         User user = userRepository.findByEmailAndProvider(email, AuthProviderEnum.NORMAL)
                 .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
         user.increaseFailLoginCount();
+    }
+
+    public UserAuthInfoResponse oauthLogin(OauthUserRequest oauthUserRequest) {
+        User user;
+        if(userRepository.findByEmailAndProvider(oauthUserRequest.email(),
+                oauthUserRequest.provider()).isPresent()) {
+             user = userRepository.findByEmailAndProvider(oauthUserRequest.email(),
+                    oauthUserRequest.provider()).orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
+        } else {
+            user = User.createOautUser(oauthUserRequest);
+
+
+            userRepository.save(user);
+
+            UserProfile userProfile = UserProfile.createUserProfile(
+                    user,
+                    oauthUserRequest.name(),
+                    oauthUserRequest.nickname()
+            );
+            userProfileRepository.save(userProfile);
+            userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(user.getId())));
+
+        }
+        String name = user.getProfile() != null && user.getProfile().getName() != null
+                ? user.getProfile().getName()
+                : oauthUserRequest.name();
+
+
+        return new UserAuthInfoResponse(
+                user.getId(),
+                name,
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole().name(),
+                user.getFailLoginCount(),
+                user.getStatus().name()
+        );
     }
 
 }

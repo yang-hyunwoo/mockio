@@ -10,27 +10,23 @@ package com.mockio.auth_service.config;
  * 컨트롤러 레벨에서 검증하도록 위임한다.</p>
  */
 
+import com.mockio.auth_service.oauth.OAuth2AuthenticationFailureHandler;
+import com.mockio.auth_service.oauth.OAuth2AuthenticationSuccessHandler;
+import com.mockio.auth_service.oauth.PrincipalOauth2UserService;
 import com.mockio.auth_service.service.CustomUserDetailsService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
-import java.util.function.Supplier;
 
 @Configuration
 @EnableWebSecurity
@@ -38,11 +34,9 @@ import java.util.function.Supplier;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final PrincipalOauth2UserService principalOauth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -71,10 +65,19 @@ public class SecurityConfig {
                                 "/api/auth/v1/login",
                                 "/api/auth/v1/.well-known/jwks.json",
                                 "/api/auth/v1/logout/all",
+                                "/api/auth/v1/oauth2/authorization/**",
+                                "/api/auth/v1/login/oauth2/code/**",
                                 "/api/auth/v1/public/**").permitAll()
                         .anyRequest().authenticated()
 
 
+                )
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/v1/oauth2/authorization"))
+                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/api/auth/v1/login/oauth2/code/**"))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(principalOauth2UserService))
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt());
 

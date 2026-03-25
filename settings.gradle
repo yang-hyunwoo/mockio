@@ -20,20 +20,11 @@ project(":gateway").projectDir = file("backend/gateway")
 include "auth-service"
 project(":auth-service").projectDir = file("backend/auth-service")
 
-include "notification-service"
-project(":notification-service").projectDir = file("backend/notification-service")
+include "core-service"
+project(":core-service").projectDir = file("backend/core-service")
 
-include "noti-service"
-project(":noti-service").projectDir = file("backend/noti-service")
-
-include "inquiry-service"
-project(":inquiry-service").projectDir = file("backend/inquiry-service")
-
-include "faq-service"
-project(":faq-service").projectDir = file("backend/faq-service")
-
-include "file-service"
-project(":file-service").projectDir = file("backend/file-service")
+include "support-service"
+project(":support-service").projectDir = file("backend/support-service")
 
 include "common-core"
 project(":common-core").projectDir = file("backend/common-core")
@@ -52,10 +43,4 @@ project(":common-kafka").projectDir = file("backend/common-kafka")
 
 include "common-ai-contractor"
 project(":common-ai-contractor").projectDir = file("backend/common-ai-contractor")
-
-include "core-service"
-project(":core-service").projectDir = file("backend/core-service")
-
-include "support-service"
-project(":support-service").projectDir = file("backend/support-service")
 

@@ -14,6 +14,7 @@ public class LoginUser implements UserDetails , OAuth2User {
 
     private final Long userId;
     private final String email;
+    private final String name;
     private final String password;
     private final String role;
     private Map<String , Object> attributes;
@@ -25,11 +26,13 @@ public class LoginUser implements UserDetails , OAuth2User {
      */
     public LoginUser(Long userId,
                      String email,
+                     String name,
                      String password,
                      int failLoginCount,
                      String status,
                      String role) {
         this.userId = userId;
+        this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -42,13 +45,15 @@ public class LoginUser implements UserDetails , OAuth2User {
      * @param attributes
      */
     public LoginUser(Long userId,
+                     String name,
                      String email,
                      String password,
-                     String role,
                      int failLoginCount,
                      String status,
+                     String role,
                      Map<String, Object> attributes) {
         this.userId = userId;
+        this.name = name;
         this.email = email;
         this.password = password;
         this.failLoginCount = failLoginCount;
@@ -76,7 +81,7 @@ public class LoginUser implements UserDetails , OAuth2User {
 
     @Override
     public String getUsername() {
-        return null;
+        return name;
     }
 
     /**
@@ -116,8 +121,5 @@ public class LoginUser implements UserDetails , OAuth2User {
         return this.status != "ACTIVE";
     }
 
-    @Override
-    public String getName() {
-        return null;
-    }
+
 }

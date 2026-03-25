@@ -57,7 +57,7 @@ public class AuthExceptionHandler {
         log.error("인증 에러", e);
         return Response.error(
                 UNAUTHORIZED.value(),
-                "아이디 또는 비밀번호가 올바르지 않습니다.",
+                "인증되지 않았습니다.",
                 CommonErrorEnum.ERR_401,
                 null
         );

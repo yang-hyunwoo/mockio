@@ -30,6 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return new LoginUser(
                user.id(),
+                user.name(),
                 user.email(),
                 user.password(),
                 user.failLoginCount(),

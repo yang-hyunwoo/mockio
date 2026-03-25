@@ -10,7 +10,7 @@ CREATE TABLE users (
    created_at TIMESTAMPTZ NOT NULL,
    updated_at TIMESTAMPTZ NOT NULL,
 
-   CONSTRAINT uk_users_email UNIQUE (email),
+   CONSTRAINT uk_users_email UNIQUE (email,provider),
    CONSTRAINT ck_users_status CHECK (status IN ('ACTIVE', 'SUSPENDED', 'DELETED')),
    CONSTRAINT ck_users_role CHECK (role IN ('USER', 'ADMIN'))
 );

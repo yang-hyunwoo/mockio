@@ -1,5 +1,6 @@
 package com.mockio.core_service.user.domain;
 
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
 import com.mockio.core_service.user.constant.AuthProviderEnum;
 import com.mockio.core_service.user.constant.UserRole;
@@ -11,9 +12,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
+
+import static com.mockio.core_service.user.constant.error.UserErrorEnum.CURRENT_PASSWORD_NOT_MATCH;
+import static com.mockio.core_service.user.constant.error.UserErrorEnum.PASSWORD_NOT_MATCH;
 
 @Entity
 @Getter
@@ -119,19 +124,11 @@ public class User extends BaseTimeEntity {
         this.failLoginCount = 0;
     }
 
-    public void changePassword(String encodedPassword) {
-        this.password = encodedPassword;
-    }
-
     public void changeStatus(UserStatus status) {
         this.status = status;
     }
 
-    public void changeRole(UserRole role) {
-        this.role = role;
-    }
-
-    public void deactivate() {
+    public void withdraw() {
         this.status = UserStatus.DELETED;
     }
 
@@ -150,4 +147,19 @@ public class User extends BaseTimeEntity {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public void resetPasswordChange(String password,
+                                    String confirmPassword,
+                                    PasswordEncoder passwordEncoder
+    ) {
+
+        if (password.equals(confirmPassword)) {
+            this.password = passwordEncoder.encode(password);
+        } else {
+            throw new CustomApiException(PASSWORD_NOT_MATCH.getHttpStatus(),
+                    CURRENT_PASSWORD_NOT_MATCH,
+                    CURRENT_PASSWORD_NOT_MATCH.getMessage());
+        }
+    }
+
 }

@@ -42,14 +42,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         redisRefreshTokenService.save(
                 loginUser.getUserId(),
                 refreshToken,
-                Duration.ofDays(1)
+                Duration.ofDays(3)
         );
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(false); // 운영 HTTPS면 true
         refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(1 * 24 * 60 * 60);
+        refreshCookie.setMaxAge(3 * 24 * 60 * 60);
         response.addCookie(refreshCookie);
 
         String targetUrl = determineTargetUrl();

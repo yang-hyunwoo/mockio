@@ -6,7 +6,6 @@ package com.mockio.core_service.interview.service;
  *  면접 설정 관련 서비스를 제공합니다.
  */
 
-import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.interview.Mapper.UserInterviewSettingMapper;
 import com.mockio.core_service.interview.domain.UserInterviewSetting;
 import com.mockio.core_service.interview.dto.request.InternalEnsureInterviewSettingRequest;
@@ -17,9 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +42,28 @@ public class UserInterviewSettingService {
                 setting.getInterviewQuestionCount()
         );
     }
+
+    /**
+     * 유저 면접 업을 경우 생성 메서드
+     * @param userId
+     * @return
+     */
+    public UserInterviewSetting absentEnsureSettingSave(Long userId) {
+        UserInterviewSetting setting = UserInterviewSetting.createUserInterviewPreference(userId);
+
+        userInterviewSettingRepository.insertIfAbsent(
+                setting.getUserId(),
+                setting.getTrack().name(),
+                setting.getDifficulty().name(),
+                setting.getFeedbackStyle().name(),
+                setting.getInterviewMode().name(),
+                setting.getAnswerTimeSeconds(),
+                setting.getInterviewQuestionCount()
+        );
+        return setting;
+    }
+
+
 
     /**
      * 면접 설정 조회
@@ -81,7 +99,7 @@ public class UserInterviewSettingService {
      */
     private UserInterviewSetting findByUserId(Long userId) {
        return userInterviewSettingRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
+                .orElseGet(() -> absentEnsureSettingSave(userId) );
     }
 
 }

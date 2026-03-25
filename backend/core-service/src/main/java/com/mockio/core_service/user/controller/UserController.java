@@ -3,6 +3,7 @@ package com.mockio.core_service.user.controller;
 import com.mockio.core_service.user.dto.UserAuthInfoResponse;
 import com.mockio.core_service.user.dto.request.LoginFailureRequest;
 import com.mockio.core_service.user.dto.request.LoginSuccessRequest;
+import com.mockio.core_service.user.dto.request.OauthUserRequest;
 import com.mockio.core_service.user.dto.response.UserInfoResponse;
 import com.mockio.core_service.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,11 @@ public class UserController {
     @PatchMapping("/internal/login-failure")
     public void loginFailure(@RequestBody LoginFailureRequest loginFailureRequest) {
         userService.loginFailure(loginFailureRequest.email());
+    }
+
+    @PostMapping("/internal/oauth-login")
+    public UserAuthInfoResponse oauthLogin(@RequestBody OauthUserRequest oauthUserRequest) {
+        return userService.oauthLogin(oauthUserRequest);
     }
 
 

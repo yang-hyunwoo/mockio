@@ -4,6 +4,7 @@ import com.mockio.common_jpa.domain.BaseTimeEntity;
 import com.mockio.core_service.user.constant.AuthProviderEnum;
 import com.mockio.core_service.user.constant.UserRole;
 import com.mockio.core_service.user.constant.UserStatus;
+import com.mockio.core_service.user.dto.request.OauthUserRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -85,6 +86,18 @@ public class User extends BaseTimeEntity {
                 .provider(AuthProviderEnum.NORMAL)
                 .build();
     }
+
+    public static User createOautUser(OauthUserRequest oauthUserRequest) {
+        return User.builder()
+                .email(oauthUserRequest.email())
+                .password(oauthUserRequest.password())
+                .failLoginCount(0)
+                .role(UserRole.USER)
+                .status(UserStatus.ACTIVE)
+                .provider(oauthUserRequest.provider())
+                .build();
+    }
+
 
     public void assignProfile(UserProfile profile) {
         this.profile = profile;

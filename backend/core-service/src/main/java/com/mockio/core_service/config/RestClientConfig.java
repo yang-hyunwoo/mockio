@@ -1,6 +1,6 @@
 package com.mockio.core_service.config;
 
-import com.mockio.core_service.user.properties.FileServiceClientProperties;
+import com.mockio.core_service.user.properties.SupportServiceClientProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 @EnableConfigurationProperties({
-        FileServiceClientProperties.class
+        SupportServiceClientProperties.class
 })
 public class RestClientConfig {
 
@@ -23,7 +23,7 @@ public class RestClientConfig {
     @Bean
     public RestClient fileServiceRestClient(
             HttpComponentsClientHttpRequestFactory requestFactory,
-            FileServiceClientProperties properties
+            SupportServiceClientProperties properties
     ) {
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())

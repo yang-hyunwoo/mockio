@@ -1,5 +1,6 @@
 package com.mockio.core_service.interview.service;
 
+import com.mockio.common_ai_contractor.constant.InterviewEndReason;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_core.exception.CustomApiException;
@@ -27,7 +28,6 @@ import java.util.List;
 
 import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 import static com.mockio.common_ai_contractor.constant.InterviewStatus.*;
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static java.time.OffsetDateTime.now;
 
 @Service
@@ -39,6 +39,7 @@ public class InterviewQuestionService {
     private final UserInterviewSettingRepository userInterviewSettingRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final AIServiceClient aiServiceClient;
+    private final UserInterviewSettingService userInterviewSettingService;
 
 
     public InterviewQuestionReadResponse startInterview(Long userId, StartInterviewRequest request) {
@@ -70,19 +71,27 @@ public class InterviewQuestionService {
     }
 
 
-
     public Long generateInterview(Long userId, StartInterviewRequest request) {
-        //1.유저 인터뷰 세팅을 조회 한다.
+
+        //1.유저 인터뷰 세팅 ( 없으면 생성 후 리턴)
         UserInterviewSetting userInterviewSetting = userInterviewSettingRepository.findByUserId(userId)
-                .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
+                .orElseGet(
+                        () -> userInterviewSettingService.absentEnsureSettingSave(userId)
+                );
+
 
         //2.유저 인터뷰 생성 및 조회 한다.
         Interview activeInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
                 .orElse(null);
 
         if (activeInterview != null) {
-            return activeInterview.getId();
+            if(interviewQuestionRepository.countByInterviewId(activeInterview.getId()) ==0) {
+                activeInterview.complete(InterviewEndReason.ERROR);
+           } else {
+                return activeInterview.getId();
+            }
         }
+
         Interview existing = interviewRepository
                 .findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
                 .orElse(null);

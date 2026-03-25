@@ -20,19 +20,12 @@ public class InterviewQuestionController {
     private final InterviewQuestionService interviewQuestionService;
     private final MessageUtil messageUtil;
 
-    @PostMapping("/interviews/current")
-    public ResponseEntity<Response<Long>> generateInterview(@CurrentSubject Long userId, StartInterviewRequest request) {
-        return Response.ok(messageUtil.getMessage("response.read"),
-                interviewQuestionService.generateInterview(userId,request));
-    }
-
     @PostMapping("/interviews/start-interview")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> startInterview(@CurrentSubject Long userId ,
                                                                                   @RequestBody StartInterviewRequest request) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 interviewQuestionService.startInterview(userId,request));
     }
-
 
     @PostMapping("/interviews/{interviewId}/questions:generate")
     public ResponseEntity<Response<InterviewQuestionReadResponse>> generateQuestions(

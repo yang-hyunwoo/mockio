@@ -1,6 +1,5 @@
 package com.mockio.common_ai_contractor.generator.question;
 
-
 import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
 import com.mockio.common_ai_contractor.constant.InterviewMode;
 import com.mockio.common_ai_contractor.constant.InterviewTrack;

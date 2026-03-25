@@ -173,7 +173,6 @@ public class ServerEngineerFallbackQuestions {
                         Set.of("CircuitBreaker", "Resilience", "FaultTolerance")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

@@ -33,7 +33,6 @@ public class CurrentUserFacade<T> {
             return null;
         }
 
-
         String userId = jwt.getSubject();
         if (userId == null || userId.isBlank()) {
             if (required) {

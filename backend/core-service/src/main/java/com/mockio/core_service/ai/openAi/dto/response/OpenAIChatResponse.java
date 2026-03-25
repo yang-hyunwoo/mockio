@@ -38,4 +38,5 @@ public record OpenAIChatResponse(
                 String content
         ) {}
     }
+
 }

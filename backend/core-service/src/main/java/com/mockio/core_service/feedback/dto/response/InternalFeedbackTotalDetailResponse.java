@@ -7,7 +7,4 @@ import java.util.List;
 public record InternalFeedbackTotalDetailResponse(
         InternalSummaryFeedback summaryFeedback,
         List<InternalFeedbackDetailResponse> feedbacks
-) {
-
-
-}
+) {}

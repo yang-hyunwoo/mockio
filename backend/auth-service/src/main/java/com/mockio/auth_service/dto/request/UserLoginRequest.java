@@ -12,5 +12,4 @@ public record UserLoginRequest(
         @NotBlank(message = "{password.notBlank}",groups = Step2.class)
         String password,
         boolean chk
-) {
-}
+) {}

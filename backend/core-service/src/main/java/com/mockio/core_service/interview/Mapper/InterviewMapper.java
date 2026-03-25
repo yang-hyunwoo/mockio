@@ -30,7 +30,6 @@ public class InterviewMapper {
                 interview.getTrack().getLabel() + " (" + interview.getDifficulty().getLabel() + ")",
                 interview.getCreatedAt(),
                 progress
-
         );
     }
 
@@ -134,6 +133,7 @@ public class InterviewMapper {
                     );
                 })
                 .toList();
+
         SummaryFeedback summary =
                 feedbackTotalDetailResponse == null ? null : feedbackTotalDetailResponse.summaryFeedback();
         Integer totalScore = summary != null ? summary.totalScore() : null;

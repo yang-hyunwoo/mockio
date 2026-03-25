@@ -18,4 +18,5 @@ public class MultipartFileResource extends ByteArrayResource {
     public String getFilename() {
         return filename;
     }
+
 }

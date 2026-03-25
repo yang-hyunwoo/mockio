@@ -173,7 +173,6 @@ public final class DesignFallbackQuestions {
                         Set.of("Communication", "Stakeholder", "Strategy")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

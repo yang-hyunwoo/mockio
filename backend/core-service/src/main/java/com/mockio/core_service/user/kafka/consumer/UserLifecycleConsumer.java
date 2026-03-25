@@ -60,7 +60,5 @@ public class UserLifecycleConsumer {
         Long userId = event.aggregateId();
     }
 
-    private void handleUserSuspended(UserLifecycleEvent event) {
-    }
 
 }

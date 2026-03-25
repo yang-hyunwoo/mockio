@@ -11,7 +11,6 @@ import com.mockio.core_service.feedback.dto.response.SummaryFeedbackText;
 
 import java.util.List;
 
-
 public class SummaryFeedbackMapper {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();

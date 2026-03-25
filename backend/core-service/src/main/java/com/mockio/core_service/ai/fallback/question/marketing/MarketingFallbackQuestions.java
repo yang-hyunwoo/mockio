@@ -173,7 +173,6 @@ public final class MarketingFallbackQuestions {
                         Set.of("Scaling", "Process", "Growth")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

@@ -173,7 +173,6 @@ public class BackEndEngineerFallbackQuestions {
                         Set.of("Observability", "Logging", "Tracing")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

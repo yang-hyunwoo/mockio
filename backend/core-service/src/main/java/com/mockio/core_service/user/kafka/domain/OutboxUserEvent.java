@@ -65,6 +65,7 @@ public class OutboxUserEvent extends BaseTimeEntity {
     @Column(name = "sent_at")
     private OffsetDateTime sentAt;
 
+
     @Builder
     private OutboxUserEvent(
             Long id,
@@ -127,7 +128,6 @@ public class OutboxUserEvent extends BaseTimeEntity {
                 .nextAttemptAt(OffsetDateTime.now())
                 .build();
     }
-
 
     public boolean isPublishableBy(String lockerId, OffsetDateTime now) {
         if (OutboxStatus.PROCESSING != this.status) return false;

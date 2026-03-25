@@ -8,5 +8,4 @@ public record OauthUserRequest(
         String password,
         String nickname,
         String name
-) {
-}
+) {}

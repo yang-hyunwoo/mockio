@@ -43,10 +43,8 @@ public class DeepDiveGate {
             if (!hasRealJustification) return true;
         }
 
-
         // 2) 근거 신호는 있어도 “구현/사용 나열”이 많으면 딥다이브 가치 ↑
         if (shallowCount >= 2) return true;
-
 
         // 3) 접속사만 있는 경우 방지(“그래서”만 있고 내용은 빈약한 케이스)
         return CONNECTORS.stream().anyMatch(text::contains) && !hasRealJustification;

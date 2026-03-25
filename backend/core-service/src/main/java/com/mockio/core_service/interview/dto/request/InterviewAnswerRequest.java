@@ -8,5 +8,4 @@ public record InterviewAnswerRequest(
         @Schema(name = "답변", example = "아아라라") String answerText,
         @Schema(name = "타이핑 시간", example = "30") Integer answerDurationSeconds,
         @Schema(name = "멱등성 키", example = "uuid") String idempotencyKey
-
 ) {}

@@ -173,7 +173,6 @@ public final class DataEngineerFallbackQuestions {
                         Set.of("DataQuality", "Monitoring", "Validation")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

@@ -25,4 +25,5 @@ public @interface Numeric {
     boolean numberEquals() default false;
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
+
 }

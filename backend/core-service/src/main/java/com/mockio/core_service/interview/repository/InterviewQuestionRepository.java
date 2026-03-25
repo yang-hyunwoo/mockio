@@ -28,11 +28,11 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
     Optional<InterviewQuestion> findByInterviewIdAndSeq(Long interviewId, Integer seq);
 
     @Query("""
-        select q
-        from InterviewQuestion q
-        join fetch q.interview i
-        where q.id = :questionId
-    """)
+                select q
+                from InterviewQuestion q
+                join fetch q.interview i
+                where q.id = :questionId
+            """)
     Optional<InterviewQuestion> findByIdWithInterview(@Param("questionId") Long questionId);
 
     List<InterviewQuestion> findByInterviewIdAndTypeOrderBySeqAsc(Long interviewId , QuestionType type);

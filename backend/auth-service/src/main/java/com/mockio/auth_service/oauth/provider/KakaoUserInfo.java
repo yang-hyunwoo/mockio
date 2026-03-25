@@ -1,11 +1,9 @@
 package com.mockio.auth_service.oauth.provider;
 
 import com.mockio.auth_service.constant.AuthProviderEnum;
-
 import java.util.Map;
 
 import static com.mockio.auth_service.constant.AuthProviderEnum.*;
-
 
 public class KakaoUserInfo implements OAuth2UserInfo {
 
@@ -45,4 +43,5 @@ public class KakaoUserInfo implements OAuth2UserInfo {
         }
         return null;
     }
+
 }

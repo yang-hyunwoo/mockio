@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
-
 @MappedSuperclass
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

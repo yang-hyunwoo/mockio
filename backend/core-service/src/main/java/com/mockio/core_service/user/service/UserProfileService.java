@@ -31,7 +31,6 @@ import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -65,13 +64,6 @@ public class UserProfileService {
     }
 
     /**
-     * 유저 탈퇴
-     */
-    public void deleteProfile(User user) {
-
-    }
-
-    /**
      * 유저 프로필 조회
      * @param
      * @return
@@ -86,9 +78,7 @@ public class UserProfileService {
         if(userProfile.getProfileImageId()!= null) {
             userProfileImageResponse = fileServiceClient.getProfileImage(userId, userProfile.getProfileImageId());
         }
-
         return UserProfileMapper.fromDetail(user,preference,userProfileImageResponse);
-
     }
 
     /**

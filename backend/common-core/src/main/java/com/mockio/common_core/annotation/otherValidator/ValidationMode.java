@@ -1,6 +1,5 @@
 package com.mockio.common_core.annotation.otherValidator;
 
-
 import com.mockio.common_core.constant.ValidationType;
 
 import java.lang.annotation.ElementType;

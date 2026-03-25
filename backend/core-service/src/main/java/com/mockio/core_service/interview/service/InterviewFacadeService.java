@@ -81,10 +81,7 @@ public class InterviewFacadeService {
                     INTERVIEW_NOT_END,
                     INTERVIEW_NOT_END.getMessage());
         }
-
     }
-
-
 
     private static void InterviewUserCheck(Long userId, InterviewQuestion question) {
         if (!Objects.equals(question.getInterview().getUserId(), userId)) {
@@ -95,4 +92,5 @@ public class InterviewFacadeService {
             );
         }
     }
+
 }

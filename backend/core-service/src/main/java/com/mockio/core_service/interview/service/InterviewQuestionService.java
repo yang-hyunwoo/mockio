@@ -41,7 +41,6 @@ public class InterviewQuestionService {
     private final AIServiceClient aiServiceClient;
     private final UserInterviewSettingService userInterviewSettingService;
 
-
     public InterviewQuestionReadResponse startInterview(Long userId, StartInterviewRequest request) {
         return generateAndSaveQuestions(generateInterview(userId,request), userId);
     }
@@ -78,7 +77,6 @@ public class InterviewQuestionService {
                 .orElseGet(
                         () -> userInterviewSettingService.absentEnsureSettingSave(userId)
                 );
-
 
         //2.유저 인터뷰 생성 및 조회 한다.
         Interview activeInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)

@@ -9,8 +9,6 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
-import org.springframework.boot.ssl.SslBundle;
-import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -29,7 +27,6 @@ import java.util.Map;
 public class KafkaErrorHandlerConfig {
 
     private final KafkaProperties kafkaProperties;
-    private final SslBundles sslBundles;
 
     @Bean
     @ConditionalOnMissingBean(name = "deadLetterProducerFactory")
@@ -81,4 +78,5 @@ public class KafkaErrorHandlerConfig {
         handler.addNotRetryableExceptions(NonRetryableEventException.class);
         return handler;
     }
+
 }

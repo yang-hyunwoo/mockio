@@ -2,11 +2,8 @@ package com.mockio.auth_service.oauth.provider;
 
 
 import com.mockio.auth_service.constant.AuthProviderEnum;
-
 import java.util.Map;
-
 import static com.mockio.auth_service.constant.AuthProviderEnum.FACEBOOK;
-
 
 public class FacebookUserInfo implements OAuth2UserInfo{
 

@@ -67,7 +67,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         AuthProviderEnum providerType = oAuth2UserInfo.getProvider();
         String providerId = oAuth2UserInfo.getProviderId();
-        String nickname  = providerType.name() + "_" + providerId;  //google_sub
+        String nickname  = providerType.name() + "_" + providerId.substring(0,15);  //google_sub
         String name = oAuth2UserInfo.getName();  //google_sub
         String password = passwordEncode.encode("oauth2-user-" + UUID.randomUUID());
         //null은 카카오이기 때문에 kakao.com으로 임의 생성
@@ -87,6 +87,5 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
                 oAuth2User.getAttributes()
         );
     }
-
 
 }

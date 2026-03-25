@@ -14,29 +14,29 @@ import java.util.List;
 public interface OutboxUserEventRepository extends JpaRepository<OutboxUserEvent, Long> {
 
     @Query(value = """
-    SELECT *
-    FROM outbox_user_events
-    WHERE status IN ('NEW','PENDING','FAILED') 
-      AND next_attempt_at <= now()
-    ORDER BY next_attempt_at ASC, created_at ASC
-    LIMIT :limit
-    FOR UPDATE SKIP LOCKED
-    """, nativeQuery = true)
+            SELECT *
+            FROM outbox_user_events
+            WHERE status IN ('NEW','PENDING','FAILED') 
+              AND next_attempt_at <= now()
+            ORDER BY next_attempt_at ASC, created_at ASC
+            LIMIT :limit
+            FOR UPDATE SKIP LOCKED
+            """, nativeQuery = true)
     List<OutboxUserEvent> lockTopDue(@Param("limit") int limit);
 
     @Query("""
-        select count(e)
-        from OutboxUserEvent e
-        where e.status = :status
-    """)
+                select count(e)
+                from OutboxUserEvent e
+                where e.status = :status
+            """)
     long countByStatus(@Param("status") OutboxStatus status);
 
     @Query("""
-        select count(e)
-        from OutboxUserEvent e
-        where e.status in :statuses
-          and e.nextAttemptAt <= :now
-    """)
+                select count(e)
+                from OutboxUserEvent e
+                where e.status in :statuses
+                  and e.nextAttemptAt <= :now
+            """)
     long countDue(@Param("statuses") List<OutboxStatus> statuses,
                   @Param("now") OffsetDateTime now);
 

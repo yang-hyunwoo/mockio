@@ -34,13 +34,15 @@ public class InterviewReadController {
 
     @GetMapping("/list")
     public ResponseEntity<Response<PageDto<InterviewPageResponse>>> getInterviewList(@CurrentSubject Long userId,
-                                                                                     @PageableDefault(size = 10, page = 0) Pageable pageable) {
+                                                                                     @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewService.getInterviewList(userId,pageable));
     }
 
     @GetMapping("/history/{interviewId}")
     public ResponseEntity<Response<InterviewResultResponse>> getInterviewHistoryDetail(@CurrentSubject Long userId,
-                                                                                       @PathVariable Long interviewId) {
+                                                                                       @PathVariable Long interviewId
+    ) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewFacadeService.getInterviewHistoryDetail(interviewId, userId));
     }
 

@@ -65,6 +65,7 @@ public class OutboxInterviewEvent extends BaseTimeEntity {
     @Column(name = "sent_at")
     private OffsetDateTime sentAt;
 
+
     @Builder
     private OutboxInterviewEvent(
             Long id,
@@ -100,7 +101,6 @@ public class OutboxInterviewEvent extends BaseTimeEntity {
                                                  Long answerId,
                                                  String eventType,
                                                  JsonNode payloadJson) {
-
         return OutboxInterviewEvent.builder()
                 .eventId(UUID.randomUUID())
                 .aggregateType(aggregateType)

@@ -12,6 +12,4 @@ public record InternalSummaryFeedback(
         List<String> improvements,
         EnumResponse status,
         InternalFeedbackDimensions feedbackDimensions
-
-) {
-}
+) {}

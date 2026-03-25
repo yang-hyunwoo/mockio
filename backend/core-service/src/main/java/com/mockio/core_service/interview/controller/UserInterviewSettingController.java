@@ -34,7 +34,6 @@ public class UserInterviewSettingController {
     public ResponseEntity<Response<Void>> ensureInterviewSettingSave(@RequestBody InternalEnsureInterviewSettingRequest request) {
         userInterviewSettingService.ensureInterviewSettingSave(request);
         return Response.create(messageUtil.getMessage("response.create"), null);
-
     }
 
     /**
@@ -54,7 +53,8 @@ public class UserInterviewSettingController {
      */
     @PatchMapping("/mypage/update-preference")
     public ResponseEntity<Response<Void>> updatePreference(@CurrentSubject Long userId ,
-                                                           @RequestBody UserInterviewSettingUpdateRequest updateRequest) {
+                                                           @RequestBody UserInterviewSettingUpdateRequest updateRequest
+    ) {
         userInterviewSettingService.updatePreference(userId, updateRequest);
 
         return Response.update(messageUtil.getMessage("response.update"));

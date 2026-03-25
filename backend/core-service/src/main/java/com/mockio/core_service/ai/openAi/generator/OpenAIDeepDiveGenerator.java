@@ -151,7 +151,6 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
         }
     }
 
-
     private static int clamp(int v, int min, int max) {
         return Math.max(min, Math.min(max, v));
     }

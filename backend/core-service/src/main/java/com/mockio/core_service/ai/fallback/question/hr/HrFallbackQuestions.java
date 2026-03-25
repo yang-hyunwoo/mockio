@@ -173,7 +173,6 @@ public final class HrFallbackQuestions {
                         Set.of("Trust", "Leadership", "Culture")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

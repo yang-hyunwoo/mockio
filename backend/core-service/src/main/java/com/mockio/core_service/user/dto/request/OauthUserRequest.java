@@ -9,5 +9,4 @@ public record OauthUserRequest(
         AuthProviderEnum provider,
         String password,
         String nickname
-) {
-}
+) {}

@@ -22,4 +22,5 @@ public @interface KoreanEnglish {
     int max() default Integer.MAX_VALUE;
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
+
 }

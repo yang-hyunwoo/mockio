@@ -22,7 +22,7 @@ public class RecaptchaService {
 
         RecaptchaRes response = restTemplate.postForObject(url, null, RecaptchaRes.class);
 
-        boolean result = response != null && response.isSuccess() && response.getScore() >= 0.5;
+        boolean result = response != null && response.success() && response.score() >= 0.5;
         log.info("reCAPTCHA 검증 결과: {}", result);
         return result;
     }

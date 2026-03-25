@@ -7,5 +7,4 @@ public record InterviewHistoryPageResponse(
         int number,
         int totalPages,
         Long totalElements
-) {
-}
+) {}

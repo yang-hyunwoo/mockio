@@ -37,6 +37,8 @@ dependencies {
 	implementation "org.springframework.ai:spring-ai-starter-model-openai"
 	implementation "io.github.resilience4j:resilience4j-spring-boot3"
 
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 	//swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
@@ -59,7 +61,7 @@ dependencies {
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
 	//redis
-//	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	//security
 	implementation 'org.springframework.boot:spring-boot-starter-security'

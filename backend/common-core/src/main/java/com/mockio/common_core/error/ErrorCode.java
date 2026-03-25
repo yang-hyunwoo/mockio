@@ -4,5 +4,4 @@ public interface ErrorCode {
     int getHttpStatus();
     String getCode();
     String getMessage();
-
 }

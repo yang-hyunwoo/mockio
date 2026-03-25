@@ -12,12 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.Duration;
-
-
 
 @Component
 @RequiredArgsConstructor
@@ -42,14 +39,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         redisRefreshTokenService.save(
                 loginUser.getUserId(),
                 refreshToken,
-                Duration.ofDays(1)
+                Duration.ofDays(3)
         );
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setSecure(false); // 운영 HTTPS면 true
         refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(1 * 24 * 60 * 60);
+        refreshCookie.setMaxAge(3 * 24 * 60 * 60);
         response.addCookie(refreshCookie);
 
         String targetUrl = determineTargetUrl();
@@ -64,7 +61,5 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
         return "http://localhost:3000/social/callback";
     }
-
-
 
 }

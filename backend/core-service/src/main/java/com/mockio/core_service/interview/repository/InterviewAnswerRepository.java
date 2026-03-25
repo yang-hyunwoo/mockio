@@ -18,20 +18,20 @@ public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer
     Optional<InterviewAnswer> findByQuestionIdAndIdempotencyKey(Long questionId, String idempotencyKey);
 
     @Query("""
-        select new com.mockio.core_service.interview.kafka.dto.response.InternalInterviewAnswerDetailResponse(
-            a.id,
-            q.interview.id,
-            q.id,
-            a.attempt,
-            q.questionText,
-            a.answerText,
-            a.answerDurationSeconds
-        )
-        from InterviewAnswer a
-        join a.question q
-        where q.interview.id = :interviewId
-        order by q.id asc, a.attempt desc
-    """)
+                select new com.mockio.core_service.interview.kafka.dto.response.InternalInterviewAnswerDetailResponse(
+                    a.id,
+                    q.interview.id,
+                    q.id,
+                    a.attempt,
+                    q.questionText,
+                    a.answerText,
+                    a.answerDurationSeconds
+                )
+                from InterviewAnswer a
+                join a.question q
+                where q.interview.id = :interviewId
+                order by q.id asc, a.attempt desc
+            """)
     List<InternalInterviewAnswerDetailResponse> findDetailsByInterviewId(Long interviewId);
 
     @Modifying(flushAutomatically = true)

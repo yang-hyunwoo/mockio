@@ -11,4 +11,5 @@ public class AuditorAwareConfig {
     public AuditorAware<Long> auditorAware() {
         return new SecurityAuditorAware();
     }
+
 }

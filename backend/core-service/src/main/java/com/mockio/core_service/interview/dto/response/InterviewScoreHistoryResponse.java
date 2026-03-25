@@ -17,5 +17,4 @@ public record InterviewScoreHistoryResponse(
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM.dd")
             OffsetDateTime endedAt
     ) {}
-
 }

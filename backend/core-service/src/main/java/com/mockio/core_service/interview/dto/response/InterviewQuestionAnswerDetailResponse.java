@@ -29,7 +29,6 @@ public class InterviewQuestionAnswerDetailResponse {
                 this.answerText = answerText;
                 this.idempotencyKey = idempotencyKey;
                 this.answerDurationSeconds = answerDurationSeconds;
-
         }
 
 }

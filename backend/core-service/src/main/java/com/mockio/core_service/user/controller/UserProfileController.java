@@ -26,7 +26,6 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
     private final MessageUtil messageUtil;
 
-
     /**
      * 유저 프로필 변경
      * @param user
@@ -54,7 +53,6 @@ public class UserProfileController {
         userProfileService.deleteProfile(user);
         return Response.update(messageUtil.getMessage("response.update"));
     }
-
 
     /**
      * 유저 세팅 정보 조회

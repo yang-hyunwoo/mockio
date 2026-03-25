@@ -6,5 +6,4 @@ public record SummaryFeedbackCompletedNotificationPayload(
         Long summaryFeedbackId,
         Integer totalScore,
         String notificationType
-) {
-}
+) {}

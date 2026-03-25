@@ -4,7 +4,4 @@ import java.util.List;
 
 public record InterviewScoreListResponse(
        List<InterviewScoreListItem> scoreList
-
-) {
-
-}
+) {}

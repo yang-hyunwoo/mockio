@@ -12,7 +12,6 @@ import java.time.OffsetDateTime;
 
 @Getter
 @MappedSuperclass
-//@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseTimeEntity {
 
     @CreatedDate

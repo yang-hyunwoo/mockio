@@ -29,4 +29,5 @@ public record OpenAIChatRequest(
             @Schema(description = "메시지 내용", example = "Spring Boot의 @Transactional 동작 원리를 설명하세요.")
             String content
     ) {}
+
 }

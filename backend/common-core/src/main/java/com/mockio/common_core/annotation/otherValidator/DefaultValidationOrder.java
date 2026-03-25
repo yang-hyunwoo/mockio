@@ -1,6 +1,5 @@
 package com.mockio.common_core.annotation.otherValidator;
 
-
 import static com.mockio.common_core.annotation.otherValidator.ValidationGroups.*;
 
 /**

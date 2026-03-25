@@ -21,8 +21,6 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     Optional<Interview> findActiveByUserIdAndStatus(Long userId, InterviewStatus status);
     Optional<Interview>  findByUserIdAndIdempotencyKey(Long userId, String idempotencyKey);
 
-    int countByUserIdAndStatus(Long userId, InterviewStatus status);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Interview i where i.id = :id and i.userId = :userId")
     Optional<Interview> findByIdAndUserIdForUpdate(@Param("id") Long id, @Param("userId") Long userId);
@@ -30,10 +28,6 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     Optional<Interview> findByIdAndUserId(Long id, Long userId);
 
     List<Interview> findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(Long userId , InterviewStatus status);
-
-    @Modifying
-    @Query("update Interview i set i.answeredQuestions = i.answeredQuestions + 1 where i.id = :id")
-    void incrementAnswered(@Param("id") Long id);
 
     @Modifying
     @Query("update Interview i set i.totalCount = i.totalCount + 1 where i.id = :id")
@@ -83,4 +77,5 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             InterviewTrack track,
             Pageable pageable
     );
+
 }

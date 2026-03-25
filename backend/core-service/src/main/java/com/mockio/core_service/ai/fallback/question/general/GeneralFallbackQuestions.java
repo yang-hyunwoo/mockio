@@ -173,7 +173,6 @@ public final class GeneralFallbackQuestions {
                         Set.of("CareerPlan", "Vision", "Growth")
                 )
         ));
-
         return Map.copyOf(map);
     }
 

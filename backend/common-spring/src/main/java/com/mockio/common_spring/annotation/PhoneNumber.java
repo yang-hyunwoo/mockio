@@ -19,4 +19,5 @@ public @interface PhoneNumber {
     String message() default "{phone.pattern}"; // default 메시지 키
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
+
 }

@@ -1,6 +1,5 @@
 package com.mockio.core_service.user.controller;
 
-
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
 import com.mockio.core_service.user.dto.request.SignupRequest;

@@ -3,16 +3,13 @@ package com.mockio.auth_service.service;
 import com.mockio.auth_service.client.UserProfileClient;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.dto.response.UserAuthInfoResponse;
-import com.mockio.common_core.constant.CommonErrorEnum;
-import com.mockio.common_core.exception.CustomApiException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_000;
 
 @Service
 @RequiredArgsConstructor
@@ -38,4 +35,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.role()
         );
     }
+
 }

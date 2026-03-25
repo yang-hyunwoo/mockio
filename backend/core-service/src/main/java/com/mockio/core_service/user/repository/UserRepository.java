@@ -13,4 +13,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                             AuthProviderEnum providerType);
 
     Optional<User> findByIdAndStatus(Long userId, UserStatus status);
+
+    Optional<User> findByEmailAndProviderAndStatus(String email,
+                                          AuthProviderEnum providerType,
+                                                   UserStatus userStatus);
+
+    Optional<User> findByIdAndStatusAndProvider(Long id,
+                                                UserStatus userStatus,
+                                                AuthProviderEnum providerEnum
+    );
+
 }

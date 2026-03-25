@@ -100,7 +100,6 @@ public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
         return true;
     }
 
-
     private GeneratedDeepDiveBundle fallbackGenerate(GenerateDeepDiveCommand command, Throwable ex) {
         log.warn("ai feedback fallback triggered. track={}, difficulty={}, cause={}",
                 command.interviewTrack(), command.interviewDifficulty(), ex.toString());

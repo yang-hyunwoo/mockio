@@ -3,7 +3,7 @@ version: "3.8"
 services:
   postgres:
     image: postgres:16
-    container_name: postgres-prod
+    container_name: postgres-dev
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -20,13 +20,13 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis-prod
+    container_name: redis-dev
     ports:
       - "6379:6379"
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
-    container_name: kafka-prod
+    container_name: kafka-dev
     ports:
       - "9092:9092"
     environment:
@@ -43,12 +43,16 @@ services:
       CLUSTER_ID: "4L6g3nShT-eMCtK--X86sw"
 
   auth-service:
-    image: yanghyunwoo/mockio-auth-service:latest
-    container_name: auth-service-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: auth-service
+    container_name: auth-service-dev
     ports:
       - "8081:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
 
       DB_HOST: postgres
       DB_PORT: 5432
@@ -81,12 +85,16 @@ services:
         condition: service_started
 
   core-service:
-    image: yanghyunwoo/mockio-core-service:latest
-    container_name: core-service-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: core-service
+    container_name: core-service-dev
     ports:
       - "8082:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
 
       DB_HOST: postgres
       DB_PORT: 5432
@@ -111,12 +119,16 @@ services:
         condition: service_started
 
   support-service:
-    image: yanghyunwoo/mockio-support-service:latest
-    container_name: support-service-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: support-service
+    container_name: support-service-dev
     ports:
       - "8083:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
 
       DB_HOST: postgres
       DB_PORT: 5432
@@ -146,12 +158,16 @@ services:
         condition: service_started
 
   gateway:
-    image: yanghyunwoo/mockio-gateway:latest
-    container_name: gateway-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: gateway
+    container_name: gateway-dev
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: dev
     depends_on:
       - auth-service
       - core-service
@@ -159,11 +175,11 @@ services:
 
   frontend:
     image: mockio-front:latest
-    container_name: mockio-front-prod
+    container_name: mockio-front-dev
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: https://mockio.cloud:8080/api
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api
       API_URL: http://gateway:8080/api
     depends_on:
       - gateway

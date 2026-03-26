@@ -42,18 +42,6 @@ public class UserProfileController {
         return Response.update(messageUtil.getMessage("response.update"));
     }
 
-
-    /**
-     * 유저 탈퇴
-     * @param user
-     * @return
-     */
-    @PatchMapping("/me/delete-profile")
-    public ResponseEntity<Response<Void>> deleteProfile(@CurrentUser User user) {
-        userProfileService.deleteProfile(user);
-        return Response.update(messageUtil.getMessage("response.update"));
-    }
-
     /**
      * 유저 세팅 정보 조회
      * @param user

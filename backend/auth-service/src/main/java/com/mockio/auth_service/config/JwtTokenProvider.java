@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -21,11 +23,11 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    @Value("${jwt.private-key}")
-    private String privateKeyPem;
+    @Value("${jwt.private-key-path}")
+    private String privateKeyPath;
 
-    @Value("${jwt.public-key}")
-    private String publicKeyPem;
+    @Value("${jwt.public-key-path}")
+    private String publicKeyPath;
 
     @Value("${jwt.access-token-expire-time}")
     private long accessTokenExpire;
@@ -93,7 +95,8 @@ public class JwtTokenProvider {
 
     private PublicKey getPublicKey() {
         try {
-            String key = publicKeyPem
+            String publicKeyString = Files.readString(Path.of(publicKeyPath));
+            String key = publicKeyString
                     .replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")
                     .replaceAll("\\s", "");
@@ -108,7 +111,8 @@ public class JwtTokenProvider {
 
     private PrivateKey getPrivateKey() {
         try {
-            String key = privateKeyPem
+            String privateKeyString = Files.readString(Path.of(privateKeyPath));
+            String key = privateKeyString
                     .replace("-----BEGIN RSA PRIVATE KEY-----", "")
                     .replace("-----END RSA PRIVATE KEY-----", "")
                     .replace("-----BEGIN PRIVATE KEY-----", "")

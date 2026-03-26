@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InternalTokenFilter extends OncePerRequestFilter {
 
-    @Value("${internal.auth.token}")
+    @Value("${internal.core.token}")
     private String internalToken;
 
     private static final List<String> INTERNAL_PATHS = List.of(

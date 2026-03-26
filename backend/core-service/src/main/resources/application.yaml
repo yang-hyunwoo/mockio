@@ -1,38 +1,38 @@
-server:
-  port: 9081
-
-services:
-  interview:
-    base-url: http://localhost:9082
-    connect-timeout-ms: 2000
-    read-timeout-ms: 3000
-
-internal:
-  auth:
-    token: Zx9Q2mL7Kp4S0aW8RjHcVbD1YtE6Nf
-
+#server:
+#  port: 9081
+#
+#services:
+#  interview:
+#    base-url: http://localhost:9082
+#    connect-timeout-ms: 2000
+#    read-timeout-ms: 3000
+#
+#internal:
+#  auth:
+#    token: Zx9Q2mL7Kp4S0aW8RjHcVbD1YtE6Nf
+#
 spring:
-  messages:
-    basename: messages/apiResponseMessage
-    encoding: UTF-8
+#  messages:
+#    basename: messages/apiResponseMessage
+#    encoding: UTF-8
   profiles:
     active: local
-  application:
-    name: user-service
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/${USER_DB_NAME}
-    username: ${DB_USER}
-    password: ${DB_PASS}
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: true
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-  config:
-    import: classpath:application-kafka.yaml
+#  application:
+#    name: user-service
+#
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/${CORE_DB_NAME}
+#    username: ${DB_USER}
+#    password: ${DB_PASS}
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    properties:
+#      hibernate:
+#        format_sql: true
+#    show-sql: true
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
+#  config:
+#    import: classpath:application-kafka.yaml

@@ -7,8 +7,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
@@ -95,7 +98,9 @@ public class JwtTokenProvider {
 
     private PublicKey getPublicKey() {
         try {
-            String publicKeyString = Files.readString(Path.of(publicKeyPath));
+            Resource resource = new ClassPathResource(publicKeyPath);
+            String publicKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
             String key = publicKeyString
                     .replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")
@@ -111,7 +116,9 @@ public class JwtTokenProvider {
 
     private PrivateKey getPrivateKey() {
         try {
-            String privateKeyString = Files.readString(Path.of(privateKeyPath));
+            Resource resource = new ClassPathResource(privateKeyPath);
+            String privateKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
             String key = privateKeyString
                     .replace("-----BEGIN RSA PRIVATE KEY-----", "")
                     .replace("-----END RSA PRIVATE KEY-----", "")

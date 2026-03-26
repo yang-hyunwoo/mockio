@@ -5,7 +5,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -14,8 +17,8 @@ import java.util.Base64;
 @Configuration
 public class JwkConfig {
 
-    @Value("${jwt.public-key}")
-    private String publicKeyPem;
+    @Value("${jwt.public-key-path}")
+    private String publicKeyPath;
 
     @Bean
     public JWKSet jwkSet() {
@@ -34,7 +37,10 @@ public class JwkConfig {
 
     private RSAPublicKey getPublicKey() {
         try {
-            String key = publicKeyPem
+            Resource resource = new ClassPathResource(publicKeyPath);
+            String publicKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+            String key = publicKeyString
                     .replace("-----BEGIN RSA PUBLIC KEY-----", "")
                     .replace("-----END RSA PUBLIC KEY-----", "")
                     .replace("-----BEGIN PUBLIC KEY-----", "")

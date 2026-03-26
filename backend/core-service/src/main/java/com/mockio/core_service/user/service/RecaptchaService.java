@@ -1,11 +1,16 @@
 package com.mockio.core_service.user.service;
 
-import com.mockio.core_service.user.dto.response.RecaptchaRes;
+import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.core_service.user.constant.error.UserErrorEnum;
+import com.mockio.core_service.user.dto.response.RecaptchaVerifyResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Component
@@ -14,17 +19,47 @@ public class RecaptchaService {
 
     @Value("${recaptcha.secret}")
     private String recaptchaSecret;
+    private final RestClient recaptchaRestClient;
 
-    private static final String VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
-    public boolean verify(String token) {
-        RestTemplate restTemplate = new RestTemplate();
-        String url = VERIFY_URL + "?secret=" + recaptchaSecret + "&response=" + token;
+    private static final String VERIFY_URL = "recaptcha/api/siteverify";
 
-        RecaptchaRes response = restTemplate.postForObject(url, null, RecaptchaRes.class);
+    public void verify(String token) {
+        if (token == null || token.isBlank()) {
+            throw new CustomApiException(
+                    UserErrorEnum.RECAPTCHA_REQUIRED.getHttpStatus(),
+                    UserErrorEnum.RECAPTCHA_REQUIRED,
+                    UserErrorEnum.RECAPTCHA_REQUIRED.getMessage()
+            );
+        }
 
-        boolean result = response != null && response.success() && response.score() >= 0.5;
-        log.info("reCAPTCHA 검증 결과: {}", result);
-        return result;
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("secret", recaptchaSecret);
+        formData.add("response", token);
+
+        RecaptchaVerifyResponse response;
+
+        try {
+            response = recaptchaRestClient.post()
+                    .uri(VERIFY_URL)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(formData)
+                    .retrieve()
+                    .body(RecaptchaVerifyResponse.class);
+        } catch (Exception e) {
+            throw new CustomApiException(
+                    UserErrorEnum.RECAPTCHA_VERIFY_FAILED.getHttpStatus(),
+                    UserErrorEnum.RECAPTCHA_VERIFY_FAILED,
+                    UserErrorEnum.RECAPTCHA_VERIFY_FAILED.getMessage()
+            );
+        }
+
+        if (response == null || !response.success()) {
+            throw new CustomApiException(
+                    UserErrorEnum.RECAPTCHA_INVALID.getHttpStatus(),
+                    UserErrorEnum.RECAPTCHA_INVALID,
+                    UserErrorEnum.RECAPTCHA_INVALID.getMessage()
+            );
+        }
     }
 
 }

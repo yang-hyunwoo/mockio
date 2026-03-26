@@ -15,10 +15,12 @@ import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.user.mapper.UserMapper;
 import com.mockio.core_service.user.repository.UserProfileRepository;
 import com.mockio.core_service.user.repository.UserRepository;
+import com.mockio.core_service.user.util.IpUtils;
 import com.mockio.core_service.util.RedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +29,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -47,13 +50,10 @@ public class UserService {
     private final PasswordResetTokenService passwordResetTokenService;
     private final RedisService redisService;
 
-
     public SignupResponse join(SignupRequest signupRequest) {
-//        if (!recaptchaService.verify(signupRequest.recaptchaToken())) {
-//            throw new CustomApiException(RECAPTCHA_ERROR.getHttpStatus(),
-//                    RECAPTCHA_ERROR,
-//                    RECAPTCHA_ERROR.getMessage());
-//        }
+
+        recaptchaService.verify(signupRequest.recaptchaToken());
+
         //1. 동일 유저 이메일 존재 검사
         userRepository.findByEmailAndProvider(signupRequest.email(), AuthProviderEnum.NORMAL).ifPresent(user -> {
             throw new CustomApiException(DUPLICATE_EMAIL.getHttpStatus(), DUPLICATE_EMAIL, DUPLICATE_EMAIL.getMessage());

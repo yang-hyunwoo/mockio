@@ -101,8 +101,8 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expire-time: 1800000
   refresh-token-expire-time: 604800000
-  private-key-path: /keys/private_key.pem
-  public-key-path: /keys/public_key.pem
+  private-key-path: keys/private_key.pem
+  public-key-path: keys/public_key.pem
 
 
 

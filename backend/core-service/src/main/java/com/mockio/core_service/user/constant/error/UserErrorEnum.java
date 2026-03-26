@@ -21,7 +21,10 @@ public enum UserErrorEnum implements ErrorCode {
     CURRENT_PASSWORD_NOT_MATCH(BAD_REQUEST.value(), "CURRENT_PASSWORD_NOT_MATCH", "비밀번호가 일치하지 않습니다."),
     PASSWORD_NOT_MATCH(BAD_REQUEST.value(), "PASSWORD_NOT_MATCH", "현재 비밀번호가 일치하지 않습니다."),
 
-    ;
+    RECAPTCHA_REQUIRED(BAD_REQUEST.value(), "RECAPTCHA_REQUIRED", "reCAPTCHA 인증이 필요합니다."),
+    RECAPTCHA_INVALID(BAD_REQUEST.value(), "RECAPTCHA_INVALID", "reCAPTCHA 검증에 실패했습니다."),
+    RECAPTCHA_VERIFY_FAILED(BAD_GATEWAY.value(), "RECAPTCHA_VERIFY_FAILED", "reCAPTCHA 검증 서버 호출에 실패했습니다."),
+    ;;
 
     private final int httpStatus;
     private final String code;

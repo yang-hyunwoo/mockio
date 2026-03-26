@@ -32,4 +32,11 @@ public class RestClientConfig {
                 .build();
     }
 
+    @Bean
+    public RestClient recaptchaRestClient() {
+        return RestClient.builder()
+                .baseUrl("https://www.google.com")
+                .build();
+    }
+
 }

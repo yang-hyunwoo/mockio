@@ -42,13 +42,7 @@ public class InterviewFeedbackConsumer {
     private final InterviewAnswerService interviewAnswerService;
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
 
-    @PostConstruct
-    public void init() {
-        log.info("InterviewLifecycleConsumer bean initialized");
-    }
-
-//    @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
-@KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service-test")
+    @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
     public void onMessage(String messageJson, Acknowledgment ack) {
         log.info("kafka message received: {}", messageJson);
         InterviewLifecycleEvent event;

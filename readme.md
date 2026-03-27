@@ -1,14 +1,34 @@
+<h1 align="center">
+    <img src="./readme/image/mockio-logo.png" alt="로고" width="200" style="vertical-align: middle;" />
+    <br />  
+<strong>mockio</strong> - AI 기반 모의 면접 플랫폼 💡
+  <br />
+  <a href="https://mockio.cloud">https://mockio.cloud</a>
+</h1>
 
-임시 토큰 확인 여부
-curl -X POST "http://localhost:8084/realms/study-realm/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password&client_id=gateway&username=testuser&password=test1234"
+<p align="center">
+    AI가 질문하고, 답변을 분석해 맞춤형 피드백을 제공하는 모의 면접 서비스입니다.
+</p>
 
-2.왼쪽 상단 드랍박스 클릭 -> create realm으로 컨테이너 생성<br/>
-3.clients -> create client -> gateway 후 생성 [return url 등등은 추후 설정 예정] <br/>
-4.Users -> create new user 로 테스트 유저 생성 <br/>
-5.realm settings->themes에서 login theme를 내가 설정한 거로 변경 가능 [디자인은 추후 다듬을 예정]
+---
+## 📌 프로젝트 소개
 
-```
-임시
-curl -X POST "http://localhost:8084/realms/study-realm/protocol/openid-connect/token"   -H "Content-Type: application/x-www-form-urlencoded"   -d "grant_type=password&client_id=gateway&username=testuser&password=test1234"
+mockio는 사용자가 실제 면접과 유사한 환경에서 답변을 연습하고,  
+AI 기반 피드백을 통해 자신의 답변을 개선할 수 있는 인터뷰 시뮬레이션 서비스입니다.
 
-```
+
+>  실시간 질문 생성  
+>  **답변 기반 AI 피드백 제공**  
+>  인터뷰 흐름 관리 및 기록
+
+---
+
+## 📚 목차
+
+- [⚙️ 개발 환경](./readme/devsetting/readme.md)
+- [🚀 실행 방법](./readme/buildme/readme.md)
+- [📂 프로젝트 구조](./readme/structure/readme.md)
+- [❗  커스텀 예외 처리](./readme/api/error/readme.md)
+- [📦 Entity , Dto , API 응답 구조](./readme/common/readme.md)
+- [🔌 DB 다이어 그램](./readme/db/readme.md)
+- [⚠️ 트러블슈팅](./readme/troubleshooting/readme.md)

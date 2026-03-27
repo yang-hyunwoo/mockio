@@ -36,8 +36,6 @@ public class OutboxInterviewEventPublishWorker {
     public List<Long> lockPendingIds(String lockerId , int limit) {
         List<OutboxInterviewEvent> events = outboxRepository.lockTopDue(limit);
 
-        log.info("lockPendingIds: lockerId={}, fetchedCount={}", lockerId, events.size());
-
         for (OutboxInterviewEvent e : events) {
             log.info("locking outbox id={}, status={}, nextAttemptAt={}",
                     e.getId(), e.getStatus(), e.getNextAttemptAt());

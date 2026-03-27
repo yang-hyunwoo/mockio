@@ -15,6 +15,7 @@ import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.user.mapper.UserMapper;
 import com.mockio.core_service.user.repository.UserProfileRepository;
 import com.mockio.core_service.user.repository.UserRepository;
+import com.mockio.core_service.user.util.EnvironmentProvider;
 import com.mockio.core_service.user.util.IpUtils;
 import com.mockio.core_service.util.RedisService;
 import jakarta.mail.MessagingException;
@@ -158,7 +159,13 @@ public class UserService {
             MimeMessageHelper helper = null;
             try {
                 String token = UUID.randomUUID().toString();
-                String link = "http://localhost:3000/password/reset?token=" + token;
+                String url = "";
+                if(EnvironmentProvider.isProd()) {
+                    url = "https://mockio.cloud";
+                }  else {
+                    url = "http://localhost:3000";
+                }
+                String link = url+"password/reset?token=" + token;
 
                 helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
                 helper.setTo(email);
@@ -223,7 +230,11 @@ public class UserService {
     private void expireRefreshCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // 로컬 http면 개발환경에 맞게 조정
+        if (EnvironmentProvider.isProd()) {
+            cookie.setSecure(true);
+        } else {
+            cookie.setSecure(false);
+        }
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);

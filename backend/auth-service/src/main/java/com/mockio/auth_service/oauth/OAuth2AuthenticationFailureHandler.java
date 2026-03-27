@@ -20,7 +20,7 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     ) throws IOException {
         String url = "http://localhost:3000";
         if(EnvironmentProvider.isProd()) {
-            url = "";
+            url = "https://mockio.cloud";
         }
 
         String targetUrl = UriComponentsBuilder.fromUriString(url)

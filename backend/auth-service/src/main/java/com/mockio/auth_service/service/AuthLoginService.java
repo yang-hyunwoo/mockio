@@ -1,6 +1,7 @@
 package com.mockio.auth_service.service;
 
 import com.mockio.auth_service.client.UserProfileClient;
+import com.mockio.auth_service.config.EnvironmentProvider;
 import com.mockio.auth_service.config.JwtTokenProvider;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.dto.UserInfoResponse;
@@ -50,7 +51,12 @@ public class AuthLoginService {
             );
 
             refreshCookie.setHttpOnly(true);
-            refreshCookie.setSecure(false); // 운영 HTTPS면 true
+            if (EnvironmentProvider.isProd()) {
+                refreshCookie.setSecure(true);
+            } else {
+                refreshCookie.setSecure(false);
+            }
+            // 운영 HTTPS면 true
             refreshCookie.setPath("/");
             refreshCookie.setMaxAge(1 * 24 * 60 * 60);
 
@@ -135,7 +141,11 @@ public class AuthLoginService {
     private void expireRefreshCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // 로컬 http면 개발환경에 맞게 조정
+        if (EnvironmentProvider.isProd()) {
+            cookie.setSecure(true);
+        } else {
+            cookie.setSecure(false);
+        }
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);

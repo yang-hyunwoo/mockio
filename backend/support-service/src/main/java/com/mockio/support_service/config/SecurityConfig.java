@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/notice/v1/public/**").permitAll()
                         .requestMatchers("/api/faq/v1/internal/**").permitAll()
                         .requestMatchers("/api/faq/v1/public/**").permitAll()
+                        .requestMatchers("/faq/v1/public/**").permitAll() //테스트용
                         .requestMatchers("/api/file/v1/internal/**").permitAll()
                         .requestMatchers("/api/file/v1/public/**").permitAll()
                         // 나머지는 다 인증 필요

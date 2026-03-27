@@ -3,7 +3,7 @@
     <br />  
 <strong>mockio</strong> - AI 기반 모의 면접 플랫폼 💡
   <br />
-  <a href="https://mockio.cloud">https://mockio.cloud</a>
+  <a href="https://mockio.cloud" target="_blank" rel="noopener noreferrer">https://mockio.cloud</a>
 </h1>
 
 <p align="center">

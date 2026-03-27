@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -98,8 +99,14 @@ public class JwtTokenProvider {
 
     private PublicKey getPublicKey() {
         try {
-            Resource resource = new ClassPathResource(publicKeyPath);
-            String publicKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String publicKeyString;
+            if(EnvironmentProvider.isProd()) {
+                publicKeyString = Files.readString(Paths.get(publicKeyPath));
+            } else {
+                Resource resource = new ClassPathResource(publicKeyPath);
+                publicKeyString= new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            }
+
 
             String key = publicKeyString
                     .replace("-----BEGIN PUBLIC KEY-----", "")
@@ -116,8 +123,14 @@ public class JwtTokenProvider {
 
     private PrivateKey getPrivateKey() {
         try {
-            Resource resource = new ClassPathResource(privateKeyPath);
-            String privateKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String privateKeyString;
+
+            if(EnvironmentProvider.isProd()) {
+                privateKeyString = Files.readString(Paths.get(privateKeyPath));
+            } else {
+                Resource resource = new ClassPathResource(privateKeyPath);
+                privateKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            }
 
             String key = privateKeyString
                     .replace("-----BEGIN RSA PRIVATE KEY-----", "")

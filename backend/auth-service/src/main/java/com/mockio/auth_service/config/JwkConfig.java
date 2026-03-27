@@ -9,6 +9,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -37,8 +39,14 @@ public class JwkConfig {
 
     private RSAPublicKey getPublicKey() {
         try {
-            Resource resource = new ClassPathResource(publicKeyPath);
-            String publicKeyString = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String publicKeyString;
+            if(EnvironmentProvider.isProd()) {
+                publicKeyString = Files.readString(Paths.get(publicKeyPath));
+            } else {
+                Resource resource = new ClassPathResource(publicKeyPath);
+                publicKeyString= new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            }
+
 
             String key = publicKeyString
                     .replace("-----BEGIN RSA PUBLIC KEY-----", "")

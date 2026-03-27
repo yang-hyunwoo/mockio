@@ -44,7 +44,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false); // 운영 HTTPS면 true
+        if (EnvironmentProvider.isProd()) {
+            refreshCookie.setSecure(true);
+        } else {
+            refreshCookie.setSecure(false);
+        }
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(3 * 24 * 60 * 60);
         response.addCookie(refreshCookie);
@@ -57,7 +61,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private String determineTargetUrl() {
         if (EnvironmentProvider.isProd()) {
-            return "https://your-domain.com/social/callback";
+            return "https://mockio.cloud/social/callback";
         }
         return "http://localhost:3000/social/callback";
     }

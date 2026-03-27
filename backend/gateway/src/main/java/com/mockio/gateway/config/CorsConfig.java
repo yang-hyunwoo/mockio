@@ -13,7 +13,7 @@ public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000");
+        final List<String> ALLOWED_ORIGINS = List.of("http://localhost:3000","https://mockio.cloud");
         final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
         final List<String> ALLOWED_HEADERS = List.of("*");
         final List<String> EXPOSED_HEADERS = List.of("Authorization", "refresh-token");

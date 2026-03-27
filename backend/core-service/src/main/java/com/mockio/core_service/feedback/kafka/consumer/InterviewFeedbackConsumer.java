@@ -19,6 +19,7 @@ import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.interview.service.InterviewAnswerService;
 import com.mockio.core_service.kafka.ProcessedEvent;
 import com.mockio.core_service.kafka.ProcessedEventRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -40,6 +41,11 @@ public class InterviewFeedbackConsumer {
     private final SummaryFeedbackTxService summaryFeedbackTxService;
     private final InterviewAnswerService interviewAnswerService;
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
+
+    @PostConstruct
+    public void init() {
+        log.info("InterviewLifecycleConsumer bean initialized");
+    }
 
 //    @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
 @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service-test")

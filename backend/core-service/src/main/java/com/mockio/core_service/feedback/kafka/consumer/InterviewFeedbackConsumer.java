@@ -41,7 +41,8 @@ public class InterviewFeedbackConsumer {
     private final InterviewAnswerService interviewAnswerService;
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
 
-    @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
+//    @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
+@KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service-test")
     public void onMessage(String messageJson, Acknowledgment ack) {
         log.info("kafka message received: {}", messageJson);
         InterviewLifecycleEvent event;

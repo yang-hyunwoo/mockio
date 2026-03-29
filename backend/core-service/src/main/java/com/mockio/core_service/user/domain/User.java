@@ -113,7 +113,7 @@ public class User extends BaseTimeEntity {
 
     public void updateLastLogin() {
         this.lastLoginAt = OffsetDateTime.now();
-        this.failLoginCount = 0;
+        resetFailLoginCount();
     }
 
     public void increaseFailLoginCount() {
@@ -132,6 +132,20 @@ public class User extends BaseTimeEntity {
         return this.status == UserStatus.ACTIVE;
     }
 
+    public void resetPasswordChange(String password,
+                                    String confirmPassword,
+                                    PasswordEncoder passwordEncoder
+    ) {
+        if (password.equals(confirmPassword)) {
+            this.password = passwordEncoder.encode(password);
+            resetFailLoginCount();
+        } else {
+            throw new CustomApiException(PASSWORD_NOT_MATCH.getHttpStatus(),
+                    CURRENT_PASSWORD_NOT_MATCH,
+                    CURRENT_PASSWORD_NOT_MATCH.getMessage());
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,20 +156,6 @@ public class User extends BaseTimeEntity {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    public void resetPasswordChange(String password,
-                                    String confirmPassword,
-                                    PasswordEncoder passwordEncoder
-    ) {
-
-        if (password.equals(confirmPassword)) {
-            this.password = passwordEncoder.encode(password);
-        } else {
-            throw new CustomApiException(PASSWORD_NOT_MATCH.getHttpStatus(),
-                    CURRENT_PASSWORD_NOT_MATCH,
-                    CURRENT_PASSWORD_NOT_MATCH.getMessage());
-        }
     }
 
 }

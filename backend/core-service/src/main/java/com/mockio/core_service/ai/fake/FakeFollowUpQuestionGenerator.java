@@ -23,6 +23,7 @@ public class FakeFollowUpQuestionGenerator implements FollowUpQuestionGenerator 
                 new FollowUpQuestion.Item(
                         "꼬리물기",
                         "꼬리물기 FAKE",
+                        "꼬리물기",
                         Set.of("꼬리물기"),
                         "FAKE",
                         "FAKE",

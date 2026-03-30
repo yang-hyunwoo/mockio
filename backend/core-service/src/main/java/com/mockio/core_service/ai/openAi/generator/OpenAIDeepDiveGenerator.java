@@ -116,6 +116,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                 new FollowUpQuestion.Item(
                         safeTitle(dto.question().title()),
                         normalizedBody,
+                        dto.question().primaryTag(),
                         sanitizer.sanitizeTags(dto.question().tags()),
                         "ollama",
                         MODEL,
@@ -178,7 +179,8 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                                List<String> gaps,
                                String reason) {}
 
-        public record Question(String title, String body, java.util.Set<String> tags) {}
+        public record Question(String title, String body, String primaryTag, java.util.Set<String> tags) {
+        }
 
         public static DeepDiveBundleDto fallback() {
             return new DeepDiveBundleDto(

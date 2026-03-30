@@ -134,13 +134,26 @@ public class InterviewQuestionService {
         interview.markGenerating();
 
         try {
+            List<Interview> byUserId = interviewRepository.findTop30ByUserIdOrderByCreatedAtDesc(userId);
+            List<Long> idList = byUserId.stream()
+                    .map(Interview::getId)
+                    .toList();
+
+
+
+            List<InterviewQuestion> tagList = interviewQuestionRepository.findTop30ByInterviewIdInAndPrimaryTagIsNotNullOrderByCreatedAtDesc(idList);
+            List<String> primaryTagList = tagList.stream()
+                    .map(InterviewQuestion::getPrimaryTag)
+                    .distinct()
+                    .toList();
             GenerateQuestionCommand cmd = new GenerateQuestionCommand(
                     userId,
                     interview.getTrack(),
                     interview.getDifficulty(),
                     interview.getInterviewMode(),
                     interview.getAnswerTimeSeconds(),
-                    interview.getCount()
+                    interview.getCount(),
+                    primaryTagList
             );
             GeneratedQuestion generatedQuestion = aiServiceClient.generateQuestions(cmd);
             questionSave(interview, generatedQuestion);
@@ -162,6 +175,7 @@ public class InterviewQuestionService {
                     interview,
                     q.seq(),
                     q.title(),
+                    q.primaryTag(),
                     q.tags(),
                     q.body(),
                     q.provider(),
@@ -248,6 +262,7 @@ public class InterviewQuestionService {
                         retryInterview,
                         source.getSeq(),
                         source.getTitle(),
+                        source.getPrimaryTag(),
                         source.getTags() == null
                                 ? new LinkedHashSet<>()
                                 : new LinkedHashSet<>(source.getTags()),

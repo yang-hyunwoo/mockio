@@ -49,3 +49,21 @@
 
 - 500 에러 급증
     - `rate(http_server_requests_seconds_count{status="500"}[5m])`
+
+
+### 🛠 Troubleshooting
+
+모니터링 구축 과정에서 다음과 같은 문제를 해결했습니다.
+
+- Docker 네트워크 분리로 인한 Prometheus scrape 실패
+- 컨테이너 간 통신 시 내부 포트/외부 포트 혼동 문제
+- 특정 서비스에서 `/actuator/prometheus` 미노출로 인한 메트릭 수집 실패
+- Grafana 데이터가 컨테이너 재시작 시 초기화되는 문제
+  → Volume 설정으로 해결
+
+
+### ✅ Result
+
+- 장애 발생 시 즉각적인 감지 및 대응 가능
+- 서비스 상태를 실시간으로 파악 가능
+- DB 커넥션 및 트래픽 병목 지점 식별 가능

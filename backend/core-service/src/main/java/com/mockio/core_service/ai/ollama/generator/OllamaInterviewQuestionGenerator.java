@@ -99,6 +99,7 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
                     ((i + 1) * 10),
                     q.title(),
                     q.body(),
+                    q.primaryTag(),
                     sanitizer.sanitizeTags(q.tags()),
                     "ollama",
                     "ollama",

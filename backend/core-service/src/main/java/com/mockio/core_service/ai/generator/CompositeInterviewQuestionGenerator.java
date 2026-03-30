@@ -117,6 +117,7 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
                     ((i + 1) * 10),
                     base.get(i).title(),
                     base.get(i).body(),
+                    base.get(i).primaryTag(),
                     base.get(i).tags(),
                     "FALLBACK",
                     "N/A",

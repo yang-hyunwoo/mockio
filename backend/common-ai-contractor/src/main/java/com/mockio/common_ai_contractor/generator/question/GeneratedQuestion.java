@@ -10,6 +10,7 @@ public record GeneratedQuestion(
             int seq,
             String title,
             String body,
+            String primaryTag,
             Set<String> tags,
             String provider,
             String model,

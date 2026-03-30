@@ -8,6 +8,7 @@ public record FollowUpQuestion(
     public record Item(
             String title,
             String body,
+            String primaryTag,
             Set<String> tags,
             String provider,
             String model,

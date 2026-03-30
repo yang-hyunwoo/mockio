@@ -190,6 +190,8 @@ services:
       API_URL: http://gateway:8080/api
     depends_on:
       - gateway
+    networks:
+      - app-network
 
   ollama:
     image: ollama/ollama
@@ -199,6 +201,8 @@ services:
     volumes:
       - ollama:/root/.ollama
     restart: always
+    networks:
+      - app-network
 
   prometheus:
     image: prom/prometheus
@@ -217,8 +221,11 @@ services:
       - "3030:3000"
     networks:
       - app-network
+    volumes:
+      - grafana-data:/var/lib/grafana
 volumes:
   ollama:
+  grafana-data:
 
 networks:
   app-network:

@@ -85,10 +85,12 @@ services:
     container_name: grafana-local
     ports:
       - "3030:3000"
-
+    volumes:
+      - grafana-data:/var/lib/grafana
 
 volumes:
   ollama:
   redis_data:
+  grafana-data:
 
 

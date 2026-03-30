@@ -18,7 +18,7 @@ spring:
   profiles:
     active: local
 #  application:
-#    name: user-service
+#    name: core-service
 #
 #  datasource:
 #    url: jdbc:postgresql://localhost:5432/${CORE_DB_NAME}

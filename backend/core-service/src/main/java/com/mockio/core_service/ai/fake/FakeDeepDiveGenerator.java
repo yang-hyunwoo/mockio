@@ -32,6 +32,7 @@ public class FakeDeepDiveGenerator implements DeepDiveGenerator {
                         new FollowUpQuestion.Item(
                                 "딥 다이브",
                                 "딥 다이브 질문",
+                                "딥다이브",
                                 Set.of("딥다이브"),
                                 "FAKE",
                                 "FAKE",

@@ -40,6 +40,8 @@ public class InterviewQuestion extends BaseTimeEntity {
     @Column(name = "tag")
     private Set<String> tags = new LinkedHashSet<>();
 
+    private String primaryTag;
+
     @Column(name = "question_text", nullable = false, columnDefinition = "TEXT")
     private String questionText;
 
@@ -101,6 +103,7 @@ public class InterviewQuestion extends BaseTimeEntity {
     private InterviewQuestion(Interview interview,
                               Integer seq,
                               String title,
+                              String primaryTag,
                               Set<String> tags,
                               String questionText,
                               QuestionStatus status,
@@ -118,6 +121,7 @@ public class InterviewQuestion extends BaseTimeEntity {
         this.interview = interview;
         this.seq = seq;
         this.title = title;
+        this.primaryTag = primaryTag;
         this.tags = tags;
         this.questionText = questionText;
         this.status = status;
@@ -138,6 +142,7 @@ public class InterviewQuestion extends BaseTimeEntity {
             Interview interview,
             int seq,
             String title,
+            String primaryTag,
             Set<String> tags,
             String questionText,
             String provider,
@@ -150,6 +155,7 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .interview(interview)
                 .seq(seq)
                 .title(title)
+                .primaryTag(primaryTag)
                 .tags(tags)
                 .questionText(questionText)
                 .status(QuestionStatus.READY)
@@ -173,6 +179,7 @@ public class InterviewQuestion extends BaseTimeEntity {
             Long triggerAnswerId,
             String idempotencyKey,
             String title,
+            String primaryTag,
             Set<String> tags,
             String questionText,
             String provider,
@@ -188,6 +195,7 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .triggerAnswerId(triggerAnswerId)
                 .idempotencyKey(idempotencyKey)
                 .title(title)
+                .primaryTag(primaryTag)
                 .tags(tags)
                 .questionText(questionText)
                 .provider(provider)
@@ -209,6 +217,7 @@ public class InterviewQuestion extends BaseTimeEntity {
             Long triggerAnswerId,
             String idempotencyKey,
             String title,
+            String primaryTag,
             Set<String> tags,
             String questionText,
             String provider,
@@ -224,6 +233,7 @@ public class InterviewQuestion extends BaseTimeEntity {
                 .triggerAnswerId(triggerAnswerId)
                 .idempotencyKey(idempotencyKey)
                 .title(title)
+                .primaryTag(primaryTag)
                 .tags(tags)
                 .questionText(questionText)
                 .provider(provider)

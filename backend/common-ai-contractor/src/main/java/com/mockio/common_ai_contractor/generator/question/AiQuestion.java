@@ -5,5 +5,6 @@ import java.util.Set;
 public record AiQuestion(
         String title,
         String body,
+        String primaryTag,
         Set<String> tags
 ) {}

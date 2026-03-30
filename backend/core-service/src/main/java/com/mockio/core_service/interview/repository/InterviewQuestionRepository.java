@@ -37,4 +37,6 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
 
     List<InterviewQuestion> findByInterviewIdAndTypeOrderBySeqAsc(Long interviewId , QuestionType type);
 
+    List<InterviewQuestion> findTop30ByInterviewIdInAndPrimaryTagIsNotNullOrderByCreatedAtDesc(List<Long> userId);
+
 }

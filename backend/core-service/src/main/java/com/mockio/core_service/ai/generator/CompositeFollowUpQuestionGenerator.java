@@ -99,6 +99,7 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
         return new FollowUpQuestion(new FollowUpQuestion.Item(
                 title,
                 q,
+                "반례",
                 Set.of("근거", "반례"),
                 "FALLBACK",
                 "N/A",

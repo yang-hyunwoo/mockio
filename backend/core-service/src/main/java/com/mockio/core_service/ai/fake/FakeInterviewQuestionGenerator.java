@@ -40,6 +40,7 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
                     i,
                     "FAKE-제목",
                     text,
+                    "스프링",
                     Set.of("스프링","JWT"),
                     "FAKE",
                     "fake-model",

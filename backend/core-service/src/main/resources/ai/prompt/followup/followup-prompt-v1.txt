@@ -4,13 +4,15 @@
 {
   "title": "string",
   "body": "string",
+  "primaryTag": "string",
   "tags": ["string","string"]
 }
 
 규칙:
 - title: 3~8단어의 짧은 주제명
 - body: 1~2문장 이내의 꼬리질문
-- tags: 2~4개, 짧은 기술 키워드
+- primaryTag는 질문의 핵심 주제를 대표하는 태그 1개만 선택하세요
+- tags는 보조 주제를 포함해 2~4개 작성하세요
 - “더 설명해보세요” 같은 일반 질문 금지
 - JSON 외 텍스트 절대 금지
 

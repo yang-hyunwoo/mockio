@@ -110,6 +110,7 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
                 q = new AiQuestion(
                         "추가 검증 질문",
                         "방금 답변에서 가장 중요한 가정(전제)은 무엇이고, 그 전제가 깨질 때 어떤 문제가 발생하나요?",
+                        "Trade-off",
                         Set.of("Follow-up", "Trade-off")
                 );
             }
@@ -117,8 +118,9 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
 
         return new FollowUpQuestion(new FollowUpQuestion.Item(
                 safeTitle(q.title()),
-                sanitizer.normalizeBody(q.body())
-                ,sanitizer.sanitizeTags(q.tags()),
+                sanitizer.normalizeBody(q.body()),
+                q.primaryTag(),
+                sanitizer.sanitizeTags(q.tags()),
                 "OPENAI",
                 MODEL,
                 "v1",

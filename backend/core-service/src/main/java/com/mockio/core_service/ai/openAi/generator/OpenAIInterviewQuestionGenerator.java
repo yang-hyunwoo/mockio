@@ -77,7 +77,8 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
         String prompt = systemPrompt.formatted(
                 command.questionCount(),
                 command.track(),
-                command.difficulty()
+                command.difficulty(),
+                command.primaryTag()
         );
         Double temperature = 0.7;
         String answer = client.chat(MODEL, prompt, commandText, temperature);
@@ -100,6 +101,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                     ((i + 1) * 10),
                     q.title(),
                     q.body(),
+                    q.primaryTag(),
                     sanitizer.sanitizeTags(q.tags()),
                     "OPENAI",
                     MODEL,

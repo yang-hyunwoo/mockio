@@ -65,7 +65,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             Pageable pageable
     );
 
-    Page<Interview> findByUserIdAndStatus(
+    Page<Interview> findByUserIdAndStatusOrderByIdDesc(
             Long userId,
             InterviewStatus status,
             Pageable pageable

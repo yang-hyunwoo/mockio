@@ -81,7 +81,7 @@ public class InterviewService {
                             InterviewEndReason.COMPLETED,
                             scorePageable);
 
-            historyInterview = interviewRepository.findByUserIdAndStatus(userId,
+            historyInterview = interviewRepository.findByUserIdAndStatusOrderByIdDesc(userId,
                     InterviewStatus.ENDED,
                     pageable
             );

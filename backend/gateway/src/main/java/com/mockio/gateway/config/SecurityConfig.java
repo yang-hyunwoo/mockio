@@ -30,7 +30,8 @@ public class SecurityConfig {
                 .authorizeExchange(ex -> ex
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers(
-                                "/health",
+                                "/actuator/prometheus",
+                                "/actuator/health",
                                 "/actuator/health/**",
                                 "/api/auth/v1/.well-known/jwks.json",
                                 "/api/users/v1/public/**",

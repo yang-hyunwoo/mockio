@@ -10,7 +10,7 @@ spring:
     basename: messages/apiResponseMessage
     encoding: UTF-8
   application:
-    name: user-service
+    name: core-service
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
     username: ${DB_USER}
@@ -29,7 +29,7 @@ spring:
     import: optional:classpath:application-kafka.yaml
   kafka:
     consumer:
-      group-id: user-service
+      group-id: core-service
   ai:
     openai:
       api-key: ${OPEN_AI_KEY}
@@ -93,3 +93,12 @@ resilience4j:
         timeout-duration: 15s
       openaiFeedbackChat:
         timeout-duration: 15s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health
+  metrics:
+    tags:
+      application: ${spring.application.name}

@@ -58,7 +58,10 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(  "/api/auth/v1/refresh",
+                        .requestMatchers("/actuator/prometheus",
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/api/auth/v1/refresh",
                                 "/api/auth/v1/logout",
                                 "/api/auth/v1/login",
                                 "/api/auth/v1/.well-known/jwks.json",

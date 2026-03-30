@@ -203,3 +203,7 @@ services:
       - app-network
 volumes:
   ollama:
+
+networks:
+  app-network:
+    driver: bridge

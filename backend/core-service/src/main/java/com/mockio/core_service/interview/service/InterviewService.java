@@ -96,7 +96,7 @@ public class InterviewService {
                             scorePageable
                     );
 
-            historyInterview = interviewRepository.findByUserIdAndStatusAndTrack(
+            historyInterview = interviewRepository.findByUserIdAndStatusAndTrackOrderByIdDesc(
                     userId,
                     InterviewStatus.ENDED,
                     track,

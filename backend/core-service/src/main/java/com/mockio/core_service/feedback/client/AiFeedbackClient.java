@@ -5,7 +5,10 @@ import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
 import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.util.APIErrorResponse;
 import lombok.RequiredArgsConstructor;
+import org.flywaydb.core.api.ErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -33,11 +36,11 @@ public class AiFeedbackClient {
                 .bodyValue(req)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(String.class)
-                                .map(msg -> new CustomApiException(
-                                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                        ILLEGALSTATE,
-                                        "ai-service error: " + msg
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
                                 ))
                 )
                 .bodyToMono(GeneratedFeedback.class)
@@ -55,11 +58,11 @@ public class AiFeedbackClient {
                 .bodyValue(req)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(String.class)
-                                .map(msg -> new CustomApiException(
-                                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                        ILLEGALSTATE,
-                                        "ai-service error: " + msg
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
                                 ))
                 )
                 .bodyToMono(GeneratedSummaryFeedback.class)
@@ -76,4 +79,14 @@ public class AiFeedbackClient {
                 || t instanceof WebClientRequestException;
     }
 
+    private AIErrorCodeEnum mapErrorCode(String errCode) {
+        if (errCode == null || errCode.isBlank()) {
+            return AIErrorCodeEnum.ILLEGAL_STATE;
+        }
+        try {
+            return AIErrorCodeEnum.valueOf(errCode);
+        } catch (IllegalArgumentException e) {
+            return AIErrorCodeEnum.ILLEGAL_STATE;
+        }
+    }
 }

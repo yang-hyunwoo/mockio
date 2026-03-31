@@ -1,5 +1,6 @@
 package com.mockio.core_service.feedback.repository;
 
+import com.mockio.common_spring.constant.Status;
 import com.mockio.core_service.feedback.domain.InterviewSummaryFeedback;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,5 +11,5 @@ public interface SummaryFeedbackRepository extends JpaRepository<InterviewSummar
 
     Optional<InterviewSummaryFeedback> findByInterviewId(Long interviewId);
 
-    List<InterviewSummaryFeedback> findByInterviewIdIn(List<Long> interviewId);
+    List<InterviewSummaryFeedback> findByInterviewIdInAndStatus(List<Long> interviewId, Status status);
 }

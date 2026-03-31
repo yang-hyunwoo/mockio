@@ -60,9 +60,11 @@ public class OpenAIClient implements AIChatClient {
 
         OpenAIChatResponse res = openAiWebClient.post()
                 .uri("/v1/chat/completions")
+                .header("Content-Type", "application/json")
                 .bodyValue(req)
                 .exchangeToMono(this::handleResponse)
                 .onErrorMap(this::mapToCustomApiException)
+                .timeout(Duration.ofSeconds(10))
                 .block(REQUEST_TIMEOUT);
 
         if (res == null || res.choices() == null || res.choices().isEmpty()

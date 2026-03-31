@@ -1,5 +1,6 @@
 package com.mockio.core_service.interview.Mapper;
 
+import com.mockio.common_ai_contractor.constant.InterviewMode;
 import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.core_service.interview.domain.Interview;
 import com.mockio.core_service.interview.domain.InterviewQuestion;
@@ -36,8 +37,12 @@ public class InterviewQuestionMapper {
                         .toList(),
                 interview.getId(),
                 completed,
-                interview.getAnswerTimeSeconds()
-                );
+                interview.getAnswerTimeSeconds(),
+                EnumResponse.of(
+                        interview.getInterviewMode().name(),
+                        interview.getInterviewMode().getLabel()
+                )
+        );
     }
 
 }

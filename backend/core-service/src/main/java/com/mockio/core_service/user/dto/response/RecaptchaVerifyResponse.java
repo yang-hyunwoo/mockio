@@ -10,5 +10,4 @@ public record RecaptchaVerifyResponse(
         String hostname,
         @JsonProperty("error-codes")
         List<String> errorCodes
-) {
-}
+) {}

@@ -105,18 +105,6 @@ public class UserProfile extends BaseTimeEntity {
         this.profileImageId = profileImageId;
     }
 
-    public void changeBio(String bio) {
-        this.bio = bio;
-    }
-
-    public void changeName(String name) {
-        this.name = name;
-    }
-
-    public void changeVisibility(ProfileVisibility visibility) {
-        this.visibility = visibility;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

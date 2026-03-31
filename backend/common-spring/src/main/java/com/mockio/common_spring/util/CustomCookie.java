@@ -1,4 +1,4 @@
-package com.mockio.core_service.user.util;
+package com.mockio.common_spring.util;
 
 import org.springframework.http.ResponseCookie;
 
@@ -13,13 +13,16 @@ public abstract class CustomCookie {
      */
     public static ResponseCookie createCookie(String cookieName, String cookieValue, int time) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName, cookieValue)
+                .httpOnly(true)
                 .maxAge(time)
                 .path("/");
 
         if (EnvironmentProvider.isProd()) {
-            builder.httpOnly(true)
-                    .secure(true)
+            builder.secure(true)
                     .sameSite("None");
+        } else {
+            builder.secure(false)
+                    .sameSite("Lax");
         }
 
         return builder.build();
@@ -30,9 +33,18 @@ public abstract class CustomCookie {
      * @return
      */
     public static ResponseCookie deleteCookie(String name) {
-        return ResponseCookie.from(name, "")
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, "")
                 .path("/")
-                .maxAge(0)
-                .build();
+                .httpOnly(true)
+                .maxAge(0);
+
+        if (EnvironmentProvider.isProd()) {
+            builder.secure(true)
+                    .sameSite("None");
+        } else {
+            builder.secure(false)
+                    .sameSite("Lax");
+        }
+        return builder.build();
     }
 }

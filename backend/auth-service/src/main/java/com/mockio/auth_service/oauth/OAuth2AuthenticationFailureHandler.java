@@ -1,6 +1,6 @@
 package com.mockio.auth_service.oauth;
 
-import com.mockio.auth_service.config.EnvironmentProvider;
+import com.mockio.common_spring.util.EnvironmentProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;

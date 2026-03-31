@@ -14,12 +14,9 @@ import com.mockio.core_service.user.dto.response.UserProfileImageResponse;
  */
 public class UserProfileMapper {
 
-
-
     public static UserProfileDetailResponse fromDetail(User user,
                                                        UserInterviewSettingReadResponse userInterviewSettingReadResponse,
                                                        UserProfileImageResponse userProfileImageResponse) {
-
         MyPageProfileDetailResponse myPageProfileDetailResponse = new MyPageProfileDetailResponse(
                 user.getProfile().getNickname(),
                 user.getEmail(),

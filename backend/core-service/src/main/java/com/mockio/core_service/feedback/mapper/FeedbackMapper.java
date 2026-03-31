@@ -5,6 +5,8 @@ import com.mockio.core_service.feedback.domain.InterviewFeedback;
 import com.mockio.core_service.feedback.dto.response.InternalFeedbackDetailResponse;
 import com.mockio.core_service.feedback.dto.response.FeedbackText;
 
+import java.util.List;
+
 public class FeedbackMapper {
 
     public static InternalFeedbackDetailResponse from(InterviewFeedback interviewFeedback, FeedbackText feedbackText) {
@@ -23,6 +25,25 @@ public class FeedbackMapper {
                 feedbackText != null ? feedbackText.dimensions() : null,
                 feedbackText != null ? feedbackText.headline() : null,
                 feedbackText != null ? feedbackText.improvementTags() : null
+        );
+    }
+
+    public static InternalFeedbackDetailResponse fromInternalEmpty(InterviewFeedback interviewFeedback) {
+        return new InternalFeedbackDetailResponse(
+                interviewFeedback.getId(),
+                interviewFeedback.getAnswerId(),
+                null,
+                null,
+                List.of(),
+                List.of(),
+                null,
+                EnumResponse.of(
+                        interviewFeedback.getStatus().name(),
+                        interviewFeedback.getStatus().getLabel()
+                ),
+                null,
+                null,
+                List.of()
         );
     }
 

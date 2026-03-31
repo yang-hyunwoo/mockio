@@ -1,14 +1,16 @@
 package com.mockio.auth_service.oauth;
 
-import com.mockio.auth_service.config.EnvironmentProvider;
 import com.mockio.auth_service.config.JwtTokenProvider;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.service.RedisRefreshTokenService;
-import jakarta.servlet.http.Cookie;
+import com.mockio.common_spring.util.CustomCookie;
+import com.mockio.common_spring.util.EnvironmentProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -42,16 +44,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 Duration.ofDays(3)
         );
 
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        if (EnvironmentProvider.isProd()) {
-            refreshCookie.setSecure(true);
-        } else {
-            refreshCookie.setSecure(false);
-        }
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(3 * 24 * 60 * 60);
-        response.addCookie(refreshCookie);
+        ResponseCookie refreshTokenCookie = CustomCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         String targetUrl = determineTargetUrl();
 

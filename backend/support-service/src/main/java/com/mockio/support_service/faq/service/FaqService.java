@@ -23,7 +23,6 @@ public class FaqService {
      */
     @Transactional(readOnly = true)
     public FaqResDto findFaqList(FaqReqDto faqReqDto) {
-
         return FaqMapper.fromList(faqQueryDslRepository.findFaqList(faqReqDto));
     }
 

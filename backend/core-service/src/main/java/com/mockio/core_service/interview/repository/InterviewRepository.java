@@ -79,4 +79,5 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     );
 
     List<Interview> findTop30ByUserIdOrderByCreatedAtDesc(Long userId);
+
 }

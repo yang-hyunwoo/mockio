@@ -20,7 +20,12 @@ public enum AIErrorCodeEnum implements ErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST.value(), "AI_BAD_REQUEST", "AI 요청 형식이 올바르지 않습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED.value(), "AI_UNAUTHORIZED", "AI 인증에 실패했습니다."),
     RATE_LIMIT(HttpStatus.TOO_MANY_REQUESTS.value(), "AI_RATE_LIMIT", "AI 요청이 너무 많아 잠시 후 다시 시도해 주세요."),
-    TEMPORARY_ERROR(HttpStatus.TEMPORARY_REDIRECT.value(),"TEMPORARY_ERROR","AI TEMPORARY_ERROR")
+    TEMPORARY_ERROR(HttpStatus.TEMPORARY_REDIRECT.value(),"TEMPORARY_ERROR","AI TEMPORARY_ERROR"),
+    AUDIO_EMPTY(HttpStatus.BAD_REQUEST.value(), "AUDIO_EMPTY", "음성 파일이 비어 있습니다."),
+    AUDIO_TYPE_MISMATCH(HttpStatus.BAD_REQUEST.value(), "AUDIO_TYPE_MISMATCH", "오디오 파일만 업로드할 수 있습니다."),
+    AUDIO_SIZE_OVER(HttpStatus.BAD_REQUEST.value(), "AUDIO_SIZE_OVER", "오디오 파일 크기는 10MB 이하여야 합니다."),
+    AUDIO_TEXT_NULL(HttpStatus.BAD_REQUEST.value(), "AUDIO_TEXT_NULL", "텍스트를 찾을 수 없습니다."),
+
     ;
 
     private final int httpStatus;

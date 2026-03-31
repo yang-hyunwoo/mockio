@@ -7,12 +7,15 @@ import com.mockio.core_service.interview.dto.request.InterviewAnswerRequest;
 import com.mockio.core_service.interview.dto.response.FeedbackDetailResponse;
 import com.mockio.core_service.interview.dto.response.InterviewQuestionAnswerDetailResponse;
 import com.mockio.core_service.interview.dto.response.InterviewQuestionReadResponse;
+import com.mockio.core_service.interview.dto.response.SttResponse;
 import com.mockio.core_service.interview.service.InterviewAnswerService;
 import com.mockio.core_service.interview.service.InterviewFacadeService;
 import com.mockio.core_service.interview.service.InterviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/interview/v1")
@@ -61,6 +64,15 @@ public class InterviewAnswerController {
     ) {
         interviewService.activeInterviewEnd(userId);
         return Response.update(messageUtil.getMessage("response.update"));
+    }
+
+    @PostMapping(value = "/answer/stt", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response<SttResponse>> aiStt(@RequestPart("file") MultipartFile multipartFile,
+                                                       @RequestParam("interviewId") Long interviewId,
+                                                       @CurrentSubject Long userId) {
+
+        return Response.create(messageUtil.getMessage("response.create"), interviewAnswerService.aiStt(multipartFile, interviewId, userId));
+
     }
 
 }

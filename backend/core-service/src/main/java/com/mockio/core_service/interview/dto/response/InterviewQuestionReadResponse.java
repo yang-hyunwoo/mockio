@@ -9,7 +9,8 @@ public record InterviewQuestionReadResponse(
         List<Item> questions,
         Long interviewId,
         boolean completed,
-        Integer answerTimeSeconds
+        Integer answerTimeSeconds,
+        EnumResponse interviewMode
 ) {
     public record Item(
             Long id,

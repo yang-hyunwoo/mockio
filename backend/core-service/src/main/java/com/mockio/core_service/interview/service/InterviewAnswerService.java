@@ -3,6 +3,7 @@ package com.mockio.core_service.interview.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.InterviewEndReason;
+import com.mockio.common_ai_contractor.constant.InterviewMode;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
@@ -17,6 +18,7 @@ import com.mockio.core_service.interview.domain.InterviewQuestion;
 import com.mockio.core_service.interview.dto.request.InterviewAnswerRequest;
 import com.mockio.core_service.interview.dto.response.InterviewQuestionAnswerDetailResponse;
 import com.mockio.core_service.interview.dto.response.InterviewQuestionReadResponse;
+import com.mockio.core_service.interview.dto.response.SttResponse;
 import com.mockio.core_service.interview.forward.ai.AIServiceClient;
 import com.mockio.core_service.interview.kafka.domain.OutboxInterviewEvent;
 import com.mockio.core_service.interview.kafka.dto.request.InterviewAnswerSkippedPayload;
@@ -36,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -305,6 +308,29 @@ public class InterviewAnswerService {
     public InterviewQuestionAnswerDetailResponse interviewAnswerRead(Long userId, Long questionId) {
         return interviewAnswerQueryDslRepository.interviewAnswerDetail(userId, questionId)
                 .orElse(null);
+    }
+
+    @Transactional
+    public SttResponse aiStt(MultipartFile file , Long interviewId , Long userId) {
+        Interview interview = interviewRepository.findByIdAndUserId(interviewId, userId)
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                INTERVIEW_FORBIDDEN.getHttpStatus(),
+                                INTERVIEW_FORBIDDEN,
+                                INTERVIEW_FORBIDDEN.getMessage()
+                        )
+                );
+
+        if (interview.getInterviewMode() == InterviewMode.VOICE) {
+            return aiServiceClient.generateStt(file);
+        } else {
+            throw new CustomApiException(
+                    INTERVIEW_FORBIDDEN.getHttpStatus(),
+                    INTERVIEW_FORBIDDEN,
+                    INTERVIEW_FORBIDDEN.getMessage()
+            );
+        }
+
     }
 
     private Interview findInterview(Long userId, Long interviewId) {

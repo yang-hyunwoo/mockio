@@ -3,6 +3,7 @@ package com.mockio.auth_service.config;
 import com.mockio.common_spring.util.EnvironmentProvider;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +19,13 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @Configuration
+@RequiredArgsConstructor
 public class JwkConfig {
 
     @Value("${jwt.public-key-path}")
     private String publicKeyPath;
+
+    private final EnvironmentProvider environmentProvider;
 
     @Bean
     public JWKSet jwkSet() {
@@ -41,7 +45,7 @@ public class JwkConfig {
     private RSAPublicKey getPublicKey() {
         try {
             String publicKeyString;
-            if(EnvironmentProvider.isProd()) {
+            if(environmentProvider.isProd()) {
                 publicKeyString = Files.readString(Paths.get(publicKeyPath));
             } else {
                 Resource resource = new ClassPathResource(publicKeyPath);

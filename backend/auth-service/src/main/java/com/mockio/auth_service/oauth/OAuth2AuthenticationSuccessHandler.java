@@ -27,6 +27,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final RedisRefreshTokenService redisRefreshTokenService;
 
+    private final EnvironmentProvider environmentProvider;
+
+    private final CustomCookie customCookie;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -44,7 +48,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 Duration.ofDays(3)
         );
 
-        ResponseCookie refreshTokenCookie = CustomCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
+        ResponseCookie refreshTokenCookie = customCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         String targetUrl = determineTargetUrl();
@@ -54,7 +58,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     }
 
     private String determineTargetUrl() {
-        if (EnvironmentProvider.isProd()) {
+        if (environmentProvider.isProd()) {
             return "https://mockio.cloud/social/callback";
         }
         return "http://localhost:3000/social/callback";

@@ -40,6 +40,8 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh-token-expire-time}")
     private long refreshTokenExpire;
 
+    private final EnvironmentProvider environmentProvider;
+
     public String createAccessToken(Long userId) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpire);
@@ -101,7 +103,7 @@ public class JwtTokenProvider {
     private PublicKey getPublicKey() {
         try {
             String publicKeyString;
-            if(EnvironmentProvider.isProd()) {
+            if(environmentProvider.isProd()) {
                 publicKeyString = Files.readString(Paths.get(publicKeyPath));
             } else {
                 Resource resource = new ClassPathResource(publicKeyPath);
@@ -126,7 +128,7 @@ public class JwtTokenProvider {
         try {
             String privateKeyString;
 
-            if(EnvironmentProvider.isProd()) {
+            if(environmentProvider.isProd()) {
                 privateKeyString = Files.readString(Paths.get(privateKeyPath));
             } else {
                 Resource resource = new ClassPathResource(privateKeyPath);

@@ -50,6 +50,8 @@ public class UserService {
     private final UserInterviewSettingService userInterviewSettingService;
     private final PasswordResetTokenService passwordResetTokenService;
     private final RedisService redisService;
+    private final EnvironmentProvider environmentProvider;
+    private final CustomCookie customCookie;
 
     /**
      * 회원 가입 로직
@@ -204,7 +206,7 @@ public class UserService {
 
         passwordMatchCheck(request, findUser);
         findUser.withdraw();
-        ResponseCookie refreshToken = CustomCookie.deleteCookie("refreshToken");
+        ResponseCookie refreshToken = customCookie.deleteCookie("refreshToken");
         response.addHeader(HttpHeaders.SET_COOKIE, refreshToken.toString());
     }
 
@@ -309,7 +311,7 @@ public class UserService {
      * @return
      */
     private String createPasswordResetLink(String token) {
-        String baseUrl = EnvironmentProvider.isProd()
+        String baseUrl = environmentProvider.isProd()
                 ? "https://mockio.cloud"
                 : "http://localhost:3000";
 

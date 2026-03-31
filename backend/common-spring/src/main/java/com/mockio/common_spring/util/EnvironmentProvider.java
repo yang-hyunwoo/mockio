@@ -18,7 +18,7 @@ public class EnvironmentProvider {
         staticEnv = env;
     }
 
-    public static boolean isProd() {
+    public  boolean isProd() {
         return staticEnv != null && staticEnv.acceptsProfiles(Profiles.of("prod"));
     }
 

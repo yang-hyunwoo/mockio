@@ -31,6 +31,7 @@ public class AuthLoginService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserProfileClient userProfileClient;
     private final RedisRefreshTokenService redisRefreshTokenService;
+    private final CustomCookie customCookie;
 
     public LoginResponse login(UserLoginRequest request , HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authToken =
@@ -44,7 +45,7 @@ public class AuthLoginService {
             String accessToken = jwtTokenProvider.createAccessToken(loginUser.getUserId());
             String refreshToken = jwtTokenProvider.createRefreshToken(loginUser);
 
-            ResponseCookie refreshTokenCookie = CustomCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
+            ResponseCookie refreshTokenCookie = customCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
 
             response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
             redisRefreshTokenService.save(
@@ -101,7 +102,7 @@ public class AuthLoginService {
         String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            ResponseCookie refreshToken1 = CustomCookie.deleteCookie("refreshToken");
+            ResponseCookie refreshToken1 = customCookie.deleteCookie("refreshToken");
             response.addHeader(HttpHeaders.SET_COOKIE, refreshToken1.toString());
         }
 
@@ -116,7 +117,7 @@ public class AuthLoginService {
         }
 
         // 3. 쿠키 제거
-        ResponseCookie refreshToken2 = CustomCookie.deleteCookie("refreshToken");
+        ResponseCookie refreshToken2 = customCookie.deleteCookie("refreshToken");
         response.addHeader(HttpHeaders.SET_COOKIE, refreshToken2.toString());
     }
 

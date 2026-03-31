@@ -22,6 +22,7 @@ public class SignupController {
 
     private final UserService userService;
     private final MessageUtil messageUtil;
+    private final CustomCookie customCookie;
 
     /**
      * 사용자 회원 가입
@@ -34,7 +35,7 @@ public class SignupController {
             @Valid @RequestBody SignupRequest request
     ) {
         SignupResponse join = userService.join(request);
-        ResponseCookie cookie = CustomCookie.createCookie("join_success", "success", 30);
+        ResponseCookie cookie = customCookie.createCookie("join_success", "success", 30);
         return Response.create(cookie.toString(), messageUtil.getMessage("response.create"), join);
     }
 

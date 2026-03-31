@@ -1,23 +1,22 @@
 package com.mockio.common_spring.util;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
+import org.springframework.stereotype.Component;
 
-public abstract class CustomCookie {
+@Component
+@RequiredArgsConstructor
+public class CustomCookie {
 
-    /**
-     * 쿠키 생성
-     * @param cookieName
-     * @param cookieValue
-     * @param time
-     * @return
-     */
-    public static ResponseCookie createCookie(String cookieName, String cookieValue, int time) {
+    private final EnvironmentProvider environmentProvider;
+
+    public ResponseCookie createCookie(String cookieName, String cookieValue, int time) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(cookieName, cookieValue)
                 .httpOnly(true)
                 .maxAge(time)
                 .path("/");
 
-        if (EnvironmentProvider.isProd()) {
+        if (environmentProvider.isProd()) {
             builder.secure(true)
                     .sameSite("None");
         } else {
@@ -27,24 +26,21 @@ public abstract class CustomCookie {
 
         return builder.build();
     }
-    /**
-     * 쿠키 삭제
-     * @param name
-     * @return
-     */
-    public static ResponseCookie deleteCookie(String name) {
+
+    public ResponseCookie deleteCookie(String name) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(name, "")
                 .path("/")
                 .httpOnly(true)
                 .maxAge(0);
 
-        if (EnvironmentProvider.isProd()) {
+        if (environmentProvider.isProd()) {
             builder.secure(true)
                     .sameSite("None");
         } else {
             builder.secure(false)
                     .sameSite("Lax");
         }
+
         return builder.build();
     }
 }

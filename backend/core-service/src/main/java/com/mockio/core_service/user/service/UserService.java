@@ -1,6 +1,8 @@
 package com.mockio.core_service.user.service;
 
 import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.common_spring.util.CustomCookie;
+import com.mockio.common_spring.util.EnvironmentProvider;
 import com.mockio.core_service.interview.service.UserInterviewSettingService;
 import com.mockio.core_service.user.constant.AuthProviderEnum;
 import com.mockio.core_service.user.constant.UserStatus;
@@ -12,25 +14,23 @@ import com.mockio.core_service.user.dto.request.*;
 import com.mockio.core_service.user.dto.response.SignupResponse;
 import com.mockio.core_service.user.dto.response.UserInfoResponse;
 import com.mockio.core_service.internalmapper.InternalMapper;
+import com.mockio.core_service.user.mapper.UserAuthInfoMapper;
 import com.mockio.core_service.user.mapper.UserMapper;
 import com.mockio.core_service.user.repository.UserProfileRepository;
 import com.mockio.core_service.user.repository.UserRepository;
-import com.mockio.core_service.user.util.EnvironmentProvider;
-import com.mockio.core_service.user.util.IpUtils;
 import com.mockio.core_service.util.RedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -51,143 +51,131 @@ public class UserService {
     private final PasswordResetTokenService passwordResetTokenService;
     private final RedisService redisService;
 
+    /**
+     * 회원 가입 로직
+     * @param signupRequest
+     * @return
+     */
     public SignupResponse join(SignupRequest signupRequest) {
 
         recaptchaService.verify(signupRequest.recaptchaToken());
 
-        //1. 동일 유저 이메일 존재 검사
-        userRepository.findByEmailAndProvider(signupRequest.email(), AuthProviderEnum.NORMAL).ifPresent(user -> {
-            throw new CustomApiException(DUPLICATE_EMAIL.getHttpStatus(), DUPLICATE_EMAIL, DUPLICATE_EMAIL.getMessage());
-        });
-        if (userProfileRepository.existsByNickname(signupRequest.nickname())) {
-            throw new CustomApiException(DUPLICATE_NICKNAME.getHttpStatus(), DUPLICATE_NICKNAME, DUPLICATE_NICKNAME.getMessage());
-        }
-        User save = userRepository.save(UserMapper.toEntity(signupRequest, passwordEncoder));
+        //1. 동일 유저 이메일 존재 검사 / 닉네임 중복 체크
+        validateDuplicate(signupRequest);
+
+        String password = passwordEncoder.encode(signupRequest.password());
+        User saveUser = userRepository.save(UserMapper.toEntity(signupRequest, password));
 
         //유저 프로필 등록
         UserProfile userProfile = UserProfile.createUserProfile(
-                save,
+                saveUser,
                 null,
                 signupRequest.nickname()
         );
+
         userProfileRepository.save(userProfile);
-        userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(save.getId())));
-        return UserMapper.from(save);
+        userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(saveUser.getId())));
+        return UserMapper.fromSignUp(saveUser);
+
     }
 
+    /**
+     * user 로그인 시 회원 검증 (auth-service)
+     * customUserDetailsService 참조
+     * @param email
+     * @return
+     */
     public UserAuthInfoResponse getUserAuthInfo(String email) {
         User user = userRepository.findByEmailAndProvider(email, AuthProviderEnum.NORMAL)
                 .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
-
-        return new UserAuthInfoResponse(
-                user.getId(),
-                user.getProfile().getName(),
-                user.getEmail(),
-                user.getPassword(),
-                user.getRole().name(),
-                user.getFailLoginCount(),
-                user.getStatus().name()
-        );
+        return UserAuthInfoMapper.fromUserAuthInfo(user);
     }
 
+    /**
+     * 사용자 정보 조회
+     * @param userId
+     * @return
+     */
     public UserInfoResponse userDetail(Long userId) {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
-
-        return new UserInfoResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getProfile().getNickname()
-        );
+        return UserMapper.fromUserInfo(user);
     }
 
+    /**
+     * 로그인 성공 (실패 카운트 초기화 , 로그인 시간 저장)
+     * @param userId
+     */
     public void resetFailCount(Long userId) {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
                 .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
         user.updateLastLogin();
-        user.resetFailLoginCount();
     }
 
+    /**
+     * 로그인 실패 (실패 카운트 증가)
+     * @param email
+     */
     public void loginFailure(String email) {
         User user = userRepository.findByEmailAndProvider(email, AuthProviderEnum.NORMAL)
                 .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
         user.increaseFailLoginCount();
     }
 
+    /**
+     * oauth 로그인
+     * @param oauthUserRequest
+     * @return
+     */
     public UserAuthInfoResponse oauthLogin(OauthUserRequest oauthUserRequest) {
-        User user;
-        if(userRepository.findByEmailAndProvider(oauthUserRequest.email(),
-                oauthUserRequest.provider()).isPresent()) {
-             user = userRepository.findByEmailAndProvider(oauthUserRequest.email(),
-                    oauthUserRequest.provider()).orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
-        } else {
-            user = User.createOautUser(oauthUserRequest);
+        User user = userRepository.findByEmailAndProvider(
+                oauthUserRequest.email(),
+                oauthUserRequest.provider()
+        ).orElseGet(() -> createOauthUser(oauthUserRequest));
 
-            userRepository.save(user);
+        String name = extractOauthUserName(user, oauthUserRequest);
 
-            UserProfile userProfile = UserProfile.createUserProfile(
-                    user,
-                    oauthUserRequest.name(),
-                    oauthUserRequest.nickname()
-            );
-            userProfileRepository.save(userProfile);
-            userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(user.getId())));
-        }
-
-        String name = user.getProfile() != null && user.getProfile().getName() != null
-                ? user.getProfile().getName()
-                : oauthUserRequest.name();
-
-        return new UserAuthInfoResponse(
-                user.getId(),
-                name,
-                user.getEmail(),
-                user.getPassword(),
-                user.getRole().name(),
-                user.getFailLoginCount(),
-                user.getStatus().name()
-        );
+        return UserAuthInfoMapper.fromOauthUserAuthInfo(user, name);
     }
 
+    /**
+     * 비밀번호 변경 이메일 전송
+     * @param email
+     */
     public void sendPasswordEmail(String email) {
-        User user = userRepository.findByEmailAndProviderAndStatus(email, AuthProviderEnum.NORMAL, UserStatus.ACTIVE)
-                .orElse(null);
-        if(userNotNull(user)) {
-            //redis 검증
-            redisService.checkRateLimit(email);
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = null;
-            try {
-                String token = UUID.randomUUID().toString();
-                String url = "";
-                if(EnvironmentProvider.isProd()) {
-                    url = "https://mockio.cloud";
-                }  else {
-                    url = "http://localhost:3000";
-                }
-                String link = url+"password/reset?token=" + token;
+        User user = userRepository.findByEmailAndProviderAndStatus(
+                email,
+                AuthProviderEnum.NORMAL,
+                UserStatus.ACTIVE
+        ).orElse(null);
 
-                helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                helper.setTo(email);
-                helper.setSubject("비밀번호 재설정");
-                String html = loadHtmlTemplate().replace("{{link}}", link);
-
-                String text = "비밀번호 재설정 링크:\n" + link;
-                helper.setText(text, html);
-
-                mailSender.send(mimeMessage);
-
-                passwordResetTokenService.resetTokenGenerate(user.getId(),token);
-
-            } catch (MessagingException e) {
-                throw new CustomApiException(MAIL_SEND_FAIL.getHttpStatus(),
-                        MAIL_SEND_FAIL,
-                        MAIL_SEND_FAIL.getMessage());
-            }
+        if (user == null) {
+            return;
         }
 
+        redisService.checkRateLimit(email);
+
+        String token = UUID.randomUUID().toString();
+        String resetLink = createPasswordResetLink(token);
+
+        passwordResetTokenService.resetTokenGenerate(user.getId(), token);
+
+        try {
+            MimeMessage mimeMessage = createPasswordResetMessage(email, resetLink);
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            throw new CustomApiException(
+                    MAIL_SEND_FAIL.getHttpStatus(),
+                    MAIL_SEND_FAIL,
+                    MAIL_SEND_FAIL.getMessage()
+            );
+        }
     }
 
+    /**
+     * 비밀번호 변경
+     * @param changeRequest
+     */
     public void resetPasswordChange(PasswordChangeRequest changeRequest) {
         PasswordResetToken passwordResetToken = passwordResetTokenService.validateToken(changeRequest.token());
         User user = userRepository.findByIdAndStatusAndProvider(passwordResetToken.getUserId(), UserStatus.ACTIVE, AuthProviderEnum.NORMAL)
@@ -197,6 +185,12 @@ public class UserService {
         passwordResetToken.updateResetToken();
     }
 
+    /**
+     * 사용자 탈퇴
+     * @param user
+     * @param request
+     * @param response
+     */
     public void deleteUser(User user, MypagePasswordChangeRequest request,HttpServletResponse response) {
         User findUser = userRepository.findByIdAndStatusAndProvider(
                 user.getId(),
@@ -210,9 +204,15 @@ public class UserService {
 
         passwordMatchCheck(request, findUser);
         findUser.withdraw();
-        expireRefreshCookie(response);
+        ResponseCookie refreshToken = CustomCookie.deleteCookie("refreshToken");
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshToken.toString());
     }
 
+    /**
+     * (마이페이지) 비밀번호 변경
+     * @param user
+     * @param request
+     */
     public void updatePasswordChange(User user, MypagePasswordChangeRequest request) {
         User userRead = userRepository.findByIdAndStatusAndProvider(user.getId(),
                         UserStatus.ACTIVE,
@@ -225,23 +225,6 @@ public class UserService {
 
         passwordMatchCheck(request,userRead);
         user.resetPasswordChange(request.newPassword(), request.confirmPassword(), passwordEncoder);
-    }
-
-    private void expireRefreshCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refreshToken", null);
-        cookie.setHttpOnly(true);
-        if (EnvironmentProvider.isProd()) {
-            cookie.setSecure(true);
-        } else {
-            cookie.setSecure(false);
-        }
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-    }
-
-    private static boolean userNotNull(User user) {
-        return user != null;
     }
 
     private String loadHtmlTemplate() {
@@ -268,6 +251,91 @@ public class UserService {
                     PASSWORD_NOT_MATCH.getMessage()
             );
         }
+    }
+
+    /**
+     * 회원가입 동일 유저 이메일 존재 검사 / 닉네임 중복 체크
+     * @param signupRequest
+     */
+    private void validateDuplicate(SignupRequest signupRequest) {
+        userRepository.findByEmailAndProvider(signupRequest.email(), AuthProviderEnum.NORMAL).ifPresent(user -> {
+            throw new CustomApiException(DUPLICATE_EMAIL.getHttpStatus(), DUPLICATE_EMAIL, DUPLICATE_EMAIL.getMessage());
+        });
+        if (userProfileRepository.existsByNickname(signupRequest.nickname())) {
+            throw new CustomApiException(DUPLICATE_NICKNAME.getHttpStatus(), DUPLICATE_NICKNAME, DUPLICATE_NICKNAME.getMessage());
+        }
+    }
+
+    /**
+     * oauth 유저 등록
+     * @param oauthUserRequest
+     * @return
+     */
+    private User createOauthUser(OauthUserRequest oauthUserRequest) {
+        User user = User.createOauthUser(oauthUserRequest);
+        User savedUser = userRepository.save(user);
+
+        UserProfile userProfile = UserProfile.createUserProfile(
+                savedUser,
+                oauthUserRequest.name(),
+                oauthUserRequest.nickname()
+        );
+        userProfileRepository.save(userProfile);
+
+        userInterviewSettingService.ensureInterviewSettingSave(
+                InternalMapper.toInternalEnsureInterviewSetting(
+                        new EnsureInterviewSettingRequest(savedUser.getId())
+                )
+        );
+
+        return savedUser;
+    }
+
+    /**
+     * ouath 유저 이름 조회
+     * @param user
+     * @param oauthUserRequest
+     * @return
+     */
+    private String extractOauthUserName(User user, OauthUserRequest oauthUserRequest) {
+        return user.getProfile() != null && user.getProfile().getName() != null
+                ? user.getProfile().getName()
+                : oauthUserRequest.name();
+    }
+
+    /**
+     * 링크 생성
+     * @param token
+     * @return
+     */
+    private String createPasswordResetLink(String token) {
+        String baseUrl = EnvironmentProvider.isProd()
+                ? "https://mockio.cloud"
+                : "http://localhost:3000";
+
+        return baseUrl + "/password/reset?token=" + token;
+    }
+
+    /**
+     * 메일 메시지 생성
+     * @param email
+     * @param resetLink
+     * @return
+     * @throws MessagingException
+     */
+    private MimeMessage createPasswordResetMessage(String email, String resetLink) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+        helper.setTo(email);
+        helper.setSubject("비밀번호 재설정");
+
+        String html = loadHtmlTemplate().replace("{{link}}", resetLink);
+        String text = "비밀번호 재설정 링크:\n" + resetLink;
+
+        helper.setText(text, html);
+
+        return mimeMessage;
     }
 
 }

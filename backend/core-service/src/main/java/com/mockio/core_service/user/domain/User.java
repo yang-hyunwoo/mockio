@@ -93,7 +93,7 @@ public class User extends BaseTimeEntity {
                 .build();
     }
 
-    public static User createOautUser(OauthUserRequest oauthUserRequest) {
+    public static User createOauthUser(OauthUserRequest oauthUserRequest) {
         return User.builder()
                 .email(oauthUserRequest.email())
                 .password(oauthUserRequest.password())

@@ -40,22 +40,7 @@ public class FeedbackService {
         }
 
         if (interviewFeedback.getStatus() != Status.SUCCEEDED) {
-            return new InternalFeedbackDetailResponse(
-                    interviewFeedback.getId(),
-                    interviewFeedback.getAnswerId(),
-                    null,
-                    null,
-                    List.of(),
-                    List.of(),
-                    null,
-                    EnumResponse.of(
-                            interviewFeedback.getStatus().name(),
-                            interviewFeedback.getStatus().getLabel()
-                    ),
-                    null,
-                    null,
-                    List.of()
-            );
+            return FeedbackMapper.fromInternalEmpty(interviewFeedback);
         }
 
         try {
@@ -81,14 +66,11 @@ public class FeedbackService {
         List<InternalFeedbackDetailResponse> responses = feedbacks.stream()
                 .map(interviewFeedback -> {
                     try {
-                        if (interviewFeedback.getFeedbackText() != null )
-                                 {
-
+                        if (interviewFeedback.getFeedbackText() != null ) {
                             FeedbackText feedbackText = objectMapper.readValue(
                                     interviewFeedback.getFeedbackText(),
                                     FeedbackText.class
                             );
-
                             return FeedbackMapper.from(interviewFeedback, feedbackText);
                         } else {
                            return FeedbackMapper.from(interviewFeedback, null);

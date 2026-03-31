@@ -1,6 +1,7 @@
 package com.mockio.auth_service.config;
 
 import com.mockio.auth_service.dto.LoginUser;
+import com.mockio.common_spring.util.EnvironmentProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

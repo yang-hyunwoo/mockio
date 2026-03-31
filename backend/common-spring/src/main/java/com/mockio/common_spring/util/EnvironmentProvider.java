@@ -1,4 +1,4 @@
-package com.mockio.auth_service.config;
+package com.mockio.common_spring.util;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +21,5 @@ public class EnvironmentProvider {
     public static boolean isProd() {
         return staticEnv != null && staticEnv.acceptsProfiles(Profiles.of("prod"));
     }
-    
+
 }

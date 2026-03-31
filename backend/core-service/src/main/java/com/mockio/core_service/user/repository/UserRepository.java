@@ -10,17 +10,16 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailAndProvider(String email,
-                                            AuthProviderEnum providerType);
+                                          AuthProviderEnum providerType);
 
     Optional<User> findByIdAndStatus(Long userId, UserStatus status);
 
     Optional<User> findByEmailAndProviderAndStatus(String email,
-                                          AuthProviderEnum providerType,
+                                                   AuthProviderEnum providerType,
                                                    UserStatus userStatus);
 
     Optional<User> findByIdAndStatusAndProvider(Long id,
                                                 UserStatus userStatus,
-                                                AuthProviderEnum providerEnum
-    );
+                                                AuthProviderEnum providerEnum);
 
 }

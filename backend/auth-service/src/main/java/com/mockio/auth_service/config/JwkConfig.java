@@ -1,5 +1,6 @@
 package com.mockio.auth_service.config;
 
+import com.mockio.common_spring.util.EnvironmentProvider;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import org.springframework.beans.factory.annotation.Value;

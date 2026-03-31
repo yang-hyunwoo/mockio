@@ -2,7 +2,6 @@ package com.mockio.core_service.user.service;
 
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.user.domain.PasswordResetToken;
-import com.mockio.core_service.user.dto.request.PasswordChangeRequest;
 import com.mockio.core_service.user.mapper.PasswordResetTokenMapper;
 import com.mockio.core_service.user.repository.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;

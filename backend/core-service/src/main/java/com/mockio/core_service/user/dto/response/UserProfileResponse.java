@@ -26,5 +26,4 @@ public record UserProfileResponse(
         EnumResponse  status,
         @Schema(description = "유저_마지막_로그인", example = "")
         OffsetDateTime lastLoginAt
-
 ) {}

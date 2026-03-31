@@ -52,14 +52,4 @@ public class UserProfileController {
         return Response.ok(messageUtil.getMessage("response.read"), userProfileService.getUserProfileDetail(user.getId()));
     }
 
-    @GetMapping("/public/me/public-page")
-    public ResponseEntity<?> publicPage(@CurrentUser(required = false) User user) {
-        if (user == null) {
-            // 로그인 안한 사용자
-        } else {
-            // 로그인 사용자
-        }
-        return ResponseEntity.ok().build();
-    }
-
 }

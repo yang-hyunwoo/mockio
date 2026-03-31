@@ -1,7 +1,6 @@
 package com.mockio.auth_service.service;
 
 import com.mockio.auth_service.client.UserProfileClient;
-import com.mockio.auth_service.config.EnvironmentProvider;
 import com.mockio.auth_service.config.JwtTokenProvider;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.dto.UserInfoResponse;
@@ -9,10 +8,13 @@ import com.mockio.auth_service.dto.request.UserLoginRequest;
 import com.mockio.auth_service.dto.response.LoginResponse;
 import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.common_spring.util.CustomCookie;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,25 +44,14 @@ public class AuthLoginService {
             String accessToken = jwtTokenProvider.createAccessToken(loginUser.getUserId());
             String refreshToken = jwtTokenProvider.createRefreshToken(loginUser);
 
-            Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+            ResponseCookie refreshTokenCookie = CustomCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
 
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
             redisRefreshTokenService.save(
                     loginUser.getUserId(),
                     refreshToken,
                     Duration.ofDays(1)
             );
-
-            refreshCookie.setHttpOnly(true);
-            if (EnvironmentProvider.isProd()) {
-                refreshCookie.setSecure(true);
-            } else {
-                refreshCookie.setSecure(false);
-            }
-            // 운영 HTTPS면 true
-            refreshCookie.setPath("/");
-            refreshCookie.setMaxAge(1 * 24 * 60 * 60);
-
-            response.addCookie(refreshCookie);
 
             return new LoginResponse(
                     loginUser.getUserId(),
@@ -110,7 +101,8 @@ public class AuthLoginService {
         String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            expireRefreshCookie(response);
+            ResponseCookie refreshToken1 = CustomCookie.deleteCookie("refreshToken");
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshToken1.toString());
         }
 
         try {
@@ -124,7 +116,8 @@ public class AuthLoginService {
         }
 
         // 3. 쿠키 제거
-        expireRefreshCookie(response);
+        ResponseCookie refreshToken2 = CustomCookie.deleteCookie("refreshToken");
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshToken2.toString());
     }
 
     private String extractRefreshToken(HttpServletRequest request) {
@@ -136,19 +129,6 @@ public class AuthLoginService {
             }
         }
         return null;
-    }
-
-    private void expireRefreshCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refreshToken", null);
-        cookie.setHttpOnly(true);
-        if (EnvironmentProvider.isProd()) {
-            cookie.setSecure(true);
-        } else {
-            cookie.setSecure(false);
-        }
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
     }
 
 }

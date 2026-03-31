@@ -1,5 +1,6 @@
 package com.mockio.core_service.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.core_service.util.handler.CusstomAccessDeniedHandler;
 import com.mockio.core_service.util.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final ObjectMapper objectMapper;
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -49,7 +51,7 @@ public class SecurityConfig {
                         BearerTokenAuthenticationFilter.class
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
                         .accessDeniedHandler(new CusstomAccessDeniedHandler()))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();

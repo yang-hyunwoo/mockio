@@ -1,5 +1,19 @@
 package com.mockio.core_service.interview.service;
 
+/**
+ * 인터뷰 답변 저장 메인 흐름 (Orchestration)
+ *
+ * 전체 흐름:
+ * 1. 인터뷰/질문 검증
+ * 2. idempotency 검증 및 중복 요청 처리
+ * 3. 답변 저장
+ * 4. 빈 답변이면 AI 처리 없이 다음 질문
+ * 5. 정상 답변이면 이벤트 발행
+ * 6. follow-up 질문 생성 시도
+ * 7. deep-dive 질문 생성 시도
+ * 8. 둘 다 없으면 다음 질문 or 인터뷰 종료
+ */
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.InterviewEndReason;
@@ -41,13 +55,25 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.IDEMPOTENCY_KEY_NOT_FOUND;
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_FORBIDDEN;
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class InterviewAnswerService {
+
+    private static final String EVENT_TOPIC_FEEDBACK = "FEEDBACK";
+    private static final String EVENT_ANSWER_SUBMITTED = "InterviewAnswerSubmitted";
+    private static final String EVENT_NO_ANSWER_SKIPPED = "InterviewNoAnswerSkipped";
+    private static final String EVENT_INTERVIEW_COMPLETED = "InterviewCompleted";
+
+    private static final int FOLLOW_UP_LIMIT_PERCENT = 60;
+    private static final int FOLLOW_UP_SEQ_GAP = 5;
+    private static final int DEEP_DIVE_SEQ_GAP = 1;
 
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
@@ -60,248 +86,59 @@ public class InterviewAnswerService {
     private final DeepDiveGate deepDiveGate;
 
     @Transactional
-    public InterviewQuestionReadResponse interviewAnswerSave(Long userId, InterviewAnswerRequest interviewAnswerRequest) {
+    public InterviewQuestionReadResponse interviewAnswerSave(Long userId, InterviewAnswerRequest request) {
 
-        // 인터뷰 권한 체크
-        Interview interview = findInterview(userId, interviewAnswerRequest.interviewId());
+        // 1. 인터뷰 접근 권한 검증 (userId 기반)
+        Interview interview = findInterview(userId, request.interviewId());
 
-        // 질문 존재 여부 확인
-        InterviewQuestion interviewQuestion = interviewQuestionRepository
-                .findByIdAndInterviewId(interviewAnswerRequest.questionId(), interviewAnswerRequest.interviewId())
-                .orElseThrow(() -> new CustomApiException(
-                        INTERVIEW_NOT_FOUND.getHttpStatus(),
-                        INTERVIEW_NOT_FOUND,
-                        INTERVIEW_NOT_FOUND.getMessage()
-                ));
+        // 2. 해당 인터뷰에 속한 질문인지 검증
+        InterviewQuestion question = findQuestion(request);
 
-        if (interviewAnswerRequest.idempotencyKey() == null || interviewAnswerRequest.idempotencyKey().isBlank()) {
-            throw new CustomApiException(
-                    IDEMPOTENCY_KEY_NOT_FOUND.getHttpStatus(),
-                    IDEMPOTENCY_KEY_NOT_FOUND,
-                    IDEMPOTENCY_KEY_NOT_FOUND.getMessage()
-            );
+        // 3. idempotency key 필수 검증 (중복 요청 방지)
+        validateIdempotencyKey(request);
+
+        // 4. 동일 요청이면 DB 조회 없이 기존 결과 재구성
+        Optional<InterviewQuestionReadResponse> duplicatedResponse = findDuplicatedResponse(interview, question, request);
+        if (duplicatedResponse.isPresent()) {
+            return duplicatedResponse.get();
         }
 
-        // 같은 요청이면 기존 응답 재구성
-        var existing = interviewAnswerRepository
-                .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey());
+        // 5. 답변 저장 (attempt 증가 포함)
+        SavedAnswerContext savedContext = saveAnswer(interview, question, request);
 
-        if (existing.isPresent()) {
-            return rebuildResponse(interview, interviewQuestion);
+        // 6. 답변이 비어있으면 AI 처리 없이 skip 이벤트만 발행
+        if (isBlankAnswer(request.answerText())) {
+            publishNoAnswerSkippedEvent(interview, question, savedContext.answer());
+            return moveNextOrComplete(interview, question);
         }
 
-        int nextAttempt = interviewAnswerRepository
-                .findMaxAttemptByQuestionId(interviewAnswerRequest.questionId())
-                .orElse(0) + 1;
+        // 7. follow-up 판단 (룰 기반)
+        FollowUpDecision decision = followUpDecider.decide(question, request, interview);
 
-        InterviewAnswer answer = InterviewAnswer.createAnswer(
-                interviewQuestion,
-                nextAttempt,
-                interviewAnswerRequest.answerText(),
-                interviewAnswerRequest.answerDurationSeconds()
-        );
-        answer.updateAnswer(interviewAnswerRequest.idempotencyKey());
+        // 8. 답변 제출 이벤트 발행 (AI 피드백용)
+        publishAnswerSubmittedEvent(interview, question, savedContext);
 
-        try {
-            interviewAnswerRepository.unsetCurrentByQuestionId(interviewAnswerRequest.questionId());
-            interviewAnswerRepository.save(answer);
-            interview.incrementAnswered();
-        } catch (DataIntegrityViolationException e) {
-            interviewAnswerRepository
-                    .findByQuestionIdAndIdempotencyKey(interviewQuestion.getId(), interviewAnswerRequest.idempotencyKey())
-                    .orElseThrow(() -> e);
+        // 9. follow-up 가능 여부 계산 (비율 제한 + 타입 체크)
+        FollowUpAvailability availability = calculateFollowUpAvailability(interview, question, decision);
 
-            return rebuildResponse(interview, interviewQuestion);
+        // 10. 일반 follow-up 질문 생성 시도
+        Optional<InterviewQuestionReadResponse> followUpResponse =
+                tryCreateFollowUp(interview, question, request, savedContext, availability);
+
+        if (followUpResponse.isPresent()) {
+            return followUpResponse.get();
         }
 
-        // 답변이 없으면 저장만 하고 AI 관련 처리는 모두 스킵
-        if (!hasAnswerText(interviewAnswerRequest.answerText())) {
-            log.info(
-                    "Skip AI feedback/follow-up/deep-dive because answer is blank. interviewId={}, questionId={}, answerId={}",
-                    interview.getId(),
-                    interviewQuestion.getId(),
-                    answer.getId()
-            );
-            InterviewAnswerSkippedPayload payload = new InterviewAnswerSkippedPayload(
-                    interview.getId(),
-                    interviewQuestion.getId(),
-                    answer.getId()
-            );
+        // 11. deep-dive 질문 생성 시도
+        Optional<InterviewQuestionReadResponse> deepDiveResponse =
+                tryCreateDeepDive(interview, question, request, savedContext, availability);
 
-            JsonNode payloadJsonNode = objectMapper.valueToTree(payload);
-
-            outboxInterviewEventRepository.save(
-                    OutboxInterviewEvent.createNew(
-                            "FEEDBACK",
-                            answer.getId(),
-                            "InterviewNoAnswerSkipped",
-                            payloadJsonNode
-                    )
-            );
-            return moveNextOrComplete(interview, interviewQuestion);
+        if (deepDiveResponse.isPresent()) {
+            return deepDiveResponse.get();
         }
 
-        FollowUpDecision decision = followUpDecider.decide(interviewQuestion, interviewAnswerRequest, interview);
-
-        int questionCount = interviewQuestionRepository.countByInterviewIdAndType(
-                interviewAnswerRequest.interviewId(),
-                QuestionType.BASE
-        );
-        int followUpCount = interviewQuestionRepository.countByInterviewIdAndType(
-                interviewAnswerRequest.interviewId(),
-                QuestionType.FOLLOW_UP
-        );
-
-        InterviewAnswerSubmittedPayload payload = new InterviewAnswerSubmittedPayload(
-                interview.getId(),
-                interviewQuestion.getId(),
-                interviewQuestion.getQuestionText(),
-                answer.getId(),
-                answer.getAnswerText(),
-                nextAttempt,
-                interview.getTrack().name(),
-                interview.getDifficulty().name(),
-                interview.getFeedbackStyle().name()
-        );
-
-        JsonNode payloadJsonNode = objectMapper.valueToTree(payload);
-
-        outboxInterviewEventRepository.save(
-                OutboxInterviewEvent.createNew(
-                        "FEEDBACK",
-                        answer.getId(),
-                        "InterviewAnswerSubmitted",
-                        payloadJsonNode
-                )
-        );
-
-        boolean canAsk = canAskFollowUp(questionCount, followUpCount);
-        boolean isBase = interviewQuestion.getType() == QuestionType.BASE;
-        boolean isDeepDive = interviewQuestion.getType() == QuestionType.DEEP_DIVE;
-        boolean wantsFollowUp = decision.askFollowUp();
-
-        /**
-         * 1) 룰로 바로 일반 꼬리질문
-         * 2) 룰에서 skip이어도 Gate 통과하면 deep dive 판정
-         * 3) 둘 다 아니면 다음 질문/완료
-         */
-        if (canAsk && wantsFollowUp && isBase) {
-
-            FollowUpQuestionCommand followUpQuestionCommand = new FollowUpQuestionCommand(
-                    interview.getTrack(),
-                    interview.getDifficulty(),
-                    interview.getFeedbackStyle(),
-                    decision.reason(),
-                    new FollowUpQuestionCommand.QAPair(
-                            interviewQuestion.getQuestionText(),
-                            interviewAnswerRequest.answerText()
-                    )
-            );
-
-            FollowUpQuestion followUpQuestion = aiServiceClient.generateFollowQuestions(followUpQuestionCommand);
-            FollowUpQuestion.Item q = followUpQuestion.questions();
-
-            int nextSeq = isDeepDive ? (interviewQuestion.getSeq() + 1) : (interviewQuestion.getSeq() + 5);
-            int nextDepth = interviewQuestion.getDepth() + 1;
-
-            InterviewQuestion saveFollowQuestion = InterviewQuestion.createFollowUp(
-                    interview,
-                    nextSeq,
-                    interviewQuestion.getId(),
-                    nextDepth,
-                    interviewQuestion.getId(),
-                    null,
-                    q.title(),
-                    q.primaryTag(),
-                    q.tags(),
-                    q.body(),
-                    q.provider(),
-                    q.model(),
-                    q.promptVersion(),
-                    q.temperature()
-            );
-
-            try {
-                interviewQuestionRepository.save(saveFollowQuestion);
-                interviewRepository.incrementTotalCount(interview.getId());
-                answer.followupUpdate(decision.reason());
-                return InterviewQuestionMapper.fromList(List.of(saveFollowQuestion), false, interview);
-            } catch (DataIntegrityViolationException e) {
-                InterviewQuestion existingFollowQuestion = interviewQuestionRepository
-                        .findByInterviewIdAndSeq(interview.getId(), nextSeq)
-                        .orElseThrow(() -> e);
-
-                return InterviewQuestionMapper.fromList(List.of(existingFollowQuestion), false, interview);
-            }
-        }
-
-        boolean deepDiveCandidate = canAsk
-                && !wantsFollowUp
-                && deepDiveGate.shouldCallAiForDeepDive(interview, interviewAnswerRequest, interviewQuestion.getType());
-
-        if (deepDiveCandidate) {
-            boolean alreadyDeepDived = interviewQuestionRepository
-                    .existsByInterviewIdAndParentQuestionIdAndType(
-                            interview.getId(),
-                            interviewQuestion.getId(),
-                            QuestionType.DEEP_DIVE
-                    );
-
-            if (!alreadyDeepDived) {
-                DeepDiveCommand deepDiveCommand = new DeepDiveCommand(
-                        interview.getTrack(),
-                        interview.getDifficulty(),
-                        interviewQuestion.getQuestionText(),
-                        interviewAnswerRequest.answerText()
-                );
-
-                GeneratedDeepDiveBundle result = aiServiceClient.generateDeepDiveResult(deepDiveCommand);
-                DeepDiveDecision dd = (result == null) ? null : result.decision();
-
-                if (dd != null && dd.shouldFollowUp()) {
-                    String deepDiveContext = buildDeepDiveContext(dd);
-                    FollowUpQuestion deepDiveQuestion = result.question();
-
-                    if (deepDiveQuestion != null && deepDiveQuestion.questions() != null) {
-                        FollowUpQuestion.Item q = deepDiveQuestion.questions();
-
-                        int deepDiveSeq = interviewQuestion.getSeq() + 1;
-                        int deepDiveDepth = interviewQuestion.getDepth() + 1;
-
-                        InterviewQuestion saveDeepDiveQuestion = InterviewQuestion.createDeepDive(
-                                interview,
-                                deepDiveSeq,
-                                interviewQuestion.getId(),
-                                deepDiveDepth,
-                                interviewQuestion.getId(),
-                                null,
-                                q.title(),
-                                q.primaryTag(),
-                                q.tags(),
-                                q.body(),
-                                q.provider(),
-                                q.model(),
-                                q.promptVersion(),
-                                q.temperature()
-                        );
-
-                        try {
-                            interviewQuestionRepository.save(saveDeepDiveQuestion);
-                            answer.followupUpdate(deepDiveContext);
-                            interviewRepository.incrementTotalCount(interview.getId());
-                            return InterviewQuestionMapper.fromList(List.of(saveDeepDiveQuestion), false, interview);
-                        } catch (DataIntegrityViolationException e) {
-                            InterviewQuestion existingDeepDiveQuestion = interviewQuestionRepository
-                                    .findByInterviewIdAndSeq(interview.getId(), deepDiveSeq)
-                                    .orElseThrow(() -> e);
-
-                            return InterviewQuestionMapper.fromList(List.of(existingDeepDiveQuestion), false, interview);
-                        }
-                    }
-                }
-            }
-        }
-        return moveNextOrComplete(interview, interviewQuestion);
+        // 12. 둘 다 없으면 다음 질문 또는 인터뷰 종료
+        return moveNextOrComplete(interview, question);
     }
 
     @Transactional(readOnly = true)
@@ -311,19 +148,10 @@ public class InterviewAnswerService {
     }
 
     @Transactional
-    public SttResponse aiStt(MultipartFile file , Long interviewId , Long userId) {
-        Interview interview = interviewRepository.findByIdAndUserId(interviewId, userId)
-                .orElseThrow(
-                        () -> new CustomApiException(
-                                INTERVIEW_FORBIDDEN.getHttpStatus(),
-                                INTERVIEW_FORBIDDEN,
-                                INTERVIEW_FORBIDDEN.getMessage()
-                        )
-                );
+    public SttResponse aiStt(MultipartFile file, Long interviewId, Long userId) {
+        Interview interview = findInterview(userId, interviewId);
 
-        if (interview.getInterviewMode() == InterviewMode.VOICE) {
-            return aiServiceClient.generateStt(file);
-        } else {
+        if (interview.getInterviewMode() != InterviewMode.VOICE) {
             throw new CustomApiException(
                     INTERVIEW_FORBIDDEN.getHttpStatus(),
                     INTERVIEW_FORBIDDEN,
@@ -331,6 +159,12 @@ public class InterviewAnswerService {
             );
         }
 
+        return aiServiceClient.generateStt(file);
+    }
+
+    @Transactional(readOnly = true)
+    public List<InternalInterviewAnswerDetailResponse> getInterviewList(Long interviewId) {
+        return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
     }
 
     private Interview findInterview(Long userId, Long interviewId) {
@@ -342,27 +176,388 @@ public class InterviewAnswerService {
                 ));
     }
 
-    private boolean canAskFollowUp(int totalCount, int followUpCount) {
-        return followUpCount * 100 < totalCount * 60;
+    private InterviewQuestion findQuestion(InterviewAnswerRequest request) {
+        return interviewQuestionRepository
+                .findByIdAndInterviewId(request.questionId(), request.interviewId())
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_NOT_FOUND.getHttpStatus(),
+                        INTERVIEW_NOT_FOUND,
+                        INTERVIEW_NOT_FOUND.getMessage()
+                ));
     }
 
-    private boolean hasAnswerText(String answerText) {
-        return answerText != null && !answerText.trim().isEmpty();
+    private void validateIdempotencyKey(InterviewAnswerRequest request) {
+        if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
+            throw new CustomApiException(
+                    IDEMPOTENCY_KEY_NOT_FOUND.getHttpStatus(),
+                    IDEMPOTENCY_KEY_NOT_FOUND,
+                    IDEMPOTENCY_KEY_NOT_FOUND.getMessage()
+            );
+        }
+    }
+
+    private Optional<InterviewQuestionReadResponse> findDuplicatedResponse(
+            Interview interview,
+            InterviewQuestion question,
+            InterviewAnswerRequest request
+    ) {
+        return interviewAnswerRepository
+                .findByQuestionIdAndIdempotencyKey(question.getId(), request.idempotencyKey())
+                .map(answer -> rebuildResponse(interview, question));
+    }
+
+    /**
+     * 답변 저장 로직
+     *
+     * - attempt 증가
+     * - 기존 current answer 제거
+     * - 새로운 answer 저장
+     *
+     *  DataIntegrityViolationException:
+     *  → 동시에 동일 요청이 들어온 경우 (idempotency race condition)
+     *  → 이미 저장된 것으로 판단하고 복구 흐름으로 처리
+     */
+    private SavedAnswerContext saveAnswer(
+            Interview interview,
+            InterviewQuestion question,
+            InterviewAnswerRequest request
+    ) {
+        int nextAttempt = interviewAnswerRepository
+                .findMaxAttemptByQuestionId(request.questionId())
+                .orElse(0) + 1;
+
+        InterviewAnswer answer = InterviewAnswer.createAnswer(
+                question,
+                nextAttempt,
+                request.answerText(),
+                request.answerDurationSeconds()
+        );
+        answer.updateAnswer(request.idempotencyKey());
+
+        try {
+            interviewAnswerRepository.unsetCurrentByQuestionId(request.questionId());
+            interviewAnswerRepository.save(answer);
+            interview.incrementAnswered();
+            return new SavedAnswerContext(answer, nextAttempt);
+        } catch (DataIntegrityViolationException e) {
+            interviewAnswerRepository
+                    .findByQuestionIdAndIdempotencyKey(question.getId(), request.idempotencyKey())
+                    .orElseThrow(() -> e);
+
+            return new SavedAnswerContext(answer, nextAttempt, true);
+        }
+    }
+
+    private void publishNoAnswerSkippedEvent(
+            Interview interview,
+            InterviewQuestion question,
+            InterviewAnswer answer
+    ) {
+        log.info(
+                "Skip AI feedback/follow-up/deep-dive because answer is blank. interviewId={}, questionId={}, answerId={}",
+                interview.getId(),
+                question.getId(),
+                answer.getId()
+        );
+
+        InterviewAnswerSkippedPayload payload = new InterviewAnswerSkippedPayload(
+                interview.getId(),
+                question.getId(),
+                answer.getId()
+        );
+
+        publishEvent(EVENT_TOPIC_FEEDBACK, answer.getId(), EVENT_NO_ANSWER_SKIPPED, payload);
+    }
+
+    private void publishAnswerSubmittedEvent(
+            Interview interview,
+            InterviewQuestion question,
+            SavedAnswerContext savedContext
+    ) {
+        InterviewAnswerSubmittedPayload payload = new InterviewAnswerSubmittedPayload(
+                interview.getId(),
+                question.getId(),
+                question.getQuestionText(),
+                savedContext.answer().getId(),
+                savedContext.answer().getAnswerText(),
+                savedContext.nextAttempt(),
+                interview.getTrack().name(),
+                interview.getDifficulty().name(),
+                interview.getFeedbackStyle().name()
+        );
+
+        publishEvent(EVENT_TOPIC_FEEDBACK, savedContext.answer().getId(), EVENT_ANSWER_SUBMITTED, payload);
+    }
+
+    private FollowUpAvailability calculateFollowUpAvailability(
+            Interview interview,
+            InterviewQuestion question,
+            FollowUpDecision decision
+    ) {
+        int baseQuestionCount = interviewQuestionRepository.countByInterviewIdAndType(
+                interview.getId(),
+                QuestionType.BASE
+        );
+
+        int followUpCount = interviewQuestionRepository.countByInterviewIdAndType(
+                interview.getId(),
+                QuestionType.FOLLOW_UP
+        );
+
+        boolean canAsk = canAskFollowUp(baseQuestionCount, followUpCount);
+        boolean isBaseQuestion = question.getType() == QuestionType.BASE;
+        boolean wantsFollowUp = decision.askFollowUp();
+
+        return new FollowUpAvailability(canAsk, isBaseQuestion, wantsFollowUp);
+    }
+
+    /**
+     * 일반 follow-up 질문 생성
+     *
+     * 조건:
+     * - follow-up 비율 제한 통과 (60% 룰)
+     * - base 질문일 것
+     * - FollowUpDecider가 요청한 경우
+     *
+     * 흐름:
+     * 1. AI에게 follow-up 질문 생성 요청
+     * 2. seq = 기존 질문 + 5 (일반 follow-up 간격)
+     * 3. DB 저장
+     * 4. answer에 follow-up 이유 기록
+     */
+    private Optional<InterviewQuestionReadResponse> tryCreateFollowUp(
+            Interview interview,
+            InterviewQuestion question,
+            InterviewAnswerRequest request,
+            SavedAnswerContext savedContext,
+            FollowUpAvailability availability
+    ) {
+        if (!availability.canAsk() || !availability.wantsFollowUp() || !availability.isBaseQuestion()) {
+            return Optional.empty();
+        }
+
+        FollowUpDecision decision = followUpDecider.decide(question, request, interview);
+
+        FollowUpQuestionCommand command = new FollowUpQuestionCommand(
+                interview.getTrack(),
+                interview.getDifficulty(),
+                interview.getFeedbackStyle(),
+                decision.reason(),
+                new FollowUpQuestionCommand.QAPair(
+                        question.getQuestionText(),
+                        request.answerText()
+                )
+        );
+
+        FollowUpQuestion generated = aiServiceClient.generateFollowQuestions(command);
+        FollowUpQuestion.Item item = generated.questions();
+
+        int nextSeq = question.getSeq() + FOLLOW_UP_SEQ_GAP;
+        int nextDepth = question.getDepth() + 1;
+
+        InterviewQuestion followUpQuestion = InterviewQuestion.createFollowUp(
+                interview,
+                nextSeq,
+                question.getId(),
+                nextDepth,
+                question.getId(),
+                null,
+                item.title(),
+                item.primaryTag(),
+                item.tags(),
+                item.body(),
+                item.provider(),
+                item.model(),
+                item.promptVersion(),
+                item.temperature()
+        );
+
+        InterviewQuestionReadResponse response = saveGeneratedQuestion(
+                interview,
+                followUpQuestion,
+                nextSeq,
+                savedContext.answer(),
+                decision.reason()
+        );
+
+        return Optional.of(response);
+    }
+
+    /**
+     * deep-dive 질문 생성
+     *
+     * 조건:
+     * - deepDiveGate 통과 (AI 호출 여부 판단)
+     *    - 난이도 HARD/VERY_HARD
+     *    - 꼬리질문일 경우만
+     *    - 너무 짧지 않은 답변
+     *    - SHALLOW_PATTERNS 패턴 사용
+     * - 이미 deep-dive 생성되지 않았을 것
+     *
+     * 특징:
+     * - seq +1 (바로 다음 질문으로 깊이 파고듦)
+     * - context 문자열로 추적 정보 저장
+     *
+     *  deep-dive는 "추가 꼬리질문"이 아니라
+     *     "심층 질문 흐름"으로 별도 분기임
+     */
+    private Optional<InterviewQuestionReadResponse> tryCreateDeepDive(
+            Interview interview,
+            InterviewQuestion question,
+            InterviewAnswerRequest request,
+            SavedAnswerContext savedContext,
+            FollowUpAvailability availability
+    ) {
+        if (!availability.canAsk() || availability.wantsFollowUp()) {
+            return Optional.empty();
+        }
+
+        boolean deepDiveCandidate = deepDiveGate.shouldCallAiForDeepDive(
+                interview,
+                request,
+                question.getType()
+        );
+
+        if (!deepDiveCandidate) {
+            return Optional.empty();
+        }
+
+        boolean alreadyDeepDived = interviewQuestionRepository
+                .existsByInterviewIdAndParentQuestionIdAndType(
+                        interview.getId(),
+                        question.getId(),
+                        QuestionType.DEEP_DIVE
+                );
+
+        if (alreadyDeepDived) {
+            return Optional.empty();
+        }
+
+        DeepDiveCommand command = new DeepDiveCommand(
+                interview.getTrack(),
+                interview.getDifficulty(),
+                question.getQuestionText(),
+                request.answerText()
+        );
+
+        GeneratedDeepDiveBundle result = aiServiceClient.generateDeepDiveResult(command);
+        DeepDiveDecision decision = result == null ? null : result.decision();
+
+        if (decision == null || !decision.shouldFollowUp()) {
+            return Optional.empty();
+        }
+
+        FollowUpQuestion deepDiveQuestion = result.question();
+        if (deepDiveQuestion == null || deepDiveQuestion.questions() == null) {
+            return Optional.empty();
+        }
+
+        FollowUpQuestion.Item item = deepDiveQuestion.questions();
+
+        int nextSeq = question.getSeq() + DEEP_DIVE_SEQ_GAP;
+        int nextDepth = question.getDepth() + 1;
+        String deepDiveContext = buildDeepDiveContext(decision);
+
+        InterviewQuestion generatedQuestion = InterviewQuestion.createDeepDive(
+                interview,
+                nextSeq,
+                question.getId(),
+                nextDepth,
+                question.getId(),
+                null,
+                item.title(),
+                item.primaryTag(),
+                item.tags(),
+                item.body(),
+                item.provider(),
+                item.model(),
+                item.promptVersion(),
+                item.temperature()
+        );
+
+        InterviewQuestionReadResponse response = saveGeneratedQuestion(
+                interview,
+                generatedQuestion,
+                nextSeq,
+                savedContext.answer(),
+                deepDiveContext
+        );
+
+        return Optional.of(response);
+    }
+
+    private InterviewQuestionReadResponse saveGeneratedQuestion(
+            Interview interview,
+            InterviewQuestion generatedQuestion,
+            int seq,
+            InterviewAnswer answer,
+            String followupReason
+    ) {
+        try {
+            interviewQuestionRepository.save(generatedQuestion);
+            interviewRepository.incrementTotalCount(interview.getId());
+            answer.followupUpdate(followupReason);
+            return InterviewQuestionMapper.fromList(List.of(generatedQuestion), false, interview);
+        } catch (DataIntegrityViolationException e) {
+            InterviewQuestion existingQuestion = interviewQuestionRepository
+                    .findByInterviewIdAndSeq(interview.getId(), seq)
+                    .orElseThrow(() -> e);
+
+            return InterviewQuestionMapper.fromList(List.of(existingQuestion), false, interview);
+        }
+    }
+
+    /**
+     * outbox 테이블 저장
+     */
+    private void publishEvent(String topic, Long aggregateId, String eventType, Object payload) {
+        JsonNode payloadJson = objectMapper.valueToTree(payload);
+
+        outboxInterviewEventRepository.save(
+                OutboxInterviewEvent.createNew(
+                        topic,
+                        aggregateId,
+                        eventType,
+                        payloadJson
+                )
+        );
+    }
+
+    /**
+     * follow-up 생성 제한 정책
+     *
+     * followUpCount / baseQuestionCount < 60%
+     *
+     * 이유:
+     * - follow-up이 과도하게 많아지는 것 방지
+     */
+    private boolean canAskFollowUp(int baseQuestionCount, int followUpCount) {
+        return followUpCount * 100 < baseQuestionCount * FOLLOW_UP_LIMIT_PERCENT;
+    }
+
+    private boolean isBlankAnswer(String answerText) {
+        return answerText == null || answerText.trim().isEmpty();
     }
 
     private InterviewQuestionReadResponse rebuildResponse(
             Interview interview,
-            InterviewQuestion interviewQuestion
+            InterviewQuestion currentQuestion
     ) {
         return interviewQuestionRepository
                 .findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(
                         interview.getId(),
-                        interviewQuestion.getSeq()
+                        currentQuestion.getSeq()
                 )
-                .map(q -> InterviewQuestionMapper.fromList(List.of(q), false, interview))
+                .map(nextQuestion -> InterviewQuestionMapper.fromList(List.of(nextQuestion), false, interview))
                 .orElseGet(() -> InterviewQuestionMapper.fromList(List.of(), false, interview));
     }
 
+    /**
+     * 다음 질문 이동 또는 인터뷰 종료
+     *
+     * - 다음 seq 질문이 있으면 반환
+     * - 없으면 인터뷰 종료 처리 + 이벤트 발행
+     */
     private InterviewQuestionReadResponse moveNextOrComplete(
             Interview interview,
             InterviewQuestion currentQuestion
@@ -372,55 +567,75 @@ public class InterviewAnswerService {
                         interview.getId(),
                         currentQuestion.getSeq()
                 )
-                .map(q -> InterviewQuestionMapper.fromList(List.of(q), false, interview))
-                .orElseGet(() -> {
-                    interview.complete(InterviewEndReason.COMPLETED);
-
-                    InterviewCompletedPayload completedPayload = new InterviewCompletedPayload(
-                            interview.getUserId(),
-                            interview.getId(),
-                            interview.getTrack().name(),
-                            interview.getDifficulty().name(),
-                            interview.getFeedbackStyle().name()
-                    );
-
-                    JsonNode completedPayloadJsonNode = objectMapper.valueToTree(completedPayload);
-
-                    outboxInterviewEventRepository.save(
-                            OutboxInterviewEvent.createNew(
-                                    "FEEDBACK",
-                                    interview.getId(),
-                                    "InterviewCompleted",
-                                    completedPayloadJsonNode
-                            )
-                    );
-
-                    return InterviewQuestionMapper.fromList(List.of(), true, interview);
-                });
+                .map(nextQuestion -> InterviewQuestionMapper.fromList(List.of(nextQuestion), false, interview))
+                .orElseGet(() -> completeInterview(interview));
     }
 
-    private String buildDeepDiveContext(DeepDiveDecision dd) {
-        String focus = (dd.focus() == null || dd.focus().isEmpty()) ? "" : String.join(",", dd.focus());
-        String gaps = (dd.gaps() == null || dd.gaps().isEmpty()) ? "" : String.join(" / ", dd.gaps());
+    /**
+     * 인터뷰 종료 처리
+     *
+     * - 상태 COMPLETED로 변경
+     * - 완료 이벤트(outbox) 발행
+     * - 클라이언트에는 "끝남" 응답 반환
+     */
+    private InterviewQuestionReadResponse completeInterview(Interview interview) {
+        interview.complete(InterviewEndReason.COMPLETED);
 
-        int depth = dd.depth();
-        if (depth < 1) {
-            depth = 1;
-        }
-        if (depth > 3) {
-            depth = 3;
-        }
+        InterviewCompletedPayload payload = new InterviewCompletedPayload(
+                interview.getUserId(),
+                interview.getId(),
+                interview.getTrack().name(),
+                interview.getDifficulty().name(),
+                interview.getFeedbackStyle().name()
+        );
+
+        publishEvent(EVENT_TOPIC_FEEDBACK, interview.getId(), EVENT_INTERVIEW_COMPLETED, payload);
+        return InterviewQuestionMapper.fromList(List.of(), true, interview);
+    }
+
+    /**
+     * deep-dive 메타 정보 문자열 생성
+     *
+     * 포함 정보:
+     * - depth (1~3 제한)
+     * - focus (핵심 주제)
+     * - gaps (부족한 부분)
+     * - reason (AI 판단 근거)
+     *
+     */
+    private String buildDeepDiveContext(DeepDiveDecision decision) {
+        String focus = (decision.focus() == null || decision.focus().isEmpty())
+                ? ""
+                : String.join(",", decision.focus());
+
+        String gaps = (decision.gaps() == null || decision.gaps().isEmpty())
+                ? ""
+                : String.join(" / ", decision.gaps());
+
+        int depth = Math.max(1, Math.min(3, decision.depth()));
 
         return "DEEPDIVE"
                 + " depth=" + depth
                 + " focus=" + focus
                 + " gaps=" + gaps
-                + " reason=" + (dd.reason() == null ? "" : dd.reason());
+                + " reason=" + (decision.reason() == null ? "" : decision.reason());
     }
 
-    @Transactional(readOnly = true)
-    public List<InternalInterviewAnswerDetailResponse> getInterviewList(Long interviewId) {
-        return interviewAnswerRepository.findDetailsByInterviewId(interviewId);
+    private record SavedAnswerContext(
+            InterviewAnswer answer,
+            int nextAttempt,
+            boolean duplicatedAfterInsert
+    ) {
+        private SavedAnswerContext(InterviewAnswer answer, int nextAttempt) {
+            this(answer, nextAttempt, false);
+        }
+    }
+
+    private record FollowUpAvailability(
+            boolean canAsk,
+            boolean isBaseQuestion,
+            boolean wantsFollowUp
+    ) {
     }
 
 }

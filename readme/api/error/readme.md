@@ -31,7 +31,11 @@ public class aa {
                               Long memberId
     ) {
         studyGroupMemberRepository.findGroupAuthNative(studyGroupId, memberId)
-                .orElseThrow(() -> new CustomApiException(BAD_REQUEST, ERR_015, ERR_015.getValue()));
+                .orElseThrow(() -> new CustomApiException(
+                        BAD_REQUEST,
+                        ERR_015,
+                        ERR_015.getValue()
+                ));
     }
 }
 ```

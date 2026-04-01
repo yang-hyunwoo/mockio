@@ -25,7 +25,11 @@ public class FeedbackTxService {
                     .orElseGet(() -> interviewFeedbackRepository.save(InterviewFeedback.create(answerId,interviewId)));
         } catch (DataIntegrityViolationException e) {
             return interviewFeedbackRepository.findByAnswerId(answerId)
-                    .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+                    .orElseThrow(() -> new CustomApiException(
+                            ANSWER_NOT_FOUND.getHttpStatus(),
+                            ANSWER_NOT_FOUND,
+                            ANSWER_NOT_FOUND.getMessage()
+                    ));
         }
 
     }
@@ -33,7 +37,11 @@ public class FeedbackTxService {
     @Transactional(propagation = REQUIRES_NEW)
     public void markSucceeded(Long answerId, GeneratedFeedback result) {
         InterviewFeedback fb = interviewFeedbackRepository.findByAnswerId(answerId)
-                .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ANSWER_NOT_FOUND.getHttpStatus(),
+                        ANSWER_NOT_FOUND,
+                        ANSWER_NOT_FOUND.getMessage()
+                ));
 
         // 이미 성공이면 스킵 (중복 처리 방지)
         if (fb.successChk()) return;
@@ -51,7 +59,11 @@ public class FeedbackTxService {
     @Transactional(propagation = REQUIRES_NEW)
     public void markSkipped(Long answerId) {
         InterviewFeedback fb = interviewFeedbackRepository.findByAnswerId(answerId)
-                .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ANSWER_NOT_FOUND.getHttpStatus(),
+                        ANSWER_NOT_FOUND,
+                        ANSWER_NOT_FOUND.getMessage()
+                ));
         fb.skipped();
     }
 

@@ -52,7 +52,11 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeDetailResDto noticeDetail(Long id) {
         NoticeBoard noticeBoard = noticeRepository.findNoticeNative(id)
-                .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ERR_012.getHttpStatus(),
+                        ERR_012,
+                        ERR_012.getMessage()
+                ));
         int sort = noticeBoard.getSort();
         return NoticeMapper.from(noticeBoard,
                 noticeRepository.findPrevNoticeNative(sort,noticeBoard.getNoticePinSort().name()).orElse(null),
@@ -66,7 +70,11 @@ public class NoticeService {
     @Transactional(readOnly = true)
     public NoticeDetailResDto mainNoticeDetail() {
         NoticeBoard noticeBoard = noticeRepository.findMainNotice()
-                .orElseThrow(() -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ERR_012.getHttpStatus(),
+                        ERR_012,
+                        ERR_012.getMessage()
+                ));
         return NoticeMapper.from(noticeBoard, null, null);
     }
 

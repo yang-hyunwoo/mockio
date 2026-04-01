@@ -1,5 +1,18 @@
 package com.mockio.core_service.interview.service;
 
+/**
+ * 인터뷰 질문 저장
+ *
+ * 전체 흐름:
+ * 1. 유저 인터뷰 세팅 / 유저 인터뷰 생성 및 조회
+ * 2. 질문 없을 경우 AI 호출
+ * 3. 질문 목록 조회 후 질문 응답
+ *
+ * retry :
+ * 1.유저 인터뷰 권한 조회
+ * 2. 인터뷰 질문 조회 후 BASE 만 질문 저장
+ */
+
 import com.mockio.common_ai_contractor.constant.InterviewEndReason;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
@@ -79,48 +92,43 @@ public class InterviewQuestionService {
                 );
 
         //2.유저 인터뷰 생성 및 조회 한다.
-        Interview activeInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
-                .orElse(null);
+        Long activeInterviewId = resolveActiveInterview(userId);
+        if (activeInterviewId != null) return activeInterviewId;
 
-        if (activeInterview != null) {
-            if(interviewQuestionRepository.countByInterviewId(activeInterview.getId()) ==0) {
-                activeInterview.complete(InterviewEndReason.ERROR);
-           } else {
-                return activeInterview.getId();
-            }
-        }
-
-        Interview existing = interviewRepository
+        return interviewRepository
                 .findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
-                .orElse(null);
+                .map(Interview::getId)
+                .orElseGet(() -> {
+                    try {
+                        Interview interview = Interview.create(
+                                request.idempotencyKey(),
+                                userId,
+                                userInterviewSetting.getTrack(),
+                                userInterviewSetting.getDifficulty(),
+                                userInterviewSetting.getFeedbackStyle(),
+                                userInterviewSetting.getInterviewMode(),
+                                userInterviewSetting.getAnswerTimeSeconds(),
+                                userInterviewSetting.getInterviewQuestionCount()
+                        );
 
-        if (existing != null) {
-            return existing.getId();
-        }
+                        return interviewRepository.save(interview).getId();
 
-        try {
-            Interview interview = Interview.create(
-                    request.idempotencyKey(),
-                    userId,
-                    userInterviewSetting.getTrack(),
-                    userInterviewSetting.getDifficulty(),
-                    userInterviewSetting.getFeedbackStyle(),
-                    userInterviewSetting.getInterviewMode(),
-                    userInterviewSetting.getAnswerTimeSeconds(),
-                    userInterviewSetting.getInterviewQuestionCount()
-            );
-
-            return interviewRepository.save(interview).getId();
-        } catch (DataIntegrityViolationException e) {
-            return interviewRepository.findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
-                    .orElseThrow(() -> e)
-                    .getId();
-        }
+                    } catch (DataIntegrityViolationException e) {
+                        return interviewRepository
+                                .findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
+                                .orElseThrow(() -> e)
+                                .getId();
+                    }
+                });
     }
 
     public InterviewQuestionReadResponse generateAndSaveQuestions(Long interviewId, Long userId) {
         Interview interview = interviewRepository.findByIdAndUserIdForUpdate(interviewId, userId)
-                .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(), INTERVIEW_NOT_FOUND, INTERVIEW_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_NOT_FOUND.getHttpStatus(),
+                        INTERVIEW_NOT_FOUND,
+                        INTERVIEW_NOT_FOUND.getMessage()
+                ));
 
         if (interview.getStatus() != ACTIVE) {
             throw new CustomApiException(INVALID_INTERVIEW_STATUS.getHttpStatus(), INVALID_INTERVIEW_STATUS, INVALID_INTERVIEW_STATUS.getMessage());
@@ -139,13 +147,12 @@ public class InterviewQuestionService {
                     .map(Interview::getId)
                     .toList();
 
-
-
             List<InterviewQuestion> tagList = interviewQuestionRepository.findTop30ByInterviewIdInAndPrimaryTagIsNotNullOrderByCreatedAtDesc(idList);
             List<String> primaryTagList = tagList.stream()
                     .map(InterviewQuestion::getPrimaryTag)
                     .distinct()
                     .toList();
+
             GenerateQuestionCommand cmd = new GenerateQuestionCommand(
                     userId,
                     interview.getTrack(),
@@ -191,7 +198,11 @@ public class InterviewQuestionService {
     @Transactional(readOnly = true)
     public InterviewQuestionReadResponse getQuestions(Long interviewId, Long userId) {
         Interview interview = interviewRepository.findById(interviewId)
-                .orElseThrow(() -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(), INTERVIEW_NOT_FOUND, INTERVIEW_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_NOT_FOUND.getHttpStatus(),
+                        INTERVIEW_NOT_FOUND,
+                        INTERVIEW_NOT_FOUND.getMessage()
+                ));
         if (interview.getUserId().equals(userId)) {
             return InterviewQuestionMapper.fromList(interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interviewId), false, interview);
         } else {
@@ -255,8 +266,6 @@ public class InterviewQuestionService {
             Interview retryInterview,
             List<InterviewQuestion> sourceQuestions
     ) {
-        OffsetDateTime now = now();
-
         return sourceQuestions.stream()
                 .map(source -> InterviewQuestion.createInterviewQuestion(
                         retryInterview,
@@ -271,9 +280,24 @@ public class InterviewQuestionService {
                         source.getModel(),
                         source.getPromptVersion(),
                         source.getTemperature(),
-                        now
+                        now()
                 ))
                 .toList();
     }
 
+    private Long resolveActiveInterview(Long userId) {
+        return interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
+                .map(interview -> {
+                    boolean hasQuestions =
+                            interviewQuestionRepository.countByInterviewId(interview.getId()) > 0;
+
+                    if (hasQuestions) {
+                        return interview.getId();
+                    }
+
+                    interview.complete(InterviewEndReason.ERROR);
+                    return null;
+                })
+                .orElse(null);
+    }
 }

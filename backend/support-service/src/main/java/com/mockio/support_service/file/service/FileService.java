@@ -81,8 +81,12 @@ public class FileService {
                                                       Long profileImageId) {
          getFileGroupDetail(profileImageId, userId, domainType);
         FileDetail fileDetail = fileDetailRepository.findTopByFileGroupIdAndDeletedFalseOrderByIdDesc(profileImageId)
-                .orElseThrow(
-                        () -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ERR_012.getHttpStatus(),
+                        ERR_012,
+                        ERR_012.getMessage()
+                ));
+
         return new UserProfileImageResponse(fileDetail.getFileUrl());
     }
 
@@ -187,9 +191,11 @@ public class FileService {
                 profileImageId,
                 domainId,
                 domainType
-        ).orElseThrow(
-                () -> new CustomApiException(ERR_012.getHttpStatus(), ERR_012, ERR_012.getMessage())
-        );
+        ).orElseThrow(() -> new CustomApiException(
+                ERR_012.getHttpStatus(),
+                ERR_012,
+                ERR_012.getMessage()
+        ));
     }
 
     private String extractFilename(String key) {

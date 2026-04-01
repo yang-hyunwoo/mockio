@@ -23,10 +23,10 @@ public class PasswordResetTokenService {
 
     public PasswordResetToken validateToken(String token) {
         return passwordResetTokenRepository.findValidToken(token)
-                .orElseThrow(
-                        () -> new CustomApiException(PASSWORD_TOKEN_NOT_VALID.getHttpStatus(),
-                                PASSWORD_TOKEN_NOT_VALID,
-                                PASSWORD_TOKEN_NOT_VALID.getMessage())
+                .orElseThrow(() -> new CustomApiException(
+                        PASSWORD_TOKEN_NOT_VALID.getHttpStatus(),
+                        PASSWORD_TOKEN_NOT_VALID,
+                        PASSWORD_TOKEN_NOT_VALID.getMessage())
                 );
     }
 

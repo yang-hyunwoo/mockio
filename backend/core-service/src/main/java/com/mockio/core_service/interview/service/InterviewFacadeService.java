@@ -44,25 +44,23 @@ public class InterviewFacadeService {
                 ));
         InterviewUserCheck(userId, question);
 
-        InterviewAnswer answer = interviewAnswerRepository
-                .findByQuestionId(questionId)
-                .orElse(null);
 
-        if (answer == null) {
-            return null;
-        }
-        return InternalMapper.fromInternalFeedbackDetail(feedbackService.interviewFeedbackRead(answer.getId()));
+        return interviewAnswerRepository
+                .findByQuestionId(questionId)
+                .map(answer -> InternalMapper.fromInternalFeedbackDetail(
+                        feedbackService.interviewFeedbackRead(answer.getId())
+                ))
+                .orElse(null);
     }
 
     public InterviewResultResponse getInterviewHistoryDetail(Long interviewId , Long userId) {
         Interview interview = interviewRepository.findByIdAndUserId(interviewId, userId)
-                .orElseThrow(
-                        () -> new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(),
-                                INTERVIEW_FORBIDDEN,
-                                INTERVIEW_FORBIDDEN.getMessage()
-                        )
-                );
-        if(interview.getStatus().equals(InterviewStatus.ENDED)) {
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_FORBIDDEN.getHttpStatus(),
+                        INTERVIEW_FORBIDDEN,
+                        INTERVIEW_FORBIDDEN.getMessage()
+                ));
+        if (interview.getStatus().equals(InterviewStatus.ENDED)) {
             List<InterviewQuestion> questions = interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interview.getId());
             List<Long> questionIds = questions.stream()
                     .map(InterviewQuestion::getId)

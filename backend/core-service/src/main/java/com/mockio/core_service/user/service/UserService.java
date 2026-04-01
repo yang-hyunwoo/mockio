@@ -89,7 +89,11 @@ public class UserService {
      */
     public UserAuthInfoResponse getUserAuthInfo(String email) {
         User user = userRepository.findByEmailAndProvider(email, AuthProviderEnum.NORMAL)
-                .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        USER_NOT_FOUND.getHttpStatus(),
+                        USER_NOT_FOUND,
+                        USER_NOT_FOUND.getMessage()
+                ));
         return UserAuthInfoMapper.fromUserAuthInfo(user);
     }
 
@@ -100,7 +104,11 @@ public class UserService {
      */
     public UserInfoResponse userDetail(Long userId) {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
-                .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        USER_NOT_FOUND.getHttpStatus(),
+                        USER_NOT_FOUND,
+                        USER_NOT_FOUND.getMessage()
+                ));
         return UserMapper.fromUserInfo(user);
     }
 
@@ -110,7 +118,11 @@ public class UserService {
      */
     public void resetFailCount(Long userId) {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
-                .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        USER_NOT_FOUND.getHttpStatus(),
+                        USER_NOT_FOUND,
+                        USER_NOT_FOUND.getMessage()
+                ));
         user.updateLastLogin();
     }
 
@@ -120,7 +132,11 @@ public class UserService {
      */
     public void loginFailure(String email) {
         User user = userRepository.findByEmailAndProvider(email, AuthProviderEnum.NORMAL)
-                .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        USER_NOT_FOUND.getHttpStatus(),
+                        USER_NOT_FOUND,
+                        USER_NOT_FOUND.getMessage()
+                ));
         user.increaseFailLoginCount();
     }
 
@@ -181,7 +197,11 @@ public class UserService {
     public void resetPasswordChange(PasswordChangeRequest changeRequest) {
         PasswordResetToken passwordResetToken = passwordResetTokenService.validateToken(changeRequest.token());
         User user = userRepository.findByIdAndStatusAndProvider(passwordResetToken.getUserId(), UserStatus.ACTIVE, AuthProviderEnum.NORMAL)
-                .orElseThrow(() -> new CustomApiException(USER_NOT_FOUND.getHttpStatus(), USER_NOT_FOUND, USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        USER_NOT_FOUND.getHttpStatus(),
+                        USER_NOT_FOUND,
+                        USER_NOT_FOUND.getMessage()
+                ));
 
         user.resetPasswordChange(changeRequest.password(), changeRequest.confirmPassword(), passwordEncoder);
         passwordResetToken.updateResetToken();
@@ -234,7 +254,8 @@ public class UserService {
             ClassPathResource resource = new ClassPathResource("mail/password-reset.html");
             return new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new CustomApiException(MAIL_LOAD_FAIL.getHttpStatus(),
+            throw new CustomApiException(
+                    MAIL_LOAD_FAIL.getHttpStatus(),
                     MAIL_LOAD_FAIL,
                     MAIL_LOAD_FAIL.getMessage());
         }

@@ -1,5 +1,9 @@
 package com.mockio.auth_service.config;
 
+/**
+ * 비밀번호 설정 클래스
+ */
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

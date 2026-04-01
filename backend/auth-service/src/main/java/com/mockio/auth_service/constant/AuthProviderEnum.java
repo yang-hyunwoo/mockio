@@ -1,5 +1,9 @@
 package com.mockio.auth_service.constant;
 
+/**
+ * 소셜 로그인 Enum
+ */
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

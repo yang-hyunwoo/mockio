@@ -3,8 +3,8 @@ package com.mockio.auth_service.config;
 /**
  * RestClient 공통 설정 클래스.
  *
- * <p>Apache HttpClient 기반 RequestFactory를 사용하여
- * 연결/응답 타임아웃을 명시적으로 설정한 RestClient Bean을 제공한다.</p>
+ * Apache HttpClient 기반 RequestFactory를 사용하여
+ * 연결/응답 타임아웃을 명시적으로 설정한 RestClient Bean을 제공한다.
  *
  * 무한 대기나 스레드 고갈을 방지하기 위한 보호 설정이다.</p>
  */
@@ -36,6 +36,12 @@ public class RestClientConfig {
         this.properties = properties;
     }
 
+    /**
+     * User 서비스 호출용 RestClient Bean
+     *
+     * baseUrl과 내부 인증 토큰 헤더(X-Internal-Token)를 기본 설정으로 포함하며,
+     * 커스텀 RequestFactory를 통해 타임아웃 정책이 적용된다.
+     */
     @Bean
     public RestClient userRestClient(HttpComponentsClientHttpRequestFactory requestFactory) {
         return RestClient.builder()
@@ -45,8 +51,15 @@ public class RestClientConfig {
                 .build();
     }
 
+    /**
+     * HttpComponents 기반 RequestFactory Bean
+     *
+     * Apache HttpClient를 사용하여
+     * 연결 타임아웃(connect timeout)과 응답 타임아웃(read timeout)을 설정한다.
+     * 모든 RestClient 요청에 공통 적용되는 네트워크 설정이다.
+     */
     @Bean
-    public HttpComponentsClientHttpRequestFactory interviewRequestFactory() {
+    public HttpComponentsClientHttpRequestFactory requestFactory() {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(Timeout.ofMilliseconds(properties.connectTimeoutMs()))
                 .setResponseTimeout(Timeout.ofMilliseconds(properties.readTimeoutMs()))

@@ -1,5 +1,11 @@
 package com.mockio.auth_service.oauth;
 
+/**
+ * 소셜 로그인 실패 Handler
+ *
+ * 소셜 로그인 실패시 메인 url을 호출 한다.
+ */
+
 import com.mockio.common_spring.util.EnvironmentProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

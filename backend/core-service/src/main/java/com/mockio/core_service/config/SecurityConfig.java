@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
                         .accessDeniedHandler(new CusstomAccessDeniedHandler()))
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())) //JWT Bearer Token을 표준 방식으로 검증하겠다
                 .build();
     }
 

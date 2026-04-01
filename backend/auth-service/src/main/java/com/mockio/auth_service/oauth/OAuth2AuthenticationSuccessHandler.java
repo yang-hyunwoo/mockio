@@ -1,5 +1,13 @@
 package com.mockio.auth_service.oauth;
 
+/**
+ * 소셜 로그인 성공 Handler
+ *
+ * 로그인 성공 시 refreshToken 생성후 쿠키로 내려 준다.
+ * 그후 callback 페이지를 호출 한다.
+ *
+ */
+
 import com.mockio.auth_service.config.JwtTokenProvider;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.service.RedisRefreshTokenService;

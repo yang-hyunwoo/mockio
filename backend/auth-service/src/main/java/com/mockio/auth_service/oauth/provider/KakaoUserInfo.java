@@ -1,5 +1,9 @@
 package com.mockio.auth_service.oauth.provider;
 
+/**
+ * 카카오 사용자 정보
+ */
+
 import com.mockio.auth_service.constant.AuthProviderEnum;
 import java.util.Map;
 

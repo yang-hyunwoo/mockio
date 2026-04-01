@@ -62,7 +62,7 @@ public class NotificationService {
                     NotificationType.SUMMARY_FEEDBACK_COMPLETED,
                     "면접 종합 피드백이 도착했습니다.",
                     "면접 결과와 종합 피드백을 확인해 보세요. (점수: " + payload.totalScore() + "점)",
-                    "/interview/result/" + payload.interviewId(),
+                    "/interview/history/" + payload.interviewId(),
                     eventId.toString(),
                     "INTERVIEW",
                     payload.interviewId()

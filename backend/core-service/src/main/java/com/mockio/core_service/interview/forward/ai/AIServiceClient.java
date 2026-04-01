@@ -2,9 +2,11 @@ package com.mockio.core_service.interview.forward.ai;
 
 import com.mockio.common_ai_contractor.constant.InterviewErrorCode;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveValid;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.followup.FollowupValid;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_core.exception.CustomApiException;
@@ -81,6 +83,28 @@ public class AIServiceClient {
                 .block();
     }
 
+    public FollowupValid generateFollowQuestionsValid(FollowUpQuestionCommand req) {
+        return aiWebClient.post()
+                .uri("/api/ai/v1/questions/followup-valid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
+                                ))
+                )
+                .bodyToMono(FollowupValid.class)
+                .timeout(Duration.ofSeconds(25))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(2)))
+                .block();
+    }
+
     public GeneratedDeepDiveBundle generateDeepDiveResult(DeepDiveCommand req) {
         return aiWebClient.post()
                 .uri("/api/ai/v1/questions/deepdive/validate-and-generate")
@@ -96,6 +120,28 @@ public class AIServiceClient {
                                 ))
                 )
                 .bodyToMono(GeneratedDeepDiveBundle.class)
+                .timeout(Duration.ofSeconds(25))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(2)))
+                .block();
+    }
+
+    public DeepDiveValid generateDeepDiveValid(DeepDiveCommand req) {
+        return aiWebClient.post()
+                .uri("/api/ai/v1/questions/deepdive/deep-dive-valid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
+                                ))
+                )
+                .bodyToMono(DeepDiveValid.class)
                 .timeout(Duration.ofSeconds(25))
                 .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
                         .filter(this::isRetryable)

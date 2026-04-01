@@ -21,26 +21,24 @@ import java.util.List;
 
 @Component
 public class RuleBasedFollowUpDecider implements FollowUpDecider {
-
-    private static final int MIN_LEN = 80;
-    private static final List<String> BANNED = List.of("모르겠", "대충", "그냥", "잘 모르");
+    private static final List<String> NO_ANSWER_PATTERNS = List.of(
+            "모르겠", "잘 모르", "기억이 안"
+    );
 
     @Override
     public FollowUpDecision decide(InterviewQuestion question, InterviewAnswerRequest req, Interview interview) {
-
         String text = req.answerText() == null ? "" : req.answerText().trim();
 
-        if (text.length() < MIN_LEN) {
-            return FollowUpDecision.askNormal("답변이 짧음");
+        if (text.isBlank()) {
+            return FollowUpDecision.skip("EMPTY_ANSWER");
         }
 
-        for (String kw : BANNED) {
-            if (text.contains(kw)) {
-                return FollowUpDecision.askNormal("모른다는 단어가 포함:" + kw);
-            }
+        boolean noAnswer = NO_ANSWER_PATTERNS.stream().anyMatch(text::contains);
+        if (noAnswer) {
+            return FollowUpDecision.skip("NO_ANSWER");
         }
 
-        return FollowUpDecision.skip("RULE_PASS");
+
+        return FollowUpDecision.deferToAi("RULE_AMBIGUOUS");
     }
-
 }

@@ -6,6 +6,8 @@ import com.mockio.common_ai_contractor.constant.InterviewTrack;
 public record DeepDiveCommand (
         InterviewTrack interviewTrack,
         InterviewDifficulty interviewDifficulty,
+        String basicQuestion,
+        String basicAnswer,
         String question,
         String answer
 ) {}

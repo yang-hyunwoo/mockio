@@ -23,7 +23,7 @@ public class CompositeFollowUpDecider implements FollowUpDecider {
     public FollowUpDecision decide(InterviewQuestion question, InterviewAnswerRequest req, Interview interview) {
 
         FollowUpDecision rule = ruleDecider.decide(question, req, interview);
-        if (rule.askFollowUp()) {
+        if (rule.shouldDeferToAi() || rule.shouldSkip()) {
             return rule; // askNormal
         }
         if (!deepDiveGate.shouldCallAiForDeepDive(interview, req,question.getType())) {

@@ -15,9 +15,7 @@ package com.mockio.core_service.ai.controller;
  *  이전 답변을 기반으로 한 후속 질문 생성
  */
 
-import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
-import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
-import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.followup.*;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
@@ -34,6 +32,7 @@ public class AIQuestionController {
 
     private final InterviewQuestionGenerator questionGenerator;
     private final FollowUpQuestionGenerator followUpQuestionGenerator;
+    private final FollowUpQuestionValid followUpQuestionValid;
 
     /**
      * 인터뷰 질문 생성 API
@@ -48,6 +47,11 @@ public class AIQuestionController {
     @PostMapping("/generate")
     public GeneratedQuestion generate(@RequestBody GenerateQuestionCommand command) {
         return questionGenerator.generate(command);
+    }
+
+    @PostMapping("/followup-valid")
+    public FollowupValid followupValid(@RequestBody FollowUpQuestionCommand command) {
+        return followUpQuestionValid.generateValid(command);
     }
 
     /**

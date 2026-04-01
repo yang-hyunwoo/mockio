@@ -81,7 +81,8 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
     @Override
     @CircuitBreaker(name = "openaiDeepDiveChat")
     public GeneratedDeepDiveBundle generate(GenerateDeepDiveCommand command) {
-
+        String basicQText = (command == null || command.basicQuestion() == null) ? "N/A" : command.basicQuestion();
+        String basicAText = (command == null || command.basicAnswer() == null) ? "N/A" : command.basicAnswer();
         String qText = (command == null || command.question() == null) ? "N/A" : command.question();
         String aText = (command == null || command.answer() == null) ? "" : command.answer();
 
@@ -90,6 +91,8 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
         String prompt = systemPrompt.formatted(command.interviewTrack(),
                         command.interviewTrack(),
                         command.interviewDifficulty(),
+                        basicQText,
+                        basicAText,
                         qText,
                         aText
                 );

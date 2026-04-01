@@ -10,9 +10,9 @@ package com.mockio.core_service.ai.controller;
  *  POST /api/ai/v1/questions/deepdive/validate-and-generate
  */
 
-import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveGenerator;
-import com.mockio.common_ai_contractor.generator.deepdive.GenerateDeepDiveCommand;
-import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
+import com.mockio.common_ai_contractor.generator.deepdive.*;
+import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.followup.FollowupValid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AIDeepDiveController {
 
     private final DeepDiveGenerator deepDiveGenerator;
+    private final DeepDiveQuestionValid deepDiveQuestionValid;
 
     /**
      * DeepDive 질문 생성 API
@@ -42,5 +43,11 @@ public class AIDeepDiveController {
     public GeneratedDeepDiveBundle generate(@RequestBody GenerateDeepDiveCommand command) {
         return deepDiveGenerator.generate(command);
     }
+
+    @PostMapping("/deepdive/deep-dive-valid")
+    public DeepDiveValid followupValid(@RequestBody GenerateDeepDiveCommand command) {
+        return deepDiveQuestionValid.generateValid(command);
+    }
+
 
 }

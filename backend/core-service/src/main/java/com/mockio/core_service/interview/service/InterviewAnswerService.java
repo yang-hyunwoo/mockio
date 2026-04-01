@@ -20,9 +20,11 @@ import com.mockio.common_ai_contractor.constant.InterviewEndReason;
 import com.mockio.common_ai_contractor.constant.InterviewMode;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveDecision;
+import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveValid;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
+import com.mockio.common_ai_contractor.generator.followup.FollowupValid;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.interview.Mapper.InterviewQuestionMapper;
 import com.mockio.core_service.interview.constant.QuestionType;
@@ -47,6 +49,7 @@ import com.mockio.core_service.interview.repository.querydsl.InterviewAnswerQuer
 import com.mockio.core_service.interview.util.DeepDiveGate;
 import com.mockio.core_service.interview.util.followup.FollowUpDecider;
 import com.mockio.core_service.interview.util.followup.FollowUpDecision;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -57,9 +60,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.IDEMPOTENCY_KEY_NOT_FOUND;
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_FORBIDDEN;
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_NOT_FOUND;
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -112,16 +113,22 @@ public class InterviewAnswerService {
             return moveNextOrComplete(interview, question);
         }
 
-        // 7. follow-up 판단 (룰 기반)
+        // 7.답변은 있지만 회피성 답변일 경우는 AI 호출
+        if(isNoAnswer(request.answerText())) {
+            publishAnswerSubmittedEvent(interview, question, savedContext);
+            return moveNextOrComplete(interview, question);
+        }
+
+        // 8. follow-up 판단 (룰 기반)
         FollowUpDecision decision = followUpDecider.decide(question, request, interview);
 
-        // 8. 답변 제출 이벤트 발행 (AI 피드백용)
+        // 9. 답변 제출 이벤트 발행 (AI 피드백용)
         publishAnswerSubmittedEvent(interview, question, savedContext);
 
-        // 9. follow-up 가능 여부 계산 (비율 제한 + 타입 체크)
+        // 10. follow-up 가능 여부 계산 (비율 제한 + 타입 체크)
         FollowUpAvailability availability = calculateFollowUpAvailability(interview, question, decision);
 
-        // 10. 일반 follow-up 질문 생성 시도
+        // 11. 일반 follow-up 질문 생성 시도
         Optional<InterviewQuestionReadResponse> followUpResponse =
                 tryCreateFollowUp(interview, question, request, savedContext, availability);
 
@@ -129,7 +136,7 @@ public class InterviewAnswerService {
             return followUpResponse.get();
         }
 
-        // 11. deep-dive 질문 생성 시도
+        // 12. deep-dive 질문 생성 시도
         Optional<InterviewQuestionReadResponse> deepDiveResponse =
                 tryCreateDeepDive(interview, question, request, savedContext, availability);
 
@@ -137,7 +144,7 @@ public class InterviewAnswerService {
             return deepDiveResponse.get();
         }
 
-        // 12. 둘 다 없으면 다음 질문 또는 인터뷰 종료
+        // 13. 둘 다 없으면 다음 질문 또는 인터뷰 종료
         return moveNextOrComplete(interview, question);
     }
 
@@ -306,9 +313,8 @@ public class InterviewAnswerService {
 
         boolean canAsk = canAskFollowUp(baseQuestionCount, followUpCount);
         boolean isBaseQuestion = question.getType() == QuestionType.BASE;
-        boolean wantsFollowUp = decision.askFollowUp();
 
-        return new FollowUpAvailability(canAsk, isBaseQuestion, wantsFollowUp);
+        return new FollowUpAvailability(canAsk, isBaseQuestion);
     }
 
     /**
@@ -332,24 +338,64 @@ public class InterviewAnswerService {
             SavedAnswerContext savedContext,
             FollowUpAvailability availability
     ) {
-        if (!availability.canAsk() || !availability.wantsFollowUp() || !availability.isBaseQuestion()) {
+        if (!availability.canAsk() || !availability.isBaseQuestion()) {
             return Optional.empty();
         }
 
-        FollowUpDecision decision = followUpDecider.decide(question, request, interview);
+        FollowUpDecision ruleDecision = followUpDecider.decide(question, request, interview);
 
-        FollowUpQuestionCommand command = new FollowUpQuestionCommand(
+        //1차 에서 걸리면 꼬리 질문 x
+        if (ruleDecision.shouldSkip()) {
+            return Optional.empty();
+        }
+
+        //꼬리질문 ai 생성 확인 후 꼬리 질문 생성
+        if(ruleDecision.shouldDeferToAi()) {
+
+            FollowUpQuestionCommand validateCommand = new FollowUpQuestionCommand(
+                    interview.getTrack(),
+                    interview.getDifficulty(),
+                    interview.getFeedbackStyle(),
+                    ruleDecision.reason(),   // 1차 힌트
+                    new FollowUpQuestionCommand.QAPair(
+                            question.getQuestionText(),
+                            request.answerText()
+                    )
+            );
+
+            // AI로 꼬리질문 필요 여부 + 사유 확인
+            FollowupValid followupValid = aiServiceClient.generateFollowQuestionsValid(validateCommand);
+
+            if (!followupValid.shouldFollowUp()) {
+                return Optional.empty();
+            }
+
+            // 실제 질문 생성은 AI가 판단한 사유/포커스를 사용
+            InterviewQuestionReadResponse response = getInterviewQuestionReadResponse(interview, question, savedContext, request,followupValid.reason() );
+
+            return Optional.of(response);
+        }
+        return Optional.empty();
+    }
+
+    private InterviewQuestionReadResponse getInterviewQuestionReadResponse(Interview interview,
+                                                                           InterviewQuestion question,
+                                                                           SavedAnswerContext savedContext,
+                                                                           InterviewAnswerRequest request,
+                                                                           String reason) {
+        FollowUpQuestionCommand generateCommand = new FollowUpQuestionCommand(
                 interview.getTrack(),
                 interview.getDifficulty(),
                 interview.getFeedbackStyle(),
-                decision.reason(),
+                reason,
                 new FollowUpQuestionCommand.QAPair(
                         question.getQuestionText(),
                         request.answerText()
                 )
         );
 
-        FollowUpQuestion generated = aiServiceClient.generateFollowQuestions(command);
+
+        FollowUpQuestion generated = aiServiceClient.generateFollowQuestions(generateCommand);
         FollowUpQuestion.Item item = generated.questions();
 
         int nextSeq = question.getSeq() + FOLLOW_UP_SEQ_GAP;
@@ -372,15 +418,13 @@ public class InterviewAnswerService {
                 item.temperature()
         );
 
-        InterviewQuestionReadResponse response = saveGeneratedQuestion(
+        return saveGeneratedQuestion(
                 interview,
                 followUpQuestion,
                 nextSeq,
                 savedContext.answer(),
-                decision.reason()
+                reason
         );
-
-        return Optional.of(response);
     }
 
     /**
@@ -408,7 +452,13 @@ public class InterviewAnswerService {
             SavedAnswerContext savedContext,
             FollowUpAvailability availability
     ) {
-        if (!availability.canAsk() || availability.wantsFollowUp()) {
+        // 1. follow-up 이후 질문에서만 deep-dive 허용
+        if (question.getType() != QuestionType.FOLLOW_UP) {
+            return Optional.empty();
+        }
+
+        // 2. 비율 제한만 체크
+        if (!availability.canAsk()) {
             return Optional.empty();
         }
 
@@ -433,12 +483,37 @@ public class InterviewAnswerService {
             return Optional.empty();
         }
 
+        //deep-dive 인 경우는 기본 질문 + 꼬리 질문을 전송
+        String basicQuestionText = interviewQuestionRepository.findById(question.getParentQuestionId())
+                .map(InterviewQuestion::getQuestionText)
+                .orElseThrow(() -> new CustomApiException(
+                        QUESTION_NOT_FOUND.getHttpStatus(),
+                        QUESTION_NOT_FOUND,
+                        QUESTION_NOT_FOUND.getMessage()
+                ));
+
+        String basicAnswerText = interviewAnswerRepository.findByQuestionId(question.getParentQuestionId())
+                .map(InterviewAnswer::getAnswerText)
+                .orElseThrow(() -> new CustomApiException(
+                        QUESTION_NOT_FOUND.getHttpStatus(),
+                        QUESTION_NOT_FOUND,
+                        QUESTION_NOT_FOUND.getMessage()
+                ));
         DeepDiveCommand command = new DeepDiveCommand(
                 interview.getTrack(),
                 interview.getDifficulty(),
+                basicQuestionText,
+                basicAnswerText,
                 question.getQuestionText(),
                 request.answerText()
         );
+
+        //ai 호출로 딥다이브 질문 생성 가능 여부 체크
+        DeepDiveValid deepDiveValid = aiServiceClient.generateDeepDiveValid(command);
+
+        if(!deepDiveValid.shouldDeepDive()) {
+            return Optional.empty();
+        }
 
         GeneratedDeepDiveBundle result = aiServiceClient.generateDeepDiveResult(command);
         DeepDiveDecision decision = result == null ? null : result.decision();
@@ -621,6 +696,18 @@ public class InterviewAnswerService {
                 + " reason=" + (decision.reason() == null ? "" : decision.reason());
     }
 
+    /**
+     * 회피성 답변은 follow/deep-dive 무시
+     * @param text
+     * @return
+     */
+    private boolean isNoAnswer(String text) {
+        String normalized = text.trim();
+        return normalized.contains("모르겠")
+                || normalized.contains("잘 모르")
+                || normalized.contains("기억이 안");
+    }
+
     private record SavedAnswerContext(
             InterviewAnswer answer,
             int nextAttempt,
@@ -633,8 +720,7 @@ public class InterviewAnswerService {
 
     private record FollowUpAvailability(
             boolean canAsk,
-            boolean isBaseQuestion,
-            boolean wantsFollowUp
+            boolean isBaseQuestion
     ) {
     }
 

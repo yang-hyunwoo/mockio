@@ -43,7 +43,11 @@ public class NotificationService {
 
     public void readNotification(Long notificationId , Long userId) {
         Notification notification = notificationRepository.findByIdAndUserId(notificationId,userId)
-                .orElseThrow(() -> new CustomApiException(NOTIFICATION_FORBIDDEN.getHttpStatus(),NOTIFICATION_FORBIDDEN, NOTIFICATION_FORBIDDEN.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        NOTIFICATION_FORBIDDEN.getHttpStatus(),
+                        NOTIFICATION_FORBIDDEN,
+                        NOTIFICATION_FORBIDDEN.getMessage()
+                ));
         notification.markAsRead();
     }
 

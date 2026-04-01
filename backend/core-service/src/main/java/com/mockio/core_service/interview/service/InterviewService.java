@@ -54,17 +54,21 @@ public class InterviewService {
 
     public void interviewEnd(Long userId , Long interviewId) {
         Interview interview = interviewRepository.findByIdAndUserId(interviewId, userId)
-                .orElseThrow(
-                        () -> new CustomApiException(INTERVIEW_FORBIDDEN.getHttpStatus(), INTERVIEW_FORBIDDEN, INTERVIEW_FORBIDDEN.getMessage())
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_FORBIDDEN.getHttpStatus(),
+                        INTERVIEW_FORBIDDEN,
+                        INTERVIEW_FORBIDDEN.getMessage())
                 );
         interview.complete(InterviewEndReason.USER_EXIT);
     }
 
     public void activeInterviewEnd(Long userId) {
         Interview activeInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
-                        .orElseThrow(
-                                () -> new CustomApiException(INTERVIEW_NOT_FOUND.getHttpStatus(),INTERVIEW_NOT_FOUND,INTERVIEW_NOT_FOUND.getMessage())
-                        );
+                .orElseThrow(() -> new CustomApiException(
+                        INTERVIEW_NOT_FOUND.getHttpStatus(),
+                        INTERVIEW_NOT_FOUND,
+                        INTERVIEW_NOT_FOUND.getMessage())
+                );
         activeInterview.complete(InterviewEndReason.USER_EXIT);
     }
 

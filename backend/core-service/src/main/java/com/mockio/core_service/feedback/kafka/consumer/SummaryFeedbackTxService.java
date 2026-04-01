@@ -34,14 +34,22 @@ public class SummaryFeedbackTxService {
                     .orElseGet(() -> summaryFeedbackRepository.save(InterviewSummaryFeedback.create(interviewId)));
         } catch (DataIntegrityViolationException e) {
             return summaryFeedbackRepository.findByInterviewId(interviewId)
-                    .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+                    .orElseThrow(() -> new CustomApiException(
+                            ANSWER_NOT_FOUND.getHttpStatus(),
+                            ANSWER_NOT_FOUND,
+                            ANSWER_NOT_FOUND.getMessage()
+                    ));
         }
     }
 
     @Transactional(propagation = REQUIRES_NEW)
     public void markSucceeded(Long interviewId, GeneratedSummaryFeedback result , InterviewCompletedPayload payload) {
         InterviewSummaryFeedback isf = summaryFeedbackRepository.findByInterviewId(interviewId)
-                .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ANSWER_NOT_FOUND.getHttpStatus(),
+                        ANSWER_NOT_FOUND,
+                        ANSWER_NOT_FOUND.getMessage()
+                ));
 
         // 이미 성공이면 스킵 (중복 처리 방지)
         if (isf.successChk()) return;
@@ -77,7 +85,11 @@ public class SummaryFeedbackTxService {
     @Transactional(propagation = REQUIRES_NEW)
     public void markSkipped(Long interviewId) {
         InterviewSummaryFeedback isf = summaryFeedbackRepository.findByInterviewId(interviewId)
-                .orElseThrow(() -> new CustomApiException(ANSWER_NOT_FOUND.getHttpStatus(), ANSWER_NOT_FOUND, ANSWER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        ANSWER_NOT_FOUND.getHttpStatus(),
+                        ANSWER_NOT_FOUND,
+                        ANSWER_NOT_FOUND.getMessage()
+                ));
 
         // 이미 성공이면 스킵 (중복 처리 방지)
         if (isf.successChk()) return;

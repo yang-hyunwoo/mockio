@@ -70,7 +70,11 @@ public class UserProfileService {
      */
     public UserProfileDetailResponse getUserProfileDetail(Long userId) {
         User user = userRepository.findByIdAndStatus(userId, UserStatus.ACTIVE)
-                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        NOT_FOUND.value(),
+                        ERR_012,
+                        ERR_012.getMessage()
+                ));
         UserProfile userProfile = user.getProfile();
 
         UserInterviewSettingReadResponse preference = InternalMapper.fromInternalUserInterviewSettingRead(userInterviewSettingService.getPreference(userId));
@@ -88,7 +92,11 @@ public class UserProfileService {
      */
     private UserProfile findByUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomApiException(NOT_FOUND.value(), ERR_012, ERR_012.getMessage()));
+                .orElseThrow(() -> new CustomApiException(
+                        NOT_FOUND.value(),
+                        ERR_012,
+                        ERR_012.getMessage()
+                ));
         return user.getProfile();
     }
 

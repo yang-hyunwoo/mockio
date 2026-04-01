@@ -12,6 +12,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
+import static com.mockio.core_service.user.constant.error.UserErrorEnum.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,9 +28,9 @@ public class RecaptchaService {
     public void verify(String token) {
         if (token == null || token.isBlank()) {
             throw new CustomApiException(
-                    UserErrorEnum.RECAPTCHA_REQUIRED.getHttpStatus(),
-                    UserErrorEnum.RECAPTCHA_REQUIRED,
-                    UserErrorEnum.RECAPTCHA_REQUIRED.getMessage()
+                    RECAPTCHA_REQUIRED.getHttpStatus(),
+                    RECAPTCHA_REQUIRED,
+                    RECAPTCHA_REQUIRED.getMessage()
             );
         }
 
@@ -47,17 +49,17 @@ public class RecaptchaService {
                     .body(RecaptchaVerifyResponse.class);
         } catch (Exception e) {
             throw new CustomApiException(
-                    UserErrorEnum.RECAPTCHA_VERIFY_FAILED.getHttpStatus(),
-                    UserErrorEnum.RECAPTCHA_VERIFY_FAILED,
-                    UserErrorEnum.RECAPTCHA_VERIFY_FAILED.getMessage()
+                    RECAPTCHA_VERIFY_FAILED.getHttpStatus(),
+                    RECAPTCHA_VERIFY_FAILED,
+                    RECAPTCHA_VERIFY_FAILED.getMessage()
             );
         }
 
         if (response == null || !response.success()) {
             throw new CustomApiException(
-                    UserErrorEnum.RECAPTCHA_INVALID.getHttpStatus(),
-                    UserErrorEnum.RECAPTCHA_INVALID,
-                    UserErrorEnum.RECAPTCHA_INVALID.getMessage()
+                    RECAPTCHA_INVALID.getHttpStatus(),
+                    RECAPTCHA_INVALID,
+                    RECAPTCHA_INVALID.getMessage()
             );
         }
     }

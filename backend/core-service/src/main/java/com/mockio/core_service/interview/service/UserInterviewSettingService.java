@@ -69,8 +69,7 @@ public class UserInterviewSettingService {
      * @return
      */
     public InterviewUserInterviewSettingReadResponse getPreference(Long userId) {
-        UserInterviewSetting byUserId = findByUserId(userId);
-        return UserInterviewSettingMapper.from(byUserId);
+        return UserInterviewSettingMapper.from(findByUserId(userId));
     }
 
     /**

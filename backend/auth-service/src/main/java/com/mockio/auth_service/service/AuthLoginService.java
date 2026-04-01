@@ -1,9 +1,17 @@
 package com.mockio.auth_service.service;
 
-import com.mockio.auth_service.client.UserProfileClient;
+/**
+ * 인증 관련 비즈니스 로직을 처리하는 서비스 클래스
+ *
+ * 로그인, 토큰 재발급, 사용자 조회, 로그아웃 기능을 제공한다.
+ * Spring Security 인증(AuthenticationManager)과 JWT 기반 토큰 발급,
+ * Redis를 통한 Refresh Token 관리, 외부 user-service 연동을 담당한다.
+ */
+
+import com.mockio.auth_service.client.UserClient;
 import com.mockio.auth_service.config.JwtTokenProvider;
 import com.mockio.auth_service.dto.LoginUser;
-import com.mockio.auth_service.dto.UserInfoResponse;
+import com.mockio.auth_service.dto.response.UserInfoResponse;
 import com.mockio.auth_service.dto.request.UserLoginRequest;
 import com.mockio.auth_service.dto.response.LoginResponse;
 import com.mockio.common_core.constant.CommonErrorEnum;
@@ -29,10 +37,18 @@ public class AuthLoginService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserProfileClient userProfileClient;
+    private final UserClient userClient;
     private final RedisRefreshTokenService redisRefreshTokenService;
     private final CustomCookie customCookie;
+    private static final String refreshCookieName = "refreshToken";
 
+    /**
+     * 로그인 처리
+     *
+     * 사용자 인증을 수행하고, 성공 시 Access Token과 Refresh Token을 발급한다.
+     * Refresh Token은 쿠키 및 Redis에 저장되며,
+     * 인증 실패 시 로그인 실패 횟수를 증가시킨다.
+     */
     public LoginResponse login(UserLoginRequest request , HttpServletResponse response) {
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(request.email(), request.password());
@@ -40,12 +56,12 @@ public class AuthLoginService {
         try {
             Authentication authentication = authenticationManager.authenticate(authToken);
             LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-            // 성공
-            userProfileClient.resetFailCount(loginUser.getUserId());
+
+            userClient.resetFailCount(loginUser.getUserId());
             String accessToken = jwtTokenProvider.createAccessToken(loginUser.getUserId());
             String refreshToken = jwtTokenProvider.createRefreshToken(loginUser);
 
-            ResponseCookie refreshTokenCookie = customCookie.createCookie("refreshToken", refreshToken, (1 * 24 * 60 * 60));
+            ResponseCookie refreshTokenCookie = customCookie.createCookie(refreshCookieName, refreshToken, (1 * 24 * 60 * 60));
 
             response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
             redisRefreshTokenService.save(
@@ -60,11 +76,18 @@ public class AuthLoginService {
                     accessToken
             );
         } catch (BadCredentialsException e) {
-            userProfileClient.loginFailure(request.email());
+            userClient.loginFailure(request.email());
             throw e;
         }
     }
 
+    /**
+     * 토큰 재발급 처리
+     *
+     * 요청 쿠키에서 Refresh Token을 추출하여 검증 후,
+     * 새로운 Access Token을 발급한다.
+     * Redis에 저장된 Refresh Token과 일치 여부를 확인한다.
+     */
     public LoginResponse refresh(HttpServletRequest request){
         String refreshToken = extractRefreshToken(request);
 
@@ -94,38 +117,49 @@ public class AuthLoginService {
         );
     }
 
+    /**
+     * 사용자 상세 조회
+     *
+     * user-service를 호출하여 사용자 정보를 조회한다.
+     */
     public UserInfoResponse userDetail(Long userId) {
-        return userProfileClient.userDetail(userId);
+        return userClient.userDetail(userId);
     }
 
+    /**
+     * 로그아웃 처리
+     *
+     * Refresh Token을 Redis에서 삭제하고,
+     * 클라이언트 쿠키에서 Refresh Token을 제거한다.
+     */
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = extractRefreshToken(request);
 
         if (refreshToken == null || refreshToken.isBlank()) {
-            ResponseCookie refreshToken1 = customCookie.deleteCookie("refreshToken");
+            ResponseCookie refreshToken1 = customCookie.deleteCookie(refreshCookieName);
             response.addHeader(HttpHeaders.SET_COOKIE, refreshToken1.toString());
         }
+        Long userId = jwtTokenProvider.ignoreTokenValid(refreshToken);
 
-        try {
-            // 1. 토큰에서 userId 추출 만료되어도 가져옴
-            Long userId = jwtTokenProvider.ignoreTokenValid(refreshToken);
-
-            // 2. Redis 삭제
-            redisRefreshTokenService.delete(userId);
-
-        } catch (Exception e) {
-        }
+        // 2. Redis 삭제
+        redisRefreshTokenService.delete(userId);
 
         // 3. 쿠키 제거
-        ResponseCookie refreshToken2 = customCookie.deleteCookie("refreshToken");
+        ResponseCookie refreshToken2 = customCookie.deleteCookie(refreshCookieName);
         response.addHeader(HttpHeaders.SET_COOKIE, refreshToken2.toString());
     }
 
+    /**
+     * Refresh Token 추출
+     *
+     * HttpServletRequest의 쿠키에서 "refreshToken" 값을 찾아 반환한다.
+     * 존재하지 않을 경우 null을 반환한다.
+     */
     private String extractRefreshToken(HttpServletRequest request) {
         if (request.getCookies() == null) return null;
 
         for (Cookie cookie : request.getCookies()) {
-            if ("refreshToken".equals(cookie.getName())) {
+            if (refreshCookieName.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }

@@ -1,8 +1,10 @@
 package com.mockio.auth_service.oauth;
 
+/**
+ * 소셜 로그인 회원 정보 저장 및 조회
+ */
 
-
-import com.mockio.auth_service.client.UserProfileClient;
+import com.mockio.auth_service.client.UserClient;
 import com.mockio.auth_service.constant.AuthProviderEnum;
 import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.dto.request.OauthUserRequest;
@@ -25,7 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
-    private final UserProfileClient userProfileClient;
+    private final UserClient userClient;
     private final PasswordEncoder passwordEncode;
 
     /**
@@ -46,23 +48,24 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         //회원가입을 강제로 진행
         OAuth2UserInfo oAuth2UserInfo = null;
-        if(userRequest.getClientRegistration().getRegistrationId().equals("google")) {
-            log.info("구글 로그인 요청");
-            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
-        } else if(userRequest.getClientRegistration().getRegistrationId().equals("facebook")) {
-            log.info("페이스북 로그인 요청");
-            oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
-
-        } else if(userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
-            log.info("네이버 로그인 요청");
-            oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
-
-        } else if(userRequest.getClientRegistration().getRegistrationId().equals("kakao")){
-            log.info("카카오 로그인 요청");
-            oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
-
-        }else {
-            log.error("오류");
+        switch (userRequest.getClientRegistration().getRegistrationId()) {
+            case "google" -> {
+                log.info("구글 로그인 요청");
+                oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+            }
+            case "facebook" -> {
+                log.info("페이스북 로그인 요청");
+                oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
+            }
+            case "naver" -> {
+                log.info("네이버 로그인 요청");
+                oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+            }
+            case "kakao" -> {
+                log.info("카카오 로그인 요청");
+                oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+            }
+            default -> log.error("오류");
         }
 
         AuthProviderEnum providerType = oAuth2UserInfo.getProvider();
@@ -74,7 +77,8 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         String email = oAuth2UserInfo.getEmail() == null ? UUID.randomUUID() + "@kakao.com" : oAuth2UserInfo.getEmail();
 
         //userClient 요청
-        UserAuthInfoResponse userAuthInfoResponse = userProfileClient.oauthLogin(new OauthUserRequest(email, providerType,password,nickname,name));
+        UserAuthInfoResponse userAuthInfoResponse = userClient.oauthLogin(
+                new OauthUserRequest(email, providerType, password, nickname, name));
 
         return new LoginUser(
                 userAuthInfoResponse.id(),

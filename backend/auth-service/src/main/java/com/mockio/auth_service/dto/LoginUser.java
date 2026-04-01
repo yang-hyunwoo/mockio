@@ -1,5 +1,18 @@
 package com.mockio.auth_service.dto;
 
+/**
+ * 인증된 사용자 정보를 표현하는 Security Principal 객체
+ *
+ * Spring Security의 UserDetails와 OAuth2User를 동시에 구현하여
+ * 일반 로그인과 OAuth2 로그인을 하나의 통합 모델로 처리한다.
+ *
+ * 사용자 식별 정보(userId, email), 인증 정보(password),
+ * 권한(role), 계정 상태(status), 로그인 실패 횟수 등을 포함하며,
+ * 인증 및 인가 과정에서 SecurityContext에 저장되어 사용된다.
+ *
+ * OAuth2 로그인 시에는 외부 제공자의 사용자 정보(attributes)를 함께 보관한다.
+ */
+
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -4,11 +4,11 @@ package com.mockio.auth_service.kafka.domain;
  * Auth Service에서 사용하는 Outbox 이벤트 엔티티.
  *
  * 트랜잭션 경계 밖에서 안정적으로 처리하기 위해
- * Outbox 패턴을 적용한 이벤트 저장소 역할을 한다.</p>
+ * Outbox 패턴을 적용한 이벤트 저장소 역할을 한다.
  *
- * <p>이 엔티티는 이벤트의 상태 전이(PENDING → PROCESSING → SENT/FAILED/DEAD),
+ * 이 엔티티는 이벤트의 상태 전이(PENDING → PROCESSING → SENT/FAILED/DEAD),
  * 재시도 횟수 관리, 멱등성 보장을 위한 식별자(idempotencyKey),
- * 그리고 장애 복구를 위한 오류 정보(lastError)를 함께 관리한다.</p>
+ * 그리고 장애 복구를 위한 오류 정보(lastError)를 함께 관리한다.
  */
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +31,9 @@ public class OutboxAuthEvent extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * 이벤트 타입
+     */
     @Column(name = "event_type", nullable = false, length = 100)
     private String eventType;
 

@@ -1,5 +1,8 @@
 package com.mockio.auth_service.util;
 
+/**
+ * 로그인 에러 코드 Handler
+ */
 
 import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_spring.util.response.Response;

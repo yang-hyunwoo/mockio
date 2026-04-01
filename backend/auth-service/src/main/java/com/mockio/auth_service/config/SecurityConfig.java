@@ -3,11 +3,11 @@ package com.mockio.auth_service.config;
 /**
  * Auth Service 전용 Spring Security 설정 클래스.
  *
- * <p>엔드포인트 성격에 따라 SecurityFilterChain을 분리하여
- * 서로 다른 보안 정책을 적용한다.</p>
+ * 엔드포인트 성격에 따라 SecurityFilterChain을 분리하여
+ * 서로 다른 보안 정책을 적용한다.
  *
  * 클라이언트가 직접 호출하는 인증 허브 엔드포인트는
- * 컨트롤러 레벨에서 검증하도록 위임한다.</p>
+ * 컨트롤러 레벨에서 검증하도록 위임한다.
  */
 
 import com.mockio.auth_service.oauth.OAuth2AuthenticationFailureHandler;
@@ -52,7 +52,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationProvider authenticationProvider) throws Exception {
-        http
+        return http
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
@@ -70,8 +70,6 @@ public class SecurityConfig {
                                 "/api/auth/v1/login/oauth2/code/**",
                                 "/api/auth/v1/public/**").permitAll()
                         .anyRequest().authenticated()
-
-
                 )
                 .oauth2Login(oauth2Login -> oauth2Login
                         .authorizationEndpoint(endpoint -> endpoint.baseUri("/api/auth/v1/oauth2/authorization"))
@@ -80,9 +78,8 @@ public class SecurityConfig {
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                         .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt());
-
-        return http.build();
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt())
+                .build();
     }
 
 }

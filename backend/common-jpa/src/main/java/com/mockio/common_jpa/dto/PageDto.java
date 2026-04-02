@@ -23,7 +23,7 @@ public class PageDto<T> {
         List<D> dtoList = page.getContent()
                 .stream()
                 .map(mapper)
-                .toList();  // Java 17 이상
+                .toList();
 
         return new PageDto<>(
                 dtoList,

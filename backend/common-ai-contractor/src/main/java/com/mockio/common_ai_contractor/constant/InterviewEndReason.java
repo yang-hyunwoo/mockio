@@ -1,5 +1,9 @@
 package com.mockio.common_ai_contractor.constant;
 
+/**
+ * 면접 종료 이유 enum
+ */
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

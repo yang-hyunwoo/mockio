@@ -1,7 +1,7 @@
 package com.mockio.common_ai_contractor.constant;
 
-/** 면접 피드백 enum
- *  FeedbackStyle
+/**
+ * 면접 피드백 enum
  */
 
 import lombok.AllArgsConstructor;

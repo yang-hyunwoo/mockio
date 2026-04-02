@@ -1,5 +1,9 @@
 package com.mockio.common_ai_contractor.constant;
 
+/**
+ * ai 모델 enum
+ */
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

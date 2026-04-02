@@ -1,5 +1,9 @@
 package com.mockio.common_ai_contractor.constant;
 
+/**
+ * 면접 에러 코드 enum
+ */
+
 import com.mockio.common_core.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,5 +1,9 @@
 package com.mockio.common_core.constant;
 
+/**
+ * 공통 Error enum
+ */
+
 import com.mockio.common_core.error.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

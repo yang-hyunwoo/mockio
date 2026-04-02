@@ -1,7 +1,7 @@
 package com.mockio.common_ai_contractor.constant;
 
-/** 면접 모드 enum
- *  InterviewMode
+/**
+ * 면접 모드 enum
  */
 
 import lombok.AllArgsConstructor;

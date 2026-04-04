@@ -17,6 +17,26 @@ spring:
           predicates:
             - Path=/api/notice/v1/**,/api/faq/v1/**,/api/notification/v1/**,/api/file/v1/**
 
+        - id: auth-service-docs
+          uri: http://auth-service:8080
+          predicates:
+            - Path=/docs/auth/**
+          filters:
+            - StripPrefix=2
+
+        - id: core-service-docs
+          uri: http://core-service:8080
+          predicates:
+            - Path=/docs/core/**
+          filters:
+            - StripPrefix=2
+
+        - id: support-service-docs
+          uri: http://support-service:8080
+          predicates:
+            - Path=/docs/support/**
+          filters:
+            - StripPrefix=2
   #          filters: 앞의 segment 하나 제거
 #            - StripPrefix=1
 #            - id: group-service

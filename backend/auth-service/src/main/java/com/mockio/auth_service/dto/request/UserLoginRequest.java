@@ -5,6 +5,7 @@ package com.mockio.auth_service.dto.request;
  */
 
 import com.mockio.common_core.annotation.Email;
+import com.mockio.common_core.annotation.Password;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
@@ -12,16 +13,17 @@ import static com.mockio.common_core.annotation.otherValidator.ValidationGroups.
 
 public record UserLoginRequest(
 
-        @NotBlank(message = "{email.notBlank}",groups = Step1.class)
+        @NotBlank(message = "{email.notBlank}", groups = Step1.class)
         @Email(groups = Step1.class)
-        @Schema(name = "이메일", example = "test@google.com")
+        @Schema(description = "이메일", example = "test@google.com")
         String email,
 
         @NotBlank(message = "{password.notBlank}",groups = Step2.class)
-        @Schema(name = "비밀번호", example = "sadfsdf")
+        @Password(message = "{password.pattern}", groups = Step2.class)
+        @Schema(description = "비밀번호", example = "sadfsdf")
         String password,
 
-        @Schema(name = "자동 로그인 여부", example = "true")
+        @Schema(description = "자동 로그인 여부", example = "true")
         boolean chk
 
 ) {}

@@ -11,6 +11,7 @@ import com.mockio.support_service.file.repository.FileDetailRepository;
 import com.mockio.support_service.file.repository.FileGroupRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,7 @@ import static com.mockio.common_core.constant.CommonErrorEnum.ERR_012;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class FileService {
 
     private final FileGroupRepository fileGroupRepository;
@@ -90,34 +92,61 @@ public class FileService {
         return new UserProfileImageResponse(fileDetail.getFileUrl());
     }
 
-    public void uploadImageCloudinary(FileGroup group,
-                                      MultipartFile file
-    ) {
+    public void uploadImageCloudinary(FileGroup group, MultipartFile file) {
+        long totalStart = System.currentTimeMillis();
+
         Cloudinary cloudinary = cloudinaryService.connectCloudinary();
         String fileUrl;
+
         try {
+            long tempCreateStart = System.currentTimeMillis();
             File tempFile = File.createTempFile("temp-", file.getOriginalFilename());
             file.transferTo(tempFile);
+            long tempCreateEnd = System.currentTimeMillis();
+
             String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+            long cloudinaryUploadStart = System.currentTimeMillis();
             var result = cloudinary.uploader().upload(
                     tempFile,
-                    ObjectUtils.asMap("public_id", "myfolder/" + uniqueName,
+                    ObjectUtils.asMap(
+                            "public_id", "myfolder/" + uniqueName,
                             "overwrite", false
                     )
             );
-            tempFile.delete();
+            long cloudinaryUploadEnd = System.currentTimeMillis();
+
+            long deleteStart = System.currentTimeMillis();
+            boolean deleted = tempFile.delete();
+            long deleteEnd = System.currentTimeMillis();
+
             fileUrl = result.get("secure_url").toString();
             String publicId = result.get("public_id").toString();
-            FileDetail filesDetails = FileDetail.createFileDetail(file.getOriginalFilename(),
+
+            long entityStart = System.currentTimeMillis();
+            FileDetail filesDetails = FileDetail.createFileDetail(
+                    file.getOriginalFilename(),
                     uniqueName,
-                    fileUrl ,
-                    file.getSize() ,
-                    file.getContentType() ,
+                    fileUrl,
+                    file.getSize(),
+                    file.getContentType(),
                     "cloudinary",
-                    publicId ,
-                    false);
+                    publicId,
+                    false
+            );
             group.addFileDetail(filesDetails);
             fileDetailRepository.save(filesDetails);
+            long entityEnd = System.currentTimeMillis();
+
+            long totalEnd = System.currentTimeMillis();
+
+            log.info("[CLOUDINARY] temp file create+transfer took={}ms", (tempCreateEnd - tempCreateStart));
+            log.info("[CLOUDINARY] upload took={}ms", (cloudinaryUploadEnd - cloudinaryUploadStart));
+            log.info("[CLOUDINARY] temp file delete took={}ms deleted={}", (deleteEnd - deleteStart), deleted);
+            log.info("[CLOUDINARY] entity save took={}ms", (entityEnd - entityStart));
+            log.info("[CLOUDINARY] total took={}ms fileName={} size={}",
+                    (totalEnd - totalStart), file.getOriginalFilename(), file.getSize());
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

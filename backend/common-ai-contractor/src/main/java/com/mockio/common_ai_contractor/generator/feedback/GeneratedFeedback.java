@@ -1,26 +1,29 @@
 package com.mockio.common_ai_contractor.generator.feedback;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * follow up ai DTO
  */
 
 public record GeneratedFeedback(
 
-        //피드백 답변
+        @Schema(description = "피드백", example = "피드백")
         String feedbackText,
 
-        //점수
+        @Schema(description = "점수", example = "10")
         Integer score,
 
-        //ai
+        @Schema(description = "ai", example = "OPENAI")
         String provider,
 
-        //ai 모델
+        @Schema(description = "ai 모델", example = "gpt")
         String model,
 
-        //ai 버전
+        @Schema(description = "ai 버전", example = "1.0")
         String promptVersion,
 
-        //연관도
+        @Schema(description = "연관도", example = "0.2")
         Double temperature
+
 ) {}

@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/v1/public/**").permitAll()
                         .requestMatchers("/api/users/v1/internal/**").permitAll()
                         .requestMatchers("/api/ai/v1/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+
                         // 나머지는 다 인증 필요
                         .anyRequest().authenticated()
                 )

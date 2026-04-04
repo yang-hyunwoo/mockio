@@ -48,7 +48,10 @@ public class SecurityConfig {
                                 "/api/file/v1/public/**",
                                 "/api/faq/v1/public/**",
                                 "/api/auth/v1/oauth2/authorization/**",
-                                "/api/auth/v1/login/oauth2/code/**"
+                                "/api/auth/v1/login/oauth2/code/**",
+                                "/docs/auth/**",
+                                "/docs/core/**",
+                                "/docs/support/**"
                         ).permitAll()
                         .anyExchange().authenticated()
                 )

@@ -6,6 +6,8 @@ import com.mockio.common_spring.util.response.Response;
 import com.mockio.core_service.user.dto.request.SignupRequest;
 import com.mockio.core_service.user.dto.response.SignupResponse;
 import com.mockio.core_service.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -15,6 +17,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "회원가입",
+        description = """
+                회원 가입 관련 API입니다.
+                
+                - 회원가입
+                """
+)
 @RestController
 @RequestMapping("/api/users/v1/public")
 @RequiredArgsConstructor
@@ -30,6 +39,7 @@ public class SignupController {
      * @param request
      * @return
      */
+    @Operation(summary = "회원가입")
     @PostMapping("/signup")
     public ResponseEntity<Response<SignupResponse>> signup(
             @Valid @RequestBody SignupRequest request

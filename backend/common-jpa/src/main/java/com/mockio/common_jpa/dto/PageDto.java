@@ -13,6 +13,7 @@ import java.util.function.Function;
 @NoArgsConstructor
 public class PageDto<T> {
 
+
     private List<T> content;          // 데이터 리스트
     private int pageNumber;           // 현재 페이지
     private int pageSize;             // 페이지 크기

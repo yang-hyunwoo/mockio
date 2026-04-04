@@ -47,8 +47,10 @@ public class UserProfileService {
      * @param nickname
      * @param profileImage
      */
-    public void updateMyProfile(Long userId , String nickname , MultipartFile profileImage) {
+    public void updateMyProfile(Long userId, String nickname, MultipartFile profileImage) {
+
         Long profileImageId = null;
+
         UserProfile byId = findByUser(userId);
 
         if (profileImage != null && !profileImage.isEmpty()) {
@@ -60,7 +62,6 @@ public class UserProfileService {
             }
         }
         byId.applyPatch(nickname, profileImageId);
-
     }
 
     /**

@@ -1,9 +1,17 @@
 package com.mockio.core_service.interview.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public record FeedbackDimensions(
-        Integer structure, //구조성
-        Integer clarity,    //명확성
-        Integer specificity //구체성
+
+        @Schema(description = "구조성", example = "0")
+        Integer structure,
+
+        @Schema(description = "명확성", example = "0")
+        Integer clarity,
+
+        @Schema(description = "구체성", example = "0")
+        Integer specificity
 ) {
     public FeedbackDimensions {
         if (structure == null) structure = 0;

@@ -1,29 +1,32 @@
 package com.mockio.common_ai_contractor.generator.feedback;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * 면접 총 평가 피드백 DTO
  */
 
 public record GeneratedSummaryFeedback(
 
-        //면접 ID
+        @Schema(description = "면접 ID", example = "1")
         Long interviewId,
 
-        //평가 답변
+        @Schema(description = "평가 답변", example = "평가 답변")
         String summaryFeedbackText,
 
-        //총합
+        @Schema(description = "총합", example = "10")
         Integer totalScore,
 
-        //ai
+        @Schema(description = "ai", example = "OPENAI")
         String provider,
 
-        //ai 모델
+        @Schema(description = "ai 모델", example = "gpt")
         String model,
 
-        //ai 버전
+        @Schema(description = "ai 버전", example = "1.0")
         String promptVersion,
 
-        //연관도
+        @Schema(description = "연관도", example = "0.2")
         Double temperature
+
 ) {}

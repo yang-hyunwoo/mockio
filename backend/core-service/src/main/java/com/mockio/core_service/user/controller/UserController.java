@@ -9,12 +9,31 @@ import com.mockio.core_service.user.dto.request.*;
 import com.mockio.core_service.user.dto.response.UserInfoResponse;
 import com.mockio.core_service.user.service.PasswordResetTokenService;
 import com.mockio.core_service.user.service.UserService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "사용자 정보",
+        description = """
+               사용자 정보 관련 API입니다.
+                
+                - 비밀번호 변경
+                - 비밀번호 찾기
+                - 탈퇴
+                - 프로필 수정
+                - 프로필 조회
+                - 면접 세팅 조회
+                """
+)
 @RestController
 @RequestMapping("/api/users/v1")
 @RequiredArgsConstructor
@@ -30,8 +49,9 @@ public class UserController {
      * @param email
      * @return
      */
+    @Hidden
     @GetMapping("/internal/login/{email}")
-    public UserAuthInfoResponse getUserAuthInfo(@PathVariable String email) {
+    public UserAuthInfoResponse getUserAuthInfo(@PathVariable @Parameter(description = "이메일" ,example = "test@naver.com") String email ) {
         return userService.getUserAuthInfo(email);
     }
 
@@ -41,8 +61,9 @@ public class UserController {
      * @param userId
      * @return
      */
+    @Hidden
     @GetMapping("/internal/user-info/{userId}")
-    public UserInfoResponse userDetail(@PathVariable Long userId) {
+    public UserInfoResponse userDetail(@PathVariable @Parameter(description = "사용자 ID" , example = "1") Long userId) {
         return userService.userDetail(userId);
     }
 
@@ -51,8 +72,9 @@ public class UserController {
      *
      * @param loginSuccessRequest
      */
+    @Hidden
     @PatchMapping("/internal/login-success")
-    public void resetFailCount(@RequestBody LoginSuccessRequest loginSuccessRequest) {
+    public void resetFailCount(@RequestBody @Valid LoginSuccessRequest loginSuccessRequest) {
         userService.resetFailCount(loginSuccessRequest.userId());
     }
 
@@ -61,8 +83,9 @@ public class UserController {
      *
      * @param loginFailureRequest
      */
+    @Hidden
     @PatchMapping("/internal/login-failure")
-    public void loginFailure(@RequestBody LoginFailureRequest loginFailureRequest) {
+    public void loginFailure(@RequestBody @Valid LoginFailureRequest loginFailureRequest) {
         userService.loginFailure(loginFailureRequest.email());
     }
 
@@ -72,8 +95,9 @@ public class UserController {
      * @param oauthUserRequest
      * @return
      */
+    @Hidden
     @PostMapping("/internal/oauth-login")
-    public UserAuthInfoResponse oauthLogin(@RequestBody OauthUserRequest oauthUserRequest) {
+    public UserAuthInfoResponse oauthLogin(@RequestBody @Valid OauthUserRequest oauthUserRequest) {
         return userService.oauthLogin(oauthUserRequest);
     }
 
@@ -82,8 +106,9 @@ public class UserController {
      *
      * @param passwordFindRequest
      */
+    @Operation(summary = "비밀번호 찾기")
     @PostMapping("/public/password-find")
-    public void passwordFind(@RequestBody PasswordFindRequest passwordFindRequest) {
+    public void passwordFind(@RequestBody @Valid PasswordFindRequest passwordFindRequest) {
         userService.sendPasswordEmail(passwordFindRequest.email().trim());
 
     }
@@ -94,8 +119,9 @@ public class UserController {
      * @param token
      * @return
      */
+    @Operation(summary = "비밀번호 찾기 토큰 검증")
     @GetMapping("/public/password/reset/validate")
-    public ResponseEntity<Response<Void>> validateToken(@RequestParam String token) {
+    public ResponseEntity<Response<Void>> validateToken(@RequestParam @Parameter(description = "토큰" , example = "asdf") String token) {
         passwordResetTokenService.validateToken(token);
         return Response.ok(messageUtil.getMessage("response.read"), null);
     }
@@ -106,8 +132,10 @@ public class UserController {
      * @param passwordChangeRequest
      * @return
      */
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "비밀번호 변경")
     @PostMapping("/public/password/change")
-    public ResponseEntity<Response<Void>> resetPasswordChange(@RequestBody PasswordChangeRequest passwordChangeRequest) {
+    public ResponseEntity<Response<Void>> resetPasswordChange(@RequestBody @Valid PasswordChangeRequest passwordChangeRequest) {
         userService.resetPasswordChange(passwordChangeRequest);
         return Response.ok(messageUtil.getMessage("response.read"), null);
     }
@@ -119,9 +147,11 @@ public class UserController {
      * @param response
      * @return
      */
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "사용자 탈퇴")
     @PatchMapping("/delete")
-    public ResponseEntity<Response<Void>> getUserProfileDetail(@CurrentUser User user,
-                                                               @RequestBody MypagePasswordChangeRequest request,
+    public ResponseEntity<Response<Void>> getUserProfileDetail(@CurrentUser @Parameter(description = "사용자" , example = "user") User user,
+                                                               @RequestBody @Valid MypagePasswordChangeRequest request,
                                                                HttpServletResponse response) {
         userService.deleteUser(user, request, response);
         return Response.ok(messageUtil.getMessage("response.read"),null);
@@ -133,8 +163,10 @@ public class UserController {
      * @param request
      * @return
      */
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "마이페이지 비밀번호 변경")
     @PostMapping("/password-change")
-    public ResponseEntity<Response<Void>> updatePasswordChange(@CurrentUser User user,
+    public ResponseEntity<Response<Void>> updatePasswordChange(@CurrentUser  @Parameter(description = "사용자" , example = "user") User user,
                                                                @RequestBody MypagePasswordChangeRequest request) {
         userService.updatePasswordChange(user, request);
         return Response.ok(messageUtil.getMessage("response.read"), null);

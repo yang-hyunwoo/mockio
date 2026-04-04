@@ -1,5 +1,16 @@
 package com.mockio.common_kafka.config;
 
+/**
+ * Kafka Consumer 에러 처리 및 DLQ(Dead Letter Queue) 전송 설정 클래스.
+ *
+ * 메시지 처리 실패 시 {DefaultErrorHandler}를 통해 재시도 정책을 적용하고,
+ * 재시도 횟수 초과 또는 복구 불가능한 예외 발생 시
+ * {DeadLetterPublishingRecoverer}를 사용하여 DLQ 토픽으로 메시지를 전송한다.
+ *
+ * 또한 DLQ 전송 전용 {ProducerFactory} 및 {KafkaTemplate}을 구성하여
+ * 다양한 payload 타입을 안전하게 직렬화할 수 있도록 지원한다.
+ */
+
 import com.mockio.common_core.exception.NonRetryableEventException;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;

@@ -11,12 +11,16 @@ package com.mockio.core_service.ai.controller;
  *  POST /api/ai/v1/feedback/summary   : 전체 요약 피드백
  */
 import com.mockio.common_ai_contractor.generator.feedback.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "AI")
 @RestController
 @RequestMapping("api/ai/v1/feedback")
 @RequiredArgsConstructor
@@ -36,8 +40,9 @@ public class AIFeedbackController {
      * @param command 피드백 생성 요청 (질문, 사용자 답변 등)
      * @return 생성된 개별 질문 피드백
      */
+    @Operation(summary = "단일 피드백 생성")
     @PostMapping("/question")
-    public GeneratedFeedback singleFeedback(@RequestBody GenerateFeedbackCommand command) {
+    public GeneratedFeedback singleFeedback(@RequestBody @Valid GenerateFeedbackCommand command) {
         return feedbackGenerator.generate(command);
     }
 
@@ -52,8 +57,9 @@ public class AIFeedbackController {
      * @param command 요약 피드백 생성 요청 (전체 응답 데이터)
      * @return 생성된 요약 피드백 결과
      */
+    @Operation(summary = "전체 요약 피드백 생성")
     @PostMapping("/summary")
-    public GeneratedSummaryFeedback summaryFeedback(@RequestBody GeneratedSummaryFeedbackCommand command) {
+    public GeneratedSummaryFeedback summaryFeedback(@RequestBody @Valid GeneratedSummaryFeedbackCommand command) {
         return summaryFeedbackGenerator.generate(command);
     }
 

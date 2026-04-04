@@ -1,5 +1,9 @@
 package com.mockio.common_jpa.config;
 
+/**
+ * query Dsl 설정 config
+ */
+
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

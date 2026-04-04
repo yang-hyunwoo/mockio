@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record UserInfoResponse(
 
-        @Schema(name = "사용자_ID", example = "1")
+        @Schema(description = "사용자_ID", example = "1")
         Long id,
 
-        @Schema(name = "이메일", example = "test@test.com")
+        @Schema(description = "이메일", example = "test@test.com")
         String email,
 
-        @Schema(name = "닉네임", example = "히하")
+        @Schema(description = "닉네임", example = "히하")
         String nickname
 
 ) {}

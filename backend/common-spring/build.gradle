@@ -28,8 +28,7 @@ dependencies {
 	// ✅ MVC/Servlet 타입들(NoHandlerFoundException, HttpServletResponse 등) 사용하려면 이게 필요
 	api 'org.springframework.boot:spring-boot-starter-web'
 
-	// swagger (공통 전파 싫으면 각 서비스로 내리세요)
-	api 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+	api "org.springdoc:springdoc-openapi-starter-webmvc-api:2.5.0"
 
 	api project(':common-core')
 }

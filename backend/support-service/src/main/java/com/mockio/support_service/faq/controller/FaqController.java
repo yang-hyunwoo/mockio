@@ -14,22 +14,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "FAQ",
+        description = """
+                FAQ 관련 API입니다.
+                
+                - FAQ 목록 조회                
+                """
+)
 @RestController
 @RequestMapping("/api/faq/v1/public")
 @RequiredArgsConstructor
-@Tag(name="FAQ 관리 API" ,description = "FaqController")
 @Slf4j
 public class FaqController {
 
     private final FaqService faqService;
-
     private final MessageUtil messageUtil;
 
-    @Operation(summary = "Faq 리스트 조회", description = "Faq 리스트 조회")
+    @Operation(summary = "Faq 리스트 조회")
     @GetMapping("/faq/list")
-    public ResponseEntity<Response<FaqResDto>> faqList(
-            FaqReqDto faqReqDto
-    ) {
+    public ResponseEntity<Response<FaqResDto>> faqList(FaqReqDto faqReqDto) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 faqService.findFaqList(faqReqDto));
     }

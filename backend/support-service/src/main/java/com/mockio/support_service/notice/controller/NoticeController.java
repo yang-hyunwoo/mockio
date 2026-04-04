@@ -7,6 +7,7 @@ import com.mockio.support_service.notice.dto.response.NoticeDetailResDto;
 import com.mockio.support_service.notice.dto.response.NoticePageResDto;
 import com.mockio.support_service.notice.service.NoticeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,41 +24,48 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/notice/v1/public")
 @RequiredArgsConstructor
-@Tag(name = "공지 사항 관리 API", description = "NoticeController")
+@Tag(name = "공지 사항",
+        description = """
+                공지 사항 관련 API입니다.
+                
+                - 공지 사항 조회
+                - 메인 공지 사항 조회
+                - 공지 사항 상세 조회
+                """
+)
 @Slf4j
 public class NoticeController {
 
     private final NoticeService noticeService;
     private final MessageUtil messageUtil;
 
-    @Operation(summary = "공지 사항 조회", description = "공지 사항 조회")
+    @Operation(summary = "공지 사항 조회")
     @GetMapping("/notice/list")
     public ResponseEntity<Response<PageDto<NoticePageResDto>>> noticeList(
-            @PageableDefault(size = 10, page = 0) Pageable pageable
+            @PageableDefault(size = 10, page = 0) @Parameter(description = "페이징" , example = "1") Pageable pageable
     ) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.noticeList(pageable));
     }
 
-    @Operation(summary = "중요 공지 사항 조회", description = "공지 사항 조회")
+    @Operation(summary = "중요 공지 사항 조회")
     @GetMapping("/notice/pinned/list")
-    public ResponseEntity<Response<List<NoticePageResDto>>> noticePinnedList(
-    ) {
+    public ResponseEntity<Response<List<NoticePageResDto>>> noticePinnedList() {
         return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.noticePinnedList());
     }
 
-    @Operation(summary = "메인 공지 사항 조회", description = "메인 공지 사항 조회")
+    @Operation(summary = "메인 공지 사항 조회")
     @GetMapping("/notice/detail")
     public ResponseEntity<Response<NoticeDetailResDto>> mainNoticeDetail() {
         return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.mainNoticeDetail());
     }
 
-    @Operation(summary = "공지 사항 상세", description = "공지 사항 상세")
+    @Operation(summary = "공지 사항 상세")
     @GetMapping("/notice/detail/{noticeId}")
     public ResponseEntity<Response<NoticeDetailResDto>> noticeDetail(
-            @PathVariable Long noticeId
+            @PathVariable @Parameter(description = "공지 ID", example = "1") Long noticeId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"),
                 noticeService.noticeDetail(noticeId));

@@ -19,12 +19,16 @@ import com.mockio.common_ai_contractor.generator.followup.*;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "AI")
 @RestController
 @RequestMapping("api/ai/v1/questions")
 @RequiredArgsConstructor
@@ -36,7 +40,7 @@ public class AIQuestionController {
 
     /**
      * 인터뷰 질문 생성 API
-     *
+     * <p>
      * 클라이언트로부터 질문 생성 요청 수신
      * 입력 조건 기반으로 AI 질문 생성
      * 생성된 질문을 반환
@@ -44,13 +48,15 @@ public class AIQuestionController {
      * @param command 질문 생성 요청 데이터 (직무, 난이도, 키워드 등)
      * @return 생성된 인터뷰 질문
      */
+    @Operation(summary = "질문 생성")
     @PostMapping("/generate")
-    public GeneratedQuestion generate(@RequestBody GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(@RequestBody @Valid GenerateQuestionCommand command) {
         return questionGenerator.generate(command);
     }
 
+    @Operation(summary = "꼬리질문 생성 체크")
     @PostMapping("/followup-valid")
-    public FollowupValid followupValid(@RequestBody FollowUpQuestionCommand command) {
+    public FollowupValid followupValid(@RequestBody @Valid FollowUpQuestionCommand command) {
         return followUpQuestionValid.generateValid(command);
     }
 
@@ -64,8 +70,9 @@ public class AIQuestionController {
      * @param command 후속 질문 생성 요청 데이터 (이전 질문, 답변 등)
      * @return 생성된 후속 질문
      */
+    @Operation(summary = "꼬리질문 생성")
     @PostMapping("/followup")
-    public FollowUpQuestion followup(@RequestBody FollowUpQuestionCommand command) {
+    public FollowUpQuestion followup(@RequestBody @Valid FollowUpQuestionCommand command) {
         return followUpQuestionGenerator.generate(command);
     }
 

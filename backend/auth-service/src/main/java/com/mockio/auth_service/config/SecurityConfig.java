@@ -68,6 +68,7 @@ public class SecurityConfig {
                                 "/api/auth/v1/logout/all",
                                 "/api/auth/v1/oauth2/authorization/**",
                                 "/api/auth/v1/login/oauth2/code/**",
+                                "/v3/api-docs/**",
                                 "/api/auth/v1/public/**").permitAll()
                         .anyRequest().authenticated()
                 )

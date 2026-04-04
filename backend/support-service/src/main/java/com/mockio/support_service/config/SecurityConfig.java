@@ -33,6 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/faq/v1/public/**").permitAll() //테스트용
                         .requestMatchers("/api/file/v1/internal/**").permitAll()
                         .requestMatchers("/api/file/v1/public/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+
                         // 나머지는 다 인증 필요
                         .anyRequest().authenticated()
                 )

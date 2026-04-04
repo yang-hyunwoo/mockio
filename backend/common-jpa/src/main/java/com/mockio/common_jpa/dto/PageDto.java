@@ -13,6 +13,7 @@ import java.util.function.Function;
 @NoArgsConstructor
 public class PageDto<T> {
 
+
     private List<T> content;          // 데이터 리스트
     private int pageNumber;           // 현재 페이지
     private int pageSize;             // 페이지 크기
@@ -23,7 +24,7 @@ public class PageDto<T> {
         List<D> dtoList = page.getContent()
                 .stream()
                 .map(mapper)
-                .toList();  // Java 17 이상
+                .toList();
 
         return new PageDto<>(
                 dtoList,

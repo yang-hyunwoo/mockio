@@ -1,8 +1,11 @@
 package com.mockio.core_service.user.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_spring.util.CustomCookie;
 import com.mockio.common_spring.util.EnvironmentProvider;
+import com.mockio.core_service.interview.dto.request.InternalEnsureInterviewSettingRequest;
 import com.mockio.core_service.interview.service.UserInterviewSettingService;
 import com.mockio.core_service.user.constant.AuthProviderEnum;
 import com.mockio.core_service.user.constant.UserStatus;
@@ -14,6 +17,8 @@ import com.mockio.core_service.user.dto.request.*;
 import com.mockio.core_service.user.dto.response.SignupResponse;
 import com.mockio.core_service.user.dto.response.UserInfoResponse;
 import com.mockio.core_service.internalmapper.InternalMapper;
+import com.mockio.core_service.user.kafka.domain.OutboxUserEvent;
+import com.mockio.core_service.user.kafka.repository.OutboxUserEventRepository;
 import com.mockio.core_service.user.mapper.UserAuthInfoMapper;
 import com.mockio.core_service.user.mapper.UserMapper;
 import com.mockio.core_service.user.repository.UserProfileRepository;
@@ -52,6 +57,8 @@ public class UserService {
     private final RedisService redisService;
     private final EnvironmentProvider environmentProvider;
     private final CustomCookie customCookie;
+    private final OutboxUserEventRepository outboxUserEventRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * 회원 가입 로직
@@ -60,7 +67,7 @@ public class UserService {
      */
     public SignupResponse join(SignupRequest signupRequest) {
 
-        recaptchaService.verify(signupRequest.recaptchaToken());
+       // recaptchaService.verify(signupRequest.recaptchaToken());
 
         //1. 동일 유저 이메일 존재 검사 / 닉네임 중복 체크
         validateDuplicate(signupRequest);
@@ -76,7 +83,20 @@ public class UserService {
         );
 
         userProfileRepository.save(userProfile);
-        userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(saveUser.getId())));
+
+        InternalEnsureInterviewSettingRequest internalEnsureInterviewSetting = InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(saveUser.getId()));
+        JsonNode payloadJson = objectMapper.valueToTree(internalEnsureInterviewSetting);
+        outboxUserEventRepository.save(
+                OutboxUserEvent.createNew(
+                        "User",
+                        saveUser.getId(),
+                        "signupAfterInterviewSetting",
+                        payloadJson
+
+                )
+        );
+
+//        userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(saveUser.getId())));
         return UserMapper.fromSignUp(saveUser);
 
     }

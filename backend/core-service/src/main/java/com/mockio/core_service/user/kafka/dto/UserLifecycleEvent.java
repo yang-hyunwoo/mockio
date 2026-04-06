@@ -1,4 +1,4 @@
-package com.mockio.core_service.user.dto;
+package com.mockio.core_service.user.kafka.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

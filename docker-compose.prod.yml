@@ -243,7 +243,7 @@ services:
 volumes:
   ollama:
   grafana-data:
-
+  influxdb-data:
 networks:
   app-network:
     driver: bridge

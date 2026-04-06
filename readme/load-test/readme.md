@@ -211,7 +211,7 @@ DB write 구조 최적화
 
 <p align="center">
   <img src="./유저정보변경.png" width="48%" />
-  <img src="./유저정보변경이미지변경.png" width="48%" />
+  <img src="./유저정보변경이미지변경.png" width="48%" />
 </p>
 
 부하 테스트 스크립트는 [`k6/profile-change-test.js`](../../k6/profile-change-test.js) 에서 확인할 수 있습니다.
@@ -283,7 +283,7 @@ CPU/DB 문제가 아니라 I/O 바운드 병목<br/>
 <summary>면접 생성 부하 테스트</summary>
 
 <p align="center">
-  <img src="./면접생성.png" width="48%" />
+  <img src="./면접생성.png" width="48%" />
 </p>
 
 부하 테스트 스크립트는 [`k6/interview-test.js`](../../k6/interview-test.js) 에서 확인할 수 있습니다.

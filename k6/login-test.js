@@ -25,7 +25,7 @@ export default function () {
         password: user.password,
     });
 
-    const res = http.post(url+'/api/auth/v1/login', payload, {
+    const res = http.post(`${url}/api/auth/v1/login`, payload, {
         headers: {
             'Content-Type': 'application/json',
         },

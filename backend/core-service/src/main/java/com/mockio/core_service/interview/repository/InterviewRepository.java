@@ -80,4 +80,8 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     List<Interview> findTop30ByUserIdOrderByCreatedAtDesc(Long userId);
 
+    Optional<Interview> findTopByUserIdAndStatusInOrderByCreatedAtDesc(
+            Long userId,
+            List<InterviewStatus> statuses
+    );
 }

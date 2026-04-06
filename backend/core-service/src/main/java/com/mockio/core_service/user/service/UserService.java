@@ -271,6 +271,16 @@ public class UserService {
         user.resetPasswordChange(request.newPassword(), request.confirmPassword(), passwordEncoder);
     }
 
+    public Long findByIdForUpdate(Long userId) {
+       return userRepository.findByIdForUpdate(userId)
+                .map(user -> user.getId())
+                .orElseThrow(()-> new CustomApiException(
+                        USER_NOT_FOUND.getHttpStatus(),
+                        USER_NOT_FOUND,
+                        USER_NOT_FOUND.getMessage()
+                ));
+    }
+
     private String loadHtmlTemplate() {
         try {
             ClassPathResource resource = new ClassPathResource("mail/password-reset.html");

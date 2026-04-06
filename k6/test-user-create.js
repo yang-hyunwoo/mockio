@@ -19,7 +19,7 @@ export default function () {
         recaptchaToken: 'dummy-token',
     });
 
-    const res = http.post(url+'/api/users/v1/public/signup', payload, {
+    const res = http.post(`${url}/api/users/v1/public/signup`, payload, {
         headers: {
             'Content-Type': 'application/json',
             "X-Load-Test-Bypass": "bG9hZFRlc3RCeUhlYWRlclRlc3Q=",

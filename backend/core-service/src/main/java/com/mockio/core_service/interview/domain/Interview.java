@@ -156,7 +156,7 @@ public class Interview extends BaseTimeEntity {
                 .interviewMode(interviewMode)
                 .answerTimeSeconds(answerTimeSeconds)
                 .questionGenStatus(QuestionGenerationStatus.NONE)
-                .status(InterviewStatus.ACTIVE)
+                .status(InterviewStatus.PENDING)
                 .feedbackStatus(InterviewFeedbackStatus.NONE)
                 .count(count)
                 .startedAt(now())
@@ -211,6 +211,7 @@ public class Interview extends BaseTimeEntity {
 
     public void markGenerated() {
         this.questionGenStatus = QuestionGenerationStatus.DONE;
+        this.status = InterviewStatus.ACTIVE;
         this.questionGenEndedAt = now();
     }
 

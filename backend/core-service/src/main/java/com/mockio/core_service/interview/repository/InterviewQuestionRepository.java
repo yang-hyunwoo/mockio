@@ -19,8 +19,6 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
 
     Optional<InterviewQuestion> findFirstByInterviewIdAndSeqGreaterThanOrderBySeqAsc(Long interviewId, Integer seq);
 
-    int countByInterviewId(Long interviewId);
-
     int countByInterviewIdAndType(Long interviewId , QuestionType type);
 
     boolean existsByInterviewIdAndParentQuestionIdAndType(Long interviewId, Long parentQuestionId, QuestionType type);

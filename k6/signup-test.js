@@ -14,7 +14,7 @@ export const options = {
 export default function () {
     //https://mockio.cloud
     //http://localhost:9000
-    const url = 'http://localhost:9000' + '/api/users/v1/public/signup';
+    const url = 'https://mockio.cloud' + '/api/users/v1/public/signup';
 
     const unique = Date.now() + '-' + Math.floor(Math.random() * 100000);
 

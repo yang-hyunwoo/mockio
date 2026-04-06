@@ -7,6 +7,7 @@ import com.mockio.core_service.interview.dto.request.RetryInterviewRequest;
 import com.mockio.core_service.interview.dto.request.StartInterviewRequest;
 import com.mockio.core_service.interview.dto.response.InterviewQuestionReadResponse;
 import com.mockio.core_service.interview.service.InterviewQuestionService;
+import com.mockio.core_service.interview.service.InterviewQuestionTxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -24,6 +25,7 @@ public class InterviewQuestionController {
 
     private final InterviewQuestionService interviewQuestionService;
     private final MessageUtil messageUtil;
+    private final InterviewQuestionTxService interviewQuestionTxService;
 
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "면접 질문 생성")
@@ -54,7 +56,7 @@ public class InterviewQuestionController {
             @PathVariable @Parameter(description = "면접ID", example = "1") Long interviewId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"),
-                interviewQuestionService.getQuestions(interviewId,userId)
+                interviewQuestionTxService.getQuestions(interviewId,userId)
         );
     }
 

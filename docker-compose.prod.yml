@@ -232,6 +232,8 @@ services:
     volumes:
       - influxdb-data:/var/lib/influxdb
     restart: always
+    networks:
+      - app-network
 
   k6:
     image: grafana/k6
@@ -239,6 +241,8 @@ services:
     volumes:
       - ./k6:/scripts
     entrypoint: [ "k6" ]
+    networks:
+      - app-network
 
 volumes:
   ollama:

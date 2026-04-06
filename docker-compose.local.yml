@@ -88,9 +88,25 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
 
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb-local
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+    restart: always
+
+  k6:
+    image: grafana/k6
+    container_name: k6-local
+    volumes:
+      - ./k6:/scripts
+    entrypoint: [ "k6" ]
+
 volumes:
   ollama:
   redis_data:
   grafana-data:
-
+  influxdb-data:
 

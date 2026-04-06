@@ -73,7 +73,7 @@ DB write 구조 최적화
 <summary>로그인 부하 테스트</summary>
 
 <p align="center">
-  <img src="./동기_로그인.png" width="48%" />
+  <img src="./동기_로그인.png" width="48%" />
   <img src="./비동기_로그인.png" width="48%" />
 </p>
 

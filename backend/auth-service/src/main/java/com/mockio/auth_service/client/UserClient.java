@@ -85,32 +85,6 @@ public class UserClient {
     }
 
     /**
-     * 로그인 성공 처리 (실패 횟수 초기화)
-     *
-     * - user-service에 성공 이벤트 전달
-     * - 상태 코드 기반 예외 처리 수행
-     */
-    public void resetFailCount(Long userId) {
-        if (userId == null) {
-            throw new CustomApiException(ERR_001.getHttpStatus(), ERR_001, "유저 정보는 " + ERR_001);
-        }
-        userRestClient.patch()
-                .uri("/api/users/v1/internal/login-success")
-                .body(new LoginSuccessRequest(userId))
-                .retrieve()
-                .onStatus(status -> status.value() == 404, (req, res) -> {
-                    throw new BadCredentialsException("아이디 또는 비밀번호가 올바르지 않습니다.");
-                })
-                .onStatus(status -> status.is5xxServerError(), (req, res) -> {
-                    throw new CustomApiException(ILLEGALSTATE.getHttpStatus(), ILLEGALSTATE,"user-service reset fail 5xx 호출");
-                })
-                .onStatus(status -> status.is4xxClientError(), (req, res) -> {
-                    throw new CustomApiException(ERR_000.getHttpStatus(), ERR_000,"user-service reset fail 4xx 호출 실패");
-                })
-                .toBodilessEntity();
-    }
-
-    /**
      * 로그인 실패 처리 (실패 횟수 증가)
      *
      * @param email 사용자 이메일

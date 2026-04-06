@@ -14,6 +14,7 @@ import com.mockio.auth_service.dto.LoginUser;
 import com.mockio.auth_service.dto.response.UserInfoResponse;
 import com.mockio.auth_service.dto.request.UserLoginRequest;
 import com.mockio.auth_service.dto.response.LoginResponse;
+import com.mockio.auth_service.kafka.producer.LoginSuccessEventProducer;
 import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_spring.util.CustomCookie;
@@ -41,7 +42,7 @@ public class AuthLoginService {
     private final RedisRefreshTokenService redisRefreshTokenService;
     private final CustomCookie customCookie;
     private static final String refreshCookieName = "refreshToken";
-
+    private final LoginSuccessEventProducer loginSuccessEventProducer;
     /**
      * 로그인 처리
      *
@@ -57,7 +58,7 @@ public class AuthLoginService {
             Authentication authentication = authenticationManager.authenticate(authToken);
             LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 
-            userClient.resetFailCount(loginUser.getUserId());
+            loginSuccessEventProducer.publish(loginUser.getUserId());
             String accessToken = jwtTokenProvider.createAccessToken(loginUser.getUserId());
             String refreshToken = jwtTokenProvider.createRefreshToken(loginUser);
 

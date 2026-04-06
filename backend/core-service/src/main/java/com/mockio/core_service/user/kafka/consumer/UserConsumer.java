@@ -1,5 +1,6 @@
 package com.mockio.core_service.user.kafka.consumer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_core.exception.NonRetryableEventException;
 import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.interview.dto.request.InternalEnsureInterviewSettingRequest;
@@ -7,8 +8,10 @@ import com.mockio.core_service.interview.service.UserInterviewSettingService;
 import com.mockio.core_service.kafka.ProcessedEvent;
 import com.mockio.core_service.kafka.ProcessedEventRepository;
 import com.mockio.core_service.user.dto.request.EnsureInterviewSettingRequest;
+import com.mockio.core_service.user.kafka.dto.LoginSuccessEvent;
 import com.mockio.core_service.user.kafka.dto.UserLifecycleEvent;
 import com.mockio.core_service.user.kafka.support.UserEventParser;
+import com.mockio.core_service.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,7 +28,10 @@ public class UserConsumer {
     private final ProcessedEventRepository processedEventRepository;
     private static final String CONSUMER_NAME = "core-service.user-lifecycle";
     private final UserInterviewSettingService userInterviewSettingService;
+    private final ObjectMapper objectMapper;
+    private final UserService userService;
 
+    //회원 가입 후 유저 면접 설정
     @KafkaListener(topics = "user.lifecycle" , groupId = "core-service")
     public void onMessage(String messageJson , Acknowledgment ack) {
         log.info("kafka message received: {}", messageJson);
@@ -60,6 +66,20 @@ public class UserConsumer {
         }
 
     }
+
+    //로그인 후 유저 실패 카운트 , 접속일자 수정
+    @KafkaListener(topics = "user.login.success", groupId = "core-service-login-success")
+    public void consume(String message) {
+        try {
+            LoginSuccessEvent event = objectMapper.readValue(message, LoginSuccessEvent.class);
+            userService.resetFailCount(event.userId());
+            log.info("consumed login success event. userId={}", event.userId());
+        } catch (Exception e) {
+            log.error("failed to consume login success event. message={}", message, e);
+            throw new RuntimeException(e);
+        }
+    }
+
 
     private void handleSignupInterviewSetting(UserLifecycleEvent event) {
         InternalEnsureInterviewSettingRequest internalEnsureInterviewSettingRequest = parser.payloadAs(event, InternalEnsureInterviewSettingRequest.class);

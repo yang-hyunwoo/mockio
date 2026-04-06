@@ -77,7 +77,7 @@ DB write 구조 최적화
   <img src="./비동기_로그인.png" width="48%" />
 </p>
 
-부하 테스트 스크립트는 [`k6/login-test.js`](../../k6/signup-test.js) 에서 확인할 수 있습니다.
+부하 테스트 스크립트는 [`k6/login-test.js`](../../k6/login-test.js) 에서 확인할 수 있습니다.
 
 📊 테스트 결과 해석
 

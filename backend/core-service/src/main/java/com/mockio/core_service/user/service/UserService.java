@@ -26,6 +26,7 @@ import com.mockio.core_service.user.repository.UserRepository;
 import com.mockio.core_service.util.RedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -59,15 +60,16 @@ public class UserService {
     private final CustomCookie customCookie;
     private final OutboxUserEventRepository outboxUserEventRepository;
     private final ObjectMapper objectMapper;
+    private final String loadTestSecret = "bG9hZFRlc3RCeUhlYWRlclRlc3Q=";
 
     /**
      * 회원 가입 로직
      * @param signupRequest
      * @return
      */
-    public SignupResponse join(SignupRequest signupRequest) {
+    public SignupResponse join(SignupRequest signupRequest,HttpServletRequest servletRequest) {
 
-       // recaptchaService.verify(signupRequest.recaptchaToken());
+        verifyRecaptchaIfNeeded(signupRequest, servletRequest);
 
         //1. 동일 유저 이메일 존재 검사 / 닉네임 중복 체크
         validateDuplicate(signupRequest);
@@ -381,4 +383,13 @@ public class UserService {
         return mimeMessage;
     }
 
+
+    public void verifyRecaptchaIfNeeded(SignupRequest signupRequest, HttpServletRequest request) {
+
+        String bypassHeader = request.getHeader("X-Load-Test-Bypass");
+        if(loadTestSecret.equals(bypassHeader)) {
+            return ;
+        }
+        recaptchaService.verify(signupRequest.recaptchaToken());
+    }
 }

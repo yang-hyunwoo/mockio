@@ -8,6 +8,7 @@ import com.mockio.core_service.user.dto.response.SignupResponse;
 import com.mockio.core_service.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -42,9 +43,10 @@ public class SignupController {
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
     public ResponseEntity<Response<SignupResponse>> signup(
-            @Valid @RequestBody SignupRequest request
+            @Valid @RequestBody SignupRequest request,
+            HttpServletRequest servletRequest
     ) {
-        SignupResponse join = userService.join(request);
+        SignupResponse join = userService.join(request,servletRequest);
         ResponseCookie cookie = customCookie.createCookie("join_success", "success", 30);
         return Response.create(cookie.toString(), messageUtil.getMessage("response.create"), join);
     }

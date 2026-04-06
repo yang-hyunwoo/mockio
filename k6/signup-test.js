@@ -5,13 +5,14 @@ export const options = {
     scenarios: {
         signup_test: {
             executor: 'constant-vus',
-            vus: 10,
+            vus: 100,
             duration: '30s'
         },
     },
 };
 
 export default function () {
+    // const url = 'https://mockio.cloud/api/users/v1/public/signup';
     const url = 'http://localhost:9000/api/users/v1/public/signup';
 
     const unique = Date.now() + '-' + Math.floor(Math.random() * 100000);
@@ -26,6 +27,7 @@ export default function () {
     const params = {
         headers: {
             'Content-Type': 'application/json',
+            "X-Load-Test-Bypass": "bG9hZFRlc3RCeUhlYWRlclRlc3Q=",
         },
     };
 

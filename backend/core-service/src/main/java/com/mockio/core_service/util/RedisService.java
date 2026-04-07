@@ -1,7 +1,6 @@
 package com.mockio.core_service.util;
 
 import com.mockio.common_core.exception.CustomApiException;
-import com.mockio.core_service.user.constant.error.UserErrorEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;

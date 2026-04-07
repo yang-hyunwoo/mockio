@@ -28,4 +28,5 @@ public interface PasswordResetTokenRepository extends JpaRepository<PasswordRese
                   AND t.expiredAt > CURRENT_TIMESTAMP
             """)
     Optional<PasswordResetToken> findValidToken(@Param("token") String token);
+
 }

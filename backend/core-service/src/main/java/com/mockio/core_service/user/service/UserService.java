@@ -97,10 +97,7 @@ public class UserService {
 
                 )
         );
-
-//        userInterviewSettingService.ensureInterviewSettingSave(InternalMapper.toInternalEnsureInterviewSetting(new EnsureInterviewSettingRequest(saveUser.getId())));
         return UserMapper.fromSignUp(saveUser);
-
     }
 
     /**
@@ -402,4 +399,5 @@ public class UserService {
         }
         recaptchaService.verify(signupRequest.recaptchaToken());
     }
+    
 }

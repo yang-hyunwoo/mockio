@@ -17,6 +17,7 @@ import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveGenerator;
 import com.mockio.common_ai_contractor.generator.deepdive.GenerateDeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
+import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
+
+import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
 @Component
 @Primary
@@ -83,7 +86,11 @@ public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
         return generators.stream()
                 .filter(g -> g.engine() == engine)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                ERR_500.getHttpStatus(),
+                                ERR_500,
+                                "AI를 찾을 수 없습니다."));
     }
 
     private AiEngine parse(String mode) {

@@ -54,7 +54,7 @@ public class SpringAiOpenAIClient implements AIChatClient {
     }
 
     private CustomApiException mapToCustomApiException(Throwable t) {
-        // ✅ 여기서 Spring AI/OpenAI 예외를 AIErrorEnum으로 매핑
+        // Spring AI/OpenAI 예외를 AIErrorEnum으로 매핑
         // Spring AI 예외 타입은 버전에 따라 조금 다른데,
         // 핵심은 429/401/403/400/timeout 등을 잡아내는 것
         String msg = t.toString();
@@ -90,4 +90,5 @@ public class SpringAiOpenAIClient implements AIChatClient {
         return t.getClass().getName().toLowerCase().contains("timeout")
                 || (c != null && c.getClass().getName().toLowerCase().contains("timeout"));
     }
+
 }

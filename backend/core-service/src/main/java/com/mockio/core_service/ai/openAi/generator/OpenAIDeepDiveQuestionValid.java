@@ -70,4 +70,5 @@ public class OpenAIDeepDiveQuestionValid implements DeepDiveQuestionValid {
         }
         return q;
     }
+
 }

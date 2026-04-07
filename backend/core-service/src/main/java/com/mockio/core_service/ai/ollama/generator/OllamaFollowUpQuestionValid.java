@@ -39,7 +39,6 @@ public class OllamaFollowUpQuestionValid implements FollowUpQuestionValid {
         return AiEngine.OLLAMA;
     }
 
-
     @Override
     public FollowupValid generateValid(FollowUpQuestionCommand command) {
         var qa = command.recentQa();

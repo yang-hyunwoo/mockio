@@ -66,4 +66,5 @@ public class OpenAIFollowUpQuestionValid implements FollowUpQuestionValid {
         }
         return q;
     }
+
 }

@@ -54,5 +54,4 @@ public class AIDeepDiveController {
         return deepDiveQuestionValid.generateValid(command);
     }
 
-
 }

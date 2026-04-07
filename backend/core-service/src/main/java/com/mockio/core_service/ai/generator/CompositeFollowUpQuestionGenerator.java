@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
+
 @Component
 @Primary
 @RequiredArgsConstructor
@@ -55,28 +57,15 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
     private List<FollowUpQuestionGenerator> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        Optional<FollowUpQuestionGenerator> openai = findOptional(AiEngine.OPENAI);
-        Optional<FollowUpQuestionGenerator> ollama = findOptional(AiEngine.OLLAMA);
-        Optional<FollowUpQuestionGenerator> fake = findOptional(AiEngine.FAKE);
+        FollowUpQuestionGenerator openai = find(AiEngine.OPENAI);
+        FollowUpQuestionGenerator ollama = find(AiEngine.OLLAMA);
+        FollowUpQuestionGenerator fake = find(AiEngine.FAKE);
 
         return switch (primary) {
-            case OLLAMA -> Stream.of(ollama, openai, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            case FAKE -> Stream.of(fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            default -> Stream.of(openai, ollama, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
+            case OLLAMA -> List.of(ollama, openai, fake);
+            case FAKE -> List.of(fake);
+            default -> List.of(openai, ollama, fake);
         };
-    }
-
-    private FollowUpQuestionGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
     }
 
     private AiEngine parse(String mode) {
@@ -108,11 +97,16 @@ public class CompositeFollowUpQuestionGenerator implements FollowUpQuestionGener
         ));
     }
 
-    private Optional<FollowUpQuestionGenerator> findOptional(AiEngine engine) {
+    private FollowUpQuestionGenerator find(AiEngine engine) {
         return generators.stream()
                 .filter(g -> g != this)
                 .filter(g -> g.engine() == engine)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                ERR_500.getHttpStatus(),
+                                ERR_500,
+                                "AI를 찾을 수 없습니다."));
     }
 
 }

@@ -35,7 +35,6 @@ public class FileController {
             @RequestPart(value = "domainType") @Parameter(description = "도메인", example = "USER") String domainType,
             @RequestPart(value = "domainId") @Parameter(description = "도메인ID", example = "1") Long domainId
     ) {
-
         return fileService.upload(domainType,domainId,file, profileImageId);
     }
 
@@ -49,4 +48,5 @@ public class FileController {
     ) {
         return fileService.getProfileImageId(domainType,userId,profileImageId);
     }
+
 }

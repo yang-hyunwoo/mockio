@@ -2,13 +2,13 @@ package com.mockio.core_service.ai.generator;
 
 
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveQuestionValid;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveValid;
 import com.mockio.common_ai_contractor.generator.deepdive.GenerateDeepDiveCommand;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -17,9 +17,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
+
 @Component
 @Primary
 @RequiredArgsConstructor
+@Slf4j
 public class CompositeDeepDiveQuestionValid implements DeepDiveQuestionValid {
 
     private final List<DeepDiveQuestionValid> generators;
@@ -54,28 +57,15 @@ public class CompositeDeepDiveQuestionValid implements DeepDiveQuestionValid {
     private List<DeepDiveQuestionValid> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        Optional<DeepDiveQuestionValid> openai = findOptional(AiEngine.OPENAI);
-        Optional<DeepDiveQuestionValid> ollama = findOptional(AiEngine.OLLAMA);
-        Optional<DeepDiveQuestionValid> fake = findOptional(AiEngine.FAKE);
+        DeepDiveQuestionValid openai = find(AiEngine.OPENAI);
+        DeepDiveQuestionValid ollama = find(AiEngine.OLLAMA);
+        DeepDiveQuestionValid fake = find(AiEngine.FAKE);
 
         return switch (primary) {
-            case OLLAMA -> Stream.of(ollama, openai, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            case FAKE -> Stream.of(fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            default -> Stream.of(openai, ollama, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
+            case OLLAMA -> List.of(ollama, openai, fake);
+            case FAKE -> List.of(fake);
+            default -> List.of(openai, ollama, fake);
         };
-    }
-
-    private DeepDiveQuestionValid find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
     }
 
     private AiEngine parse(String mode) {
@@ -93,6 +83,8 @@ public class CompositeDeepDiveQuestionValid implements DeepDiveQuestionValid {
     }
 
     private DeepDiveValid fallbackGenerate(GenerateDeepDiveCommand command, Throwable t) {
+        log.error("ai deepDive fallback triggered. track={}, difficulty={}, cause={}",
+                command.interviewTrack(), command.interviewDifficulty(), t.toString());
         return new DeepDiveValid(
                 false,
                 "AI 오류",
@@ -100,11 +92,16 @@ public class CompositeDeepDiveQuestionValid implements DeepDiveQuestionValid {
         );
     }
 
-    private Optional<DeepDiveQuestionValid> findOptional(AiEngine engine) {
+    private DeepDiveQuestionValid find(AiEngine engine) {
         return generators.stream()
                 .filter(g -> g != this)
                 .filter(g -> g.engine() == engine)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                ERR_500.getHttpStatus(),
+                                ERR_500,
+                                "AI를 찾을 수 없습니다."));
     }
 
 }

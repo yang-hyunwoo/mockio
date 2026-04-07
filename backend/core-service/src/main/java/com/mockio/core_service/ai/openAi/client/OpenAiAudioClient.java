@@ -28,8 +28,8 @@ public class OpenAiAudioClient {
     public String transcribe(InputStream inputStream,
                              String filename,
                              String contentType,
-                             String model) {
-
+                             String model
+    ) {
         validate(inputStream, filename, contentType);
 
         try {
@@ -58,7 +58,6 @@ public class OpenAiAudioClient {
                         AUDIO_TEXT_NULL.getMessage()
                 );
             }
-
             return response.text();
 
         } catch (CustomApiException e) {
@@ -70,8 +69,8 @@ public class OpenAiAudioClient {
 
     private void validate(InputStream inputStream,
                           String filename,
-                          String contentType) {
-
+                          String contentType
+    ) {
         if (inputStream == null) {
             throw new CustomApiException(
                     AUDIO_EMPTY.getHttpStatus(),
@@ -155,4 +154,5 @@ public class OpenAiAudioClient {
             return -1;
         }
     }
+
 }

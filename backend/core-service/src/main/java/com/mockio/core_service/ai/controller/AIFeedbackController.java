@@ -10,6 +10,7 @@ package com.mockio.core_service.ai.controller;
  *  POST /api/ai/v1/feedback/question  : 단일 질문 피드백
  *  POST /api/ai/v1/feedback/summary   : 전체 요약 피드백
  */
+
 import com.mockio.common_ai_contractor.generator.feedback.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

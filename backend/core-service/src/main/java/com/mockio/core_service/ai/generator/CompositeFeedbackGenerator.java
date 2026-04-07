@@ -25,6 +25,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
+
 @Component
 @Primary
 @RequiredArgsConstructor
@@ -80,7 +82,11 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
         return generators.stream()
                 .filter(g -> g.engine() == engine)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                ERR_500.getHttpStatus(),
+                                ERR_500,
+                                "AI를 찾을 수 없습니다."));
     }
 
     private AiEngine parse(String mode) {
@@ -98,7 +104,7 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
     }
 
     private GeneratedFeedback fallbackGenerate(GenerateFeedbackCommand command, Throwable ex) {
-        log.warn("ai feedback fallback triggered. track={}, difficulty={}, cause={}",
+        log.error("ai feedback fallback triggered. track={}, difficulty={}, cause={}",
                 command.track(), command.difficulty(), ex.toString());
 
         // 프로젝트 정책에 맞게 최소 fallback 구성

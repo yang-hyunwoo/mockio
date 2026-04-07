@@ -193,10 +193,17 @@ public class Interview extends BaseTimeEntity {
                 .build();
     }
 
+    /**
+     * 면접 질문 생성 완료
+     * @return
+     */
     public boolean isQuestionGenerated() {
         return this.questionGenStatus == QuestionGenerationStatus.DONE;
     }
 
+    /**
+     * 면접 질문 생성
+     */
     public void markGenerating() {
         if (this.questionGenStatus == QuestionGenerationStatus.DONE) {
             throw new CustomApiException(QUESTIONS_ALREADY_DONE.getHttpStatus(), QUESTIONS_ALREADY_DONE, QUESTIONS_ALREADY_DONE.getMessage());
@@ -221,6 +228,10 @@ public class Interview extends BaseTimeEntity {
         this.questionGenError = error;
     }
 
+    /**
+     * 면접 종료
+     * @param interviewEndReason
+     */
     public void complete(InterviewEndReason interviewEndReason) {
         if (status == InterviewStatus.ENDED) return; // 멱등
         if (status != InterviewStatus.ACTIVE) {

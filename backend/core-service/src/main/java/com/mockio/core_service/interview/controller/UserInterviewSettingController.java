@@ -45,12 +45,15 @@ public class UserInterviewSettingController {
 
     /**
      * 면접 설정 조회
+     *
      * @param
      * @return
      */
     @Operation(summary = "면접 설정 조회")
     @GetMapping("/me/get-preference")
-    public ResponseEntity<Response<InterviewUserInterviewSettingReadResponse>> getPreference(@CurrentSubject @Parameter(description = "사용자ID", example = "1") Long userId) {
+    public ResponseEntity<Response<InterviewUserInterviewSettingReadResponse>> getPreference(
+            @CurrentSubject @Parameter(description = "사용자_ID", example = "1") Long userId
+    ) {
         return Response.ok(messageUtil.getMessage("response.read"), userInterviewSettingService.getPreference(userId));
     }
 
@@ -62,8 +65,9 @@ public class UserInterviewSettingController {
      */
     @Operation(summary = "면접 설정 수정")
     @PatchMapping("/mypage/update-preference")
-    public ResponseEntity<Response<Void>> updatePreference(@CurrentSubject @Parameter(description = "사용자ID", example = "1") Long userId,
-                                                           @RequestBody @Valid UserInterviewSettingUpdateRequest updateRequest
+    public ResponseEntity<Response<Void>> updatePreference(
+            @CurrentSubject @Parameter(description = "사용자_ID", example = "1") Long userId,
+            @RequestBody @Valid UserInterviewSettingUpdateRequest updateRequest
     ) {
         userInterviewSettingService.updatePreference(userId, updateRequest);
         return Response.update(messageUtil.getMessage("response.update"));

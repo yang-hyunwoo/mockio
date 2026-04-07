@@ -44,15 +44,34 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final FeedbackService feedbackService;
 
+    /**
+     * 면접 목록 메인 조회
+     *
+     * @param userId
+     * @return
+     */
     public InterviewMainListResponse getInterviewMainList(Long userId) {
         return InterviewMapper.fromMainList(interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE));
     }
 
+    /**
+     * 면접 페이징 리스트 조회 [실패 제외]
+     *
+     * @param userId
+     * @param pageable
+     * @return
+     */
     public PageDto<InterviewPageResponse> getInterviewList(Long userId, Pageable pageable) {
-        return PageDto.of(interviewRepository.findByUserIdOrderByActiveFirst(userId,InterviewStatus.FAILED ,pageable),InterviewMapper::fromItem);
+        return PageDto.of(interviewRepository.findByUserIdOrderByActiveFirst(userId, InterviewStatus.FAILED, pageable), InterviewMapper::fromItem);
     }
 
-    public void interviewEnd(Long userId , Long interviewId) {
+    /**
+     * 면접 종료
+     *
+     * @param userId
+     * @param interviewId
+     */
+    public void interviewEnd(Long userId, Long interviewId) {
         Interview interview = interviewRepository.findByIdAndUserId(interviewId, userId)
                 .orElseThrow(() -> new CustomApiException(
                         INTERVIEW_FORBIDDEN.getHttpStatus(),
@@ -62,6 +81,11 @@ public class InterviewService {
         interview.complete(InterviewEndReason.USER_EXIT);
     }
 
+    /**
+     * 사용자 면접 종료 (진행중인 면접 -> 종료)
+     *
+     * @param userId
+     */
     public void activeInterviewEnd(Long userId) {
         Interview activeInterview = interviewRepository.findActiveByUserIdAndStatus(userId, ACTIVE)
                 .orElseThrow(() -> new CustomApiException(
@@ -72,26 +96,66 @@ public class InterviewService {
         activeInterview.complete(InterviewEndReason.USER_EXIT);
     }
 
+    /**
+     * 면접 이력 페이징 조회
+     *
+     * @param userId
+     * @param track
+     * @param pageable
+     * @return
+     */
     public InterviewHistoryPageResponse getInterviewHistory(Long userId, InterviewTrack track, Pageable pageable) {
         Pageable scorePageable = PageRequest.of(0, 7, Sort.by(Sort.Direction.DESC, "endedAt"));
 
-        List<Interview> scoreInterview;
-        Page<Interview> historyInterview;
+        List<Interview> scoreInterview = getScoreInterviewList(userId, track, scorePageable);
+        ;
+        Page<Interview> historyInterview = getInterviewHistoryPage(userId, track, pageable);
+        List<Interview> historyContent = historyInterview.getContent();
 
+        Collections.reverse(scoreInterview); // 차트용 asc
+
+        if (scoreInterview.isEmpty()) {
+            return createEmptyHistoryResponse(historyInterview);
+        }
+
+        Set<Long> interviewIds = Stream.concat(
+                        scoreInterview.stream(),
+                        historyContent.stream()
+                )
+                .map(Interview::getId)
+                .collect(Collectors.toSet());
+
+        //피드백 서비스 호출
+        InternalInterviewScoreListResponse internalScoreResponse = feedbackService.getScoreHistory(new ArrayList<>(interviewIds));
+        InterviewScoreListResponse interviewScoreList = InternalMapper.fromInterviewScoreList(internalScoreResponse);
+
+        Map<Long, InterviewScoreListItem> scoreMap = createScoreMap(interviewScoreList);
+
+        InterviewScoreHistoryResponse scoreHistory = InterviewMapper.fromScoreHistoryList(scoreInterview, scoreMap);
+
+        InterviewHistoryResponse interviewHistoryResponse = InterviewMapper.fromHistoryList(historyContent, scoreMap);
+        WeakPointResponse weakPointResponse = InterviewMapper.fromWeakPoint(interviewScoreList.scoreList());
+
+        return InterviewMapper.fromHistoryResponse(scoreHistory, interviewHistoryResponse, historyInterview, weakPointResponse);
+    }
+
+    /**
+     * 면접 점수 리스트 조회
+     *
+     * @param userId
+     * @param track
+     * @param scorePageable
+     * @return
+     */
+    private List<Interview> getScoreInterviewList(Long userId, InterviewTrack track, Pageable scorePageable) {
         if (track == null) {
-            scoreInterview = interviewRepository
+            return interviewRepository
                     .findByUserIdAndStatusAndEndReason(userId,
                             InterviewStatus.ENDED,
                             InterviewEndReason.COMPLETED,
                             scorePageable);
-
-            historyInterview = interviewRepository.findByUserIdAndStatusOrderByIdDesc(userId,
-                    InterviewStatus.ENDED,
-                    pageable
-            );
-
         } else {
-            scoreInterview = interviewRepository
+            return interviewRepository
                     .findByUserIdAndStatusAndEndReasonAndTrack(
                             userId,
                             InterviewStatus.ENDED,
@@ -99,55 +163,54 @@ public class InterviewService {
                             track,
                             scorePageable
                     );
+        }
+    }
 
-            historyInterview = interviewRepository.findByUserIdAndStatusAndTrackOrderByIdDesc(
+    /**
+     * 면접 이력 메이지 조회
+     *
+     * @param userId
+     * @param track
+     * @param pageable
+     * @return
+     */
+    private Page<Interview> getInterviewHistoryPage(Long userId, InterviewTrack track, Pageable pageable) {
+        if (track == null) {
+            return interviewRepository.findByUserIdAndStatusOrderByIdDesc(userId,
+                    InterviewStatus.ENDED,
+                    pageable
+            );
+        } else {
+            return interviewRepository.findByUserIdAndStatusAndTrackOrderByIdDesc(
                     userId,
                     InterviewStatus.ENDED,
                     track,
                     pageable
             );
         }
-        Set<Long> interviewIds = Stream.concat(
-                        scoreInterview.stream(),
-                        historyInterview.getContent().stream()
-                )
-                .map(Interview::getId)
-                .collect(Collectors.toSet());
+    }
 
-        Collections.reverse(scoreInterview); // 차트용 asc
+    private InterviewHistoryPageResponse createEmptyHistoryResponse(Page<Interview> historyInterview) {
+        InterviewScoreHistoryResponse scoreHistory =
+                InterviewMapper.fromScoreHistoryList(List.of(), Map.of());
 
-        if (scoreInterview.isEmpty()) {
-            InterviewScoreHistoryResponse scoreHistory =
-                    InterviewMapper.fromScoreHistoryList(List.of(), Map.of());
+        InterviewHistoryResponse interviewHistoryResponse =
+                InterviewMapper.fromHistoryList(historyInterview.getContent(), Map.of());
 
-            InterviewHistoryResponse interviewHistoryResponse =
-                    InterviewMapper.fromHistoryList(historyInterview.getContent(), Map.of());
+        return InterviewMapper.fromHistoryResponse(
+                scoreHistory,
+                interviewHistoryResponse,
+                historyInterview,
+                null
+        );
+    }
 
-            return InterviewMapper.fromHistoryResponse(
-                    scoreHistory,
-                    interviewHistoryResponse,
-                    historyInterview,
-                    null
-            );
-        }
-
-        //피드백 서비스 호출
-        InternalInterviewScoreListResponse scoreHistory1 = feedbackService.getScoreHistory(new ArrayList<>(interviewIds));
-        InterviewScoreListResponse interviewScoreList = InternalMapper.fromInterviewScoreList(scoreHistory1);
-
-        Map<Long, InterviewScoreListItem> scoreMap =
-                interviewScoreList.scoreList().stream()
-                        .collect(Collectors.toMap(
-                                InterviewScoreListItem::interviewId,
-                                item -> item
-                        ));
-
-        InterviewScoreHistoryResponse scoreHistory =InterviewMapper.fromScoreHistoryList(scoreInterview, scoreMap);
-
-        InterviewHistoryResponse interviewHistoryResponse = InterviewMapper.fromHistoryList(historyInterview.getContent(), scoreMap);
-        WeakPointResponse weakPointResponse = InterviewMapper.fromWeakPoint(interviewScoreList.scoreList());
-
-        return InterviewMapper.fromHistoryResponse(scoreHistory,interviewHistoryResponse,historyInterview,weakPointResponse);
+    private Map<Long, InterviewScoreListItem> createScoreMap(InterviewScoreListResponse interviewScoreList) {
+        return interviewScoreList.scoreList().stream()
+                .collect(Collectors.toMap(
+                        InterviewScoreListItem::interviewId,
+                        item -> item
+                ));
     }
 
 }

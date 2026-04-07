@@ -29,37 +29,17 @@ public class UserInterviewSettingService {
      * 초기 면접 설정 저장
      */
     public void ensureInterviewSettingSave(InternalEnsureInterviewSettingRequest request) {
-        UserInterviewSetting setting =
-                UserInterviewSetting.createUserInterviewPreference(request.userId());
-
-        userInterviewSettingRepository.insertIfAbsent(
-                setting.getUserId(),
-                setting.getTrack().name(),
-                setting.getDifficulty().name(),
-                setting.getFeedbackStyle().name(),
-                setting.getInterviewMode().name(),
-                setting.getAnswerTimeSeconds(),
-                setting.getInterviewQuestionCount()
-        );
+        insertInterviewSetting(UserInterviewSetting.createUserInterviewPreference(request.userId()));
     }
 
     /**
-     * 유저 면접 업을 경우 생성 메서드
+     * 유저 면접 없을 경우 생성 메서드
      * @param userId
      * @return
      */
     public UserInterviewSetting absentEnsureSettingSave(Long userId) {
         UserInterviewSetting setting = UserInterviewSetting.createUserInterviewPreference(userId);
-
-        userInterviewSettingRepository.insertIfAbsent(
-                setting.getUserId(),
-                setting.getTrack().name(),
-                setting.getDifficulty().name(),
-                setting.getFeedbackStyle().name(),
-                setting.getInterviewMode().name(),
-                setting.getAnswerTimeSeconds(),
-                setting.getInterviewQuestionCount()
-        );
+        insertInterviewSetting(setting);
         return setting;
     }
 
@@ -97,6 +77,22 @@ public class UserInterviewSettingService {
     private UserInterviewSetting findByUserId(Long userId) {
        return userInterviewSettingRepository.findByUserId(userId)
                 .orElseGet(() -> absentEnsureSettingSave(userId) );
+    }
+
+    /**
+     * 면접 저장
+     * @param setting
+     */
+    private void insertInterviewSetting(UserInterviewSetting setting) {
+        userInterviewSettingRepository.insertIfAbsent(
+                setting.getUserId(),
+                setting.getTrack().name(),
+                setting.getDifficulty().name(),
+                setting.getFeedbackStyle().name(),
+                setting.getInterviewMode().name(),
+                setting.getAnswerTimeSeconds(),
+                setting.getInterviewQuestionCount()
+        );
     }
 
 }

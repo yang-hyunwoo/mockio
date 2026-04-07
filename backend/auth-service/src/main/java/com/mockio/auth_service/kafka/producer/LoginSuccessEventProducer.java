@@ -33,4 +33,5 @@ public class LoginSuccessEventProducer {
             log.error("failed to publish login success event. userId={}", userId, e);
         }
     }
+
 }

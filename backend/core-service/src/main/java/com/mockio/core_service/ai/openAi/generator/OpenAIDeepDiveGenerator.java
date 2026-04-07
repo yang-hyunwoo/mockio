@@ -127,6 +127,7 @@ public class OpenAIDeepDiveGenerator implements DeepDiveGenerator {
                         temperature
                 )
         );
+
         return new GeneratedDeepDiveBundle(decision, question);
     }
 

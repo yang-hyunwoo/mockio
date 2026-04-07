@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
+
 @Component
 @Primary
 @RequiredArgsConstructor
@@ -67,28 +69,15 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
     private List<InterviewQuestionGenerator> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        Optional<InterviewQuestionGenerator> openai = findOptional(AiEngine.OPENAI);
-        Optional<InterviewQuestionGenerator> ollama = findOptional(AiEngine.OLLAMA);
-        Optional<InterviewQuestionGenerator> fake = findOptional(AiEngine.FAKE);
+        InterviewQuestionGenerator openai = find(AiEngine.OPENAI);
+        InterviewQuestionGenerator ollama = find(AiEngine.OLLAMA);
+        InterviewQuestionGenerator fake = find(AiEngine.FAKE);
 
         return switch (primary) {
-            case OLLAMA -> Stream.of(ollama, openai, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            case FAKE -> Stream.of(fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            default -> Stream.of(openai, ollama, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
+            case OLLAMA -> List.of(ollama, openai, fake);
+            case FAKE -> List.of(fake);
+            default -> List.of(openai, ollama, fake);
         };
-    }
-
-    private InterviewQuestionGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
     }
 
     private AiEngine parse(String mode) {
@@ -127,11 +116,16 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
         return new GeneratedQuestion(fallback);
     }
 
-    private Optional<InterviewQuestionGenerator> findOptional(AiEngine engine) {
+    private InterviewQuestionGenerator find(AiEngine engine) {
         return generators.stream()
                 .filter(g -> g != this)
                 .filter(g -> g.engine() == engine)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                ERR_500.getHttpStatus(),
+                                ERR_500,
+                                "AI를 찾을 수 없습니다."));
     }
 
 }

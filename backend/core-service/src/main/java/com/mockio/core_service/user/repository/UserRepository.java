@@ -25,7 +25,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByIdAndStatusAndProvider(Long id,
                                                 UserStatus userStatus,
                                                 AuthProviderEnum providerEnum);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where u.id = :userId")
     Optional<User> findByIdForUpdate(@Param("userId") Long userId);
+
 }

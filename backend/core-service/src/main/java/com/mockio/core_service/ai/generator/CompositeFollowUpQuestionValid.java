@@ -7,25 +7,27 @@ import com.mockio.common_ai_contractor.generator.followup.*;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
+
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
 
 @Component
 @Primary
 @RequiredArgsConstructor
+@Slf4j
 public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
 
     private final List<FollowUpQuestionValid> generators;
 
     @Value("${ai.generator}")
     private String mode;
-
 
     @Override
     public AiEngine engine() {
@@ -53,28 +55,15 @@ public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
     private List<FollowUpQuestionValid> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        Optional<FollowUpQuestionValid> openai = findOptional(AiEngine.OPENAI);
-        Optional<FollowUpQuestionValid> ollama = findOptional(AiEngine.OLLAMA);
-        Optional<FollowUpQuestionValid> fake = findOptional(AiEngine.FAKE);
+        FollowUpQuestionValid openai = find(AiEngine.OPENAI);
+        FollowUpQuestionValid ollama = find(AiEngine.OLLAMA);
+        FollowUpQuestionValid fake = find(AiEngine.FAKE);
 
         return switch (primary) {
-            case OLLAMA -> Stream.of(ollama, openai, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            case FAKE -> Stream.of(fake)
-                    .flatMap(Optional::stream)
-                    .toList();
-            default -> Stream.of(openai, ollama, fake)
-                    .flatMap(Optional::stream)
-                    .toList();
+            case OLLAMA -> List.of(ollama, openai, fake);
+            case FAKE -> List.of(fake);
+            default -> List.of(openai, ollama, fake);
         };
-    }
-
-    private FollowUpQuestionValid find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
     }
 
     private AiEngine parse(String mode) {
@@ -92,6 +81,8 @@ public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
     }
 
     private FollowupValid fallbackGenerate(FollowUpQuestionCommand command, Throwable t) {
+        log.error("ai deepDive fallback triggered. track={}, difficulty={}, cause={}",
+                command.interviewTrack(), command.interviewDifficulty(), t.toString());
         return new FollowupValid(
                 false,
                 "AI 오류",
@@ -99,11 +90,16 @@ public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
         );
     }
 
-    private Optional<FollowUpQuestionValid> findOptional(AiEngine engine) {
+    private FollowUpQuestionValid find(AiEngine engine) {
         return generators.stream()
                 .filter(g -> g != this)
                 .filter(g -> g.engine() == engine)
-                .findFirst();
+                .findFirst()
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                ERR_500.getHttpStatus(),
+                                ERR_500,
+                                "AI를 찾을 수 없습니다."));
     }
 
 }

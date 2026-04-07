@@ -106,4 +106,5 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private static String safeLower(String s) {
         return s == null ? "" : s.toLowerCase();
     }
+
 }

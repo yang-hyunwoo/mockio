@@ -93,20 +93,15 @@ public class FileService {
     }
 
     public void uploadImageCloudinary(FileGroup group, MultipartFile file) {
-        long totalStart = System.currentTimeMillis();
 
         Cloudinary cloudinary = cloudinaryService.connectCloudinary();
         String fileUrl;
 
         try {
-            long tempCreateStart = System.currentTimeMillis();
             File tempFile = File.createTempFile("temp-", file.getOriginalFilename());
             file.transferTo(tempFile);
-            long tempCreateEnd = System.currentTimeMillis();
-
             String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
-            long cloudinaryUploadStart = System.currentTimeMillis();
             var result = cloudinary.uploader().upload(
                     tempFile,
                     ObjectUtils.asMap(
@@ -114,16 +109,9 @@ public class FileService {
                             "overwrite", false
                     )
             );
-            long cloudinaryUploadEnd = System.currentTimeMillis();
-
-            long deleteStart = System.currentTimeMillis();
-            boolean deleted = tempFile.delete();
-            long deleteEnd = System.currentTimeMillis();
-
             fileUrl = result.get("secure_url").toString();
             String publicId = result.get("public_id").toString();
 
-            long entityStart = System.currentTimeMillis();
             FileDetail filesDetails = FileDetail.createFileDetail(
                     file.getOriginalFilename(),
                     uniqueName,
@@ -136,16 +124,6 @@ public class FileService {
             );
             group.addFileDetail(filesDetails);
             fileDetailRepository.save(filesDetails);
-            long entityEnd = System.currentTimeMillis();
-
-            long totalEnd = System.currentTimeMillis();
-
-            log.info("[CLOUDINARY] temp file create+transfer took={}ms", (tempCreateEnd - tempCreateStart));
-            log.info("[CLOUDINARY] upload took={}ms", (cloudinaryUploadEnd - cloudinaryUploadStart));
-            log.info("[CLOUDINARY] temp file delete took={}ms deleted={}", (deleteEnd - deleteStart), deleted);
-            log.info("[CLOUDINARY] entity save took={}ms", (entityEnd - entityStart));
-            log.info("[CLOUDINARY] total took={}ms fileName={} size={}",
-                    (totalEnd - totalStart), file.getOriginalFilename(), file.getSize());
 
         } catch (IOException e) {
             throw new RuntimeException(e);

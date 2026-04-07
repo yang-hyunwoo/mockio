@@ -14,19 +14,17 @@ package com.mockio.auth_service.client;
 import com.mockio.auth_service.constant.UserErrorEnum;
 import com.mockio.auth_service.dto.response.UserInfoResponse;
 import com.mockio.auth_service.dto.request.LoginFailureRequest;
-import com.mockio.auth_service.dto.request.LoginSuccessRequest;
 import com.mockio.auth_service.dto.request.OauthUserRequest;
 import com.mockio.auth_service.dto.response.UserAuthInfoResponse;
 import com.mockio.auth_service.util.APIErrorResponse;
 import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
@@ -96,17 +94,10 @@ public class UserClient {
         userRestClient.patch()
                 .uri("/api/users/v1/internal/login-failure")
                 .body(new LoginFailureRequest(email))
-                .retrieve()
-                .onStatus(status -> status.value() == 404, (req, res) -> {
-                    throw new BadCredentialsException("아이디 또는 비밀번호가 올바르지 않습니다.");
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
-                    throw new CustomApiException(ILLEGALSTATE.getHttpStatus(), ILLEGALSTATE,"user-service login fail 5xx 호출");
-                })
-                .onStatus(HttpStatusCode::is4xxClientError, (req, res) -> {
-                    throw new CustomApiException(ERR_000.getHttpStatus(), ERR_000,"user-service login fail 4xx 호출");
-                })
-                .toBodilessEntity();
+                .exchange((request, response) -> {
+                    clientError(response);
+                    return null;
+                });
     }
 
     /**

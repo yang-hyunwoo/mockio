@@ -12,7 +12,6 @@ import com.mockio.core_service.user.service.UserService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -142,6 +141,7 @@ public class UserController {
 
     /**
      * 사용자 탈퇴
+     *
      * @param user
      * @param request
      * @param response
@@ -150,15 +150,18 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "사용자 탈퇴")
     @PatchMapping("/delete")
-    public ResponseEntity<Response<Void>> getUserProfileDetail(@CurrentUser @Parameter(description = "사용자" , example = "user") User user,
-                                                               @RequestBody @Valid MypagePasswordChangeRequest request,
-                                                               HttpServletResponse response) {
+    public ResponseEntity<Response<Void>> getUserProfileDetail(
+            @CurrentUser @Parameter(description = "사용자", example = "user") User user,
+            @RequestBody @Valid MypagePasswordChangeRequest request,
+            HttpServletResponse response
+    ) {
         userService.deleteUser(user, request, response);
-        return Response.ok(messageUtil.getMessage("response.read"),null);
+        return Response.ok(messageUtil.getMessage("response.read"), null);
     }
 
     /**
      * 마이페이지 비밀번호 변경
+     *
      * @param user
      * @param request
      * @return
@@ -166,8 +169,10 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "마이페이지 비밀번호 변경")
     @PostMapping("/password-change")
-    public ResponseEntity<Response<Void>> updatePasswordChange(@CurrentUser  @Parameter(description = "사용자" , example = "user") User user,
-                                                               @RequestBody MypagePasswordChangeRequest request) {
+    public ResponseEntity<Response<Void>> updatePasswordChange(
+            @CurrentUser @Parameter(description = "사용자", example = "user") User user,
+            @RequestBody MypagePasswordChangeRequest request
+    ) {
         userService.updatePasswordChange(user, request);
         return Response.ok(messageUtil.getMessage("response.read"), null);
     }

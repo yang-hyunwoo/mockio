@@ -149,8 +149,6 @@ public class AIServiceClient {
                 .block();
     }
 
-
-
     public SttResponse generateStt(MultipartFile multipartFile) {
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -188,7 +186,6 @@ public class AIServiceClient {
         }
     }
 
-
     private AIErrorCodeEnum mapErrorCode(String errCode) {
         if (errCode == null || errCode.isBlank()) {
             return AIErrorCodeEnum.ILLEGAL_STATE;
@@ -199,4 +196,5 @@ public class AIServiceClient {
             return AIErrorCodeEnum.ILLEGAL_STATE;
         }
     }
+
 }

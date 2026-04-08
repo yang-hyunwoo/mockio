@@ -339,7 +339,6 @@ public class UserService {
                         new EnsureInterviewSettingRequest(savedUser.getId())
                 )
         );
-
         return savedUser;
     }
 

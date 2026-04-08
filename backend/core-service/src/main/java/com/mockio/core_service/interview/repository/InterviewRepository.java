@@ -84,4 +84,5 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             Long userId,
             List<InterviewStatus> statuses
     );
+
 }

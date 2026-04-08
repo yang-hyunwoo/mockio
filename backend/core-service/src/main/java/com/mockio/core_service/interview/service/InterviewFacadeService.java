@@ -42,7 +42,7 @@ public class InterviewFacadeService {
                         INTERVIEW_NOT_FOUND,
                         INTERVIEW_NOT_FOUND.getMessage()
                 ));
-        InterviewUserCheck(userId, question);
+        interviewUserCheck(userId, question);
 
 
         return interviewAnswerRepository
@@ -81,7 +81,7 @@ public class InterviewFacadeService {
         }
     }
 
-    private static void InterviewUserCheck(Long userId, InterviewQuestion question) {
+    private static void interviewUserCheck(Long userId, InterviewQuestion question) {
         if (!Objects.equals(question.getInterview().getUserId(), userId)) {
             throw new CustomApiException(
                     INTERVIEW_FORBIDDEN.getHttpStatus(),

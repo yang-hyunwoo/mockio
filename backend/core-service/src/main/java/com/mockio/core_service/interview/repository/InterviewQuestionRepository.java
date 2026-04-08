@@ -11,8 +11,6 @@ import java.util.Optional;
 
 public interface InterviewQuestionRepository extends JpaRepository<InterviewQuestion, Long> {
 
-    boolean existsByInterviewId(Long interviewId);
-
     List<InterviewQuestion> findAllByInterviewIdOrderBySeqAsc(Long interviewId);
 
     Optional<InterviewQuestion> findByIdAndInterviewId(Long id , Long interviewId);

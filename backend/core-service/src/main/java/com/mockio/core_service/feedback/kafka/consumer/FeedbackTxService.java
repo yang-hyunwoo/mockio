@@ -31,7 +31,6 @@ public class FeedbackTxService {
                             ANSWER_NOT_FOUND.getMessage()
                     ));
         }
-
     }
 
     @Transactional(propagation = REQUIRES_NEW)

@@ -290,7 +290,8 @@ public class InterviewAnswerService {
                 savedContext.nextAttempt(),
                 interview.getTrack().name(),
                 interview.getDifficulty().name(),
-                interview.getFeedbackStyle().name()
+                interview.getFeedbackStyle().name(),
+                question.getPrimaryTag()
         );
 
         publishEvent(EVENT_TOPIC_FEEDBACK, savedContext.answer().getId(), EVENT_ANSWER_SUBMITTED, payload);

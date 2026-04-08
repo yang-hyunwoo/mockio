@@ -53,6 +53,8 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
             try {
                 return g.generate(command);
             } catch (RuntimeException ex) {
+                log.error("generator failed. engine={}, message={}", g.engine(), ex.getMessage(), ex);
+
                 last = ex;
                 if (!isFallbackable(ex)) {
                     throw ex;

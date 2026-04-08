@@ -19,7 +19,6 @@ import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.interview.service.InterviewAnswerService;
 import com.mockio.core_service.kafka.ProcessedEvent;
 import com.mockio.core_service.kafka.ProcessedEventRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -94,7 +93,8 @@ public class InterviewFeedbackConsumer {
                         payload.answerText(),
                         payload.track(),
                         payload.difficulty(),
-                        payload.feedbackStyle()
+                        payload.feedbackStyle(),
+                        payload.primaryTag()
                 )
         );
         feedbackTxService.markSucceeded(interviewFeedback.getAnswerId(), result);

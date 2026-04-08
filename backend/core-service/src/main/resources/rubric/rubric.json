@@ -1,0 +1,89 @@
+{
+  "BACKEND_ENGINEER": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "design", "label": "설계 능력", "maxScore": 5 },
+    { "key": "performance", "label": "성능 고려", "maxScore": 5 },
+    { "key": "security", "label": "보안 고려", "maxScore": 5 },
+    { "key": "tradeoff", "label": "트레이드오프 설명", "maxScore": 5 }
+  ],
+
+  "FRONTEND_ENGINEER": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "uiux", "label": "UI/UX 이해", "maxScore": 5 },
+    { "key": "state", "label": "상태 관리", "maxScore": 5 },
+    { "key": "performance", "label": "성능 최적화", "maxScore": 5 },
+    { "key": "tradeoff", "label": "트레이드오프 설명", "maxScore": 5 }
+  ],
+
+  "SERVER_ENGINEER": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "system", "label": "시스템 설계", "maxScore": 5 },
+    { "key": "performance", "label": "성능/확장성", "maxScore": 5 },
+    { "key": "reliability", "label": "안정성/장애 대응", "maxScore": 5 },
+    { "key": "tradeoff", "label": "트레이드오프 설명", "maxScore": 5 }
+  ],
+
+  "DATA_ENGINEER": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "analysis", "label": "데이터 분석 능력", "maxScore": 5 },
+    { "key": "logic", "label": "논리적 접근", "maxScore": 5 },
+    { "key": "tooling", "label": "도구/기술 활용", "maxScore": 5 },
+    { "key": "insight", "label": "인사이트 도출", "maxScore": 5 }
+  ],
+
+  "DESIGN": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "creativity", "label": "창의성", "maxScore": 5 },
+    { "key": "visual", "label": "비주얼 완성도", "maxScore": 5 },
+    { "key": "usability", "label": "사용성", "maxScore": 5 },
+    { "key": "communication", "label": "의도 전달력", "maxScore": 5 }
+  ],
+
+  "PRODUCT": [
+    { "key": "understanding", "label": "문제 정의", "maxScore": 5 },
+    { "key": "strategy", "label": "제품 전략", "maxScore": 5 },
+    { "key": "priority", "label": "우선순위 판단", "maxScore": 5 },
+    { "key": "user", "label": "사용자 중심 사고", "maxScore": 5 },
+    { "key": "tradeoff", "label": "의사결정/트레이드오프", "maxScore": 5 }
+  ],
+
+  "BUSINESS": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "logic", "label": "논리적 사고", "maxScore": 5 },
+    { "key": "strategy", "label": "전략 수립", "maxScore": 5 },
+    { "key": "impact", "label": "비즈니스 임팩트", "maxScore": 5 },
+    { "key": "communication", "label": "설득력", "maxScore": 5 }
+  ],
+
+  "MARKETING": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "targeting", "label": "타겟 분석", "maxScore": 5 },
+    { "key": "strategy", "label": "마케팅 전략", "maxScore": 5 },
+    { "key": "creativity", "label": "캠페인 아이디어", "maxScore": 5 },
+    { "key": "data", "label": "데이터 기반 판단", "maxScore": 5 }
+  ],
+
+  "SALES": [
+    { "key": "understanding", "label": "고객 니즈 이해", "maxScore": 5 },
+    { "key": "communication", "label": "커뮤니케이션", "maxScore": 5 },
+    { "key": "persuasion", "label": "설득력", "maxScore": 5 },
+    { "key": "problem", "label": "문제 해결", "maxScore": 5 },
+    { "key": "closing", "label": "클로징 능력", "maxScore": 5 }
+  ],
+
+  "HR": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "people", "label": "인재 판단", "maxScore": 5 },
+    { "key": "communication", "label": "커뮤니케이션", "maxScore": 5 },
+    { "key": "process", "label": "프로세스 이해", "maxScore": 5 },
+    { "key": "ethics", "label": "윤리/공정성", "maxScore": 5 }
+  ],
+
+  "GENERAL": [
+    { "key": "understanding", "label": "문제 이해", "maxScore": 5 },
+    { "key": "logic", "label": "논리적 사고", "maxScore": 5 },
+    { "key": "communication", "label": "표현력", "maxScore": 5 },
+    { "key": "problem", "label": "문제 해결", "maxScore": 5 },
+    { "key": "clarity", "label": "답변 명확성", "maxScore": 5 }
+  ]
+}

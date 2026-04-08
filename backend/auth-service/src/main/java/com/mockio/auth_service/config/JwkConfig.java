@@ -40,7 +40,6 @@ import static com.mockio.common_core.constant.CommonErrorEnum.*;
 @RequiredArgsConstructor
 @Slf4j
 public class JwkConfig {
-
     @Value("${jwt.public-key-path}")
     private String publicKeyPath;
 

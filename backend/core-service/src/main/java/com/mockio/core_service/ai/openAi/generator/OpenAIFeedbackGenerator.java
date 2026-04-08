@@ -75,13 +75,12 @@ public class OpenAIFeedbackGenerator implements FeedbackGenerator {
         }
         String prompt = null;
 
-            prompt = systemPrompt.formatted(
-                    command.track(),
-                    command.difficulty(),
-                    command.questionText(),
-                    command.answerText()
-
-                   );
+        prompt = systemPrompt.formatted(
+                command.track(),
+                command.difficulty(),
+                command.questionText(),
+                command.answerText()
+        );
 
 
         String answer = client.chat(MODEL, prompt, commandText, temperature);

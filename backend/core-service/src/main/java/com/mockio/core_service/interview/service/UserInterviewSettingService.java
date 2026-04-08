@@ -74,7 +74,7 @@ public class UserInterviewSettingService {
      * @param userId
      * @return
      */
-    private UserInterviewSetting findByUserId(Long userId) {
+    public UserInterviewSetting findByUserId(Long userId) {
        return userInterviewSettingRepository.findByUserId(userId)
                 .orElseGet(() -> absentEnsureSettingSave(userId) );
     }

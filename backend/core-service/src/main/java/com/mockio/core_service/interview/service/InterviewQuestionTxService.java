@@ -6,11 +6,15 @@ import com.mockio.core_service.interview.Mapper.InterviewQuestionMapper;
 import com.mockio.core_service.interview.constant.QuestionType;
 import com.mockio.core_service.interview.domain.Interview;
 import com.mockio.core_service.interview.domain.InterviewQuestion;
+import com.mockio.core_service.interview.domain.UserInterviewSetting;
 import com.mockio.core_service.interview.dto.request.InterviewGenerateContext;
 import com.mockio.core_service.interview.dto.request.RetryInterviewRequest;
 import com.mockio.core_service.interview.dto.response.InterviewQuestionReadResponse;
 import com.mockio.core_service.interview.repository.InterviewQuestionRepository;
 import com.mockio.core_service.interview.repository.InterviewRepository;
+import com.mockio.core_service.user.domain.UserProfile;
+import com.mockio.core_service.user.dto.response.UserProfileDetailResponse;
+import com.mockio.core_service.user.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +38,7 @@ public class InterviewQuestionTxService {
 
     private final InterviewRepository interviewRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
+    private final UserInterviewSettingService userInterviewSettingService;
 
     @Transactional
     public InterviewGenerateContext prepareGenerate(Long interviewId, Long userId) {
@@ -62,7 +67,8 @@ public class InterviewQuestionTxService {
             interview.markGenerating();
         }
 
-        List<Interview> interviews = interviewRepository.findTop30ByUserIdOrderByCreatedAtDesc(userId);
+        UserInterviewSetting byUserId = userInterviewSettingService.findByUserId(userId);
+        List<Interview> interviews = interviewRepository.findTop30ByUserIdAndTrackOrderByCreatedAtDesc(userId,byUserId.getTrack());
         List<Long> interviewIds = interviews.stream()
                 .map(Interview::getId)
                 .toList();

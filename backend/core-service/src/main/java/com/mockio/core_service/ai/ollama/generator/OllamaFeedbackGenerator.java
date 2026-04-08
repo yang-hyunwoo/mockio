@@ -1,5 +1,7 @@
 package com.mockio.core_service.ai.ollama.generator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
@@ -7,6 +9,7 @@ import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.core_service.ai.ollama.client.OllamaClient;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
+import com.mockio.core_service.ai.util.RubricProvider;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,8 @@ public class OllamaFeedbackGenerator implements FeedbackGenerator {
     private final PromptLoader promptLoader;
     private final AiResponseSanitizer sanitizer;
     private static final String MODEL = "llama3.1:8b";
+    private final ObjectMapper objectMapper;
+    private final RubricProvider rubricProvider;
     private String commandPrompt;
     private String systemPrompt;
 
@@ -47,11 +52,21 @@ public class OllamaFeedbackGenerator implements FeedbackGenerator {
     public GeneratedFeedback generate(GenerateFeedbackCommand command) {
         Double temperature = 0.3;
 
-        String commandText = commandPrompt.formatted(
-                command.track(),
-                command.difficulty(),
-                command.feedbackStyle()
-        );
+        String commandText = null;
+        try {
+            commandText = commandText = commandPrompt.formatted(
+                    command.track(),
+                    command.difficulty(),
+                    command.feedbackStyle(),
+                    command.primaryTag(),
+                    objectMapper.writeValueAsString(
+                            rubricProvider.getByTrack(command.track())
+
+                    )
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         String prompt = systemPrompt.formatted(
                 command.track(),

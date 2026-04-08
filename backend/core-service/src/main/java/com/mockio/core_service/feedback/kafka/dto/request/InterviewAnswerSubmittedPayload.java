@@ -9,5 +9,6 @@ public record InterviewAnswerSubmittedPayload(
         Integer attempt,
         String track,
         String difficulty,
-        String feedbackStyle
+        String feedbackStyle,
+        String primaryTag
 ) {}

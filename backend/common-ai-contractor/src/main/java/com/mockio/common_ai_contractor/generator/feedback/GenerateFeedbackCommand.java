@@ -29,7 +29,10 @@ public record GenerateFeedbackCommand(
 
         @NotBlank(message = "{default.notBlank}", groups = Step1.class)
         @Schema(description = "피드백 스타일", example = "STRICT")
-        String feedbackStyle
+        String feedbackStyle,
+
+        @Schema(description = "질문 태그", example = "REST")
+        String primaryTag
 
 ) {}
 

@@ -78,7 +78,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
             Pageable pageable
     );
 
-    List<Interview> findTop30ByUserIdOrderByCreatedAtDesc(Long userId);
+    List<Interview> findTop30ByUserIdAndTrackOrderByCreatedAtDesc(Long userId , InterviewTrack track);
 
     Optional<Interview> findTopByUserIdAndStatusInOrderByCreatedAtDesc(
             Long userId,

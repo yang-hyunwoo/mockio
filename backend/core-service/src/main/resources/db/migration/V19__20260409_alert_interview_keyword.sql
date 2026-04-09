@@ -1,0 +1,2 @@
+ALTER TABLE interview_keyword
+ALTER COLUMN keyword TYPE VARCHAR(1000);

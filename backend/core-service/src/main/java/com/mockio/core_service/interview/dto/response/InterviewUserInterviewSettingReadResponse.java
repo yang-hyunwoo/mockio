@@ -3,6 +3,8 @@ package com.mockio.core_service.interview.dto.response;
 import com.mockio.common_spring.util.response.EnumResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.List;
+
 public record InterviewUserInterviewSettingReadResponse(
 
     @Schema(description = "면접_설정_pk", example = "1")
@@ -24,6 +26,10 @@ public record InterviewUserInterviewSettingReadResponse(
     Integer answerTimeSeconds,
 
     @Schema(description = "면접_답변_갯수", example = "90")
-    int questionCount
+    int questionCount,
+
+    @Schema(description = "면접_질문_키워드", example = "[]")
+    List<String> interviewKeyword
+
 
 ) {}

@@ -42,7 +42,8 @@ public class InterviewQuestionService {
                     context.difficulty(),
                     context.interviewMode(),
                     context.answerTimeSeconds(),
-                    context.count() +ADD_QUESTION_COUNT
+                    context.count() +ADD_QUESTION_COUNT,
+                    context.interviewKeyword()
             );
 
             generatedQuestion = aiServiceClient.generateQuestions(cmd);

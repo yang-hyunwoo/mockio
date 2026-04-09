@@ -51,7 +51,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     void init() {
         String absPath = "ai/prompt/question/";
         commandPrompt = promptLoader.load(absPath + "question-command-prompt-" + promptVersion + ".txt");
-        systemPrompt = promptLoader.load(absPath + "question-prompt-test-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "question-prompt-" + promptVersion + ".txt");
     }
 
     @Override
@@ -75,10 +75,15 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
 
         String commandText = commandPrompt.formatted(command.track());
 
+        String keywordText = command.interviewKeyword() == null || command.interviewKeyword().isEmpty()
+                ? "없음"
+                : String.join(", ", command.interviewKeyword());
+
         String prompt = systemPrompt.formatted(
                 command.questionCount(),
-                command.track(),
-                command.difficulty()
+                command.track().getLabel(),
+                command.difficulty(),
+                keywordText
         );
         Double temperature = 0.7;
         String answer = client.chat(MODEL, prompt, commandText, temperature);

@@ -5,10 +5,9 @@ package com.mockio.core_service.interview.domain;
  * UserProfile
  */
 
-import com.mockio.common_ai_contractor.constant.InterviewDifficulty;
-import com.mockio.common_ai_contractor.constant.InterviewFeedbackStyle;
-import com.mockio.common_ai_contractor.constant.InterviewMode;
-import com.mockio.common_ai_contractor.constant.InterviewTrack;
+import com.mockio.common_ai_contractor.constant.*;
+import com.mockio.common_core.constant.CommonErrorEnum;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_jpa.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -16,8 +15,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import static com.mockio.common_core.constant.CommonErrorEnum.ERR_000;
 import static java.util.Optional.ofNullable;
 
 
@@ -55,6 +57,14 @@ public class UserInterviewSetting extends BaseTimeEntity {
 
     @Column(name = "interview_question_count", nullable = false)
     private int interviewQuestionCount;
+
+    @OneToMany(
+            mappedBy = "interviewSetting",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private final List<InterviewKeyword> keywords = new ArrayList<>();
+
 
 
     @Builder
@@ -104,13 +114,15 @@ public class UserInterviewSetting extends BaseTimeEntity {
                            InterviewFeedbackStyle feedbackStyle,
                            InterviewMode interviewMode,
                            Integer answerTimeSeconds,
-                           int interviewQuestionCount) {
+                           int interviewQuestionCount,
+                           List<String> interviewKeyword) {
         ofNullable(track).ifPresent(this::changeTrack);
         ofNullable(difficulty).ifPresent(this::changeDifficulty);
         ofNullable(feedbackStyle).ifPresent(this::changeFeedbackStyle);
         ofNullable(interviewMode).ifPresent(this::changeInterviewMode);
         ofNullable(answerTimeSeconds).ifPresent(this::changeAnswerTimeSeconds);
         changeInterviewQuestionCount(interviewQuestionCount);
+        replaceKeywords(interviewKeyword);
     }
 
     /**
@@ -118,7 +130,11 @@ public class UserInterviewSetting extends BaseTimeEntity {
      * @param track
      */
     public void changeTrack(InterviewTrack track) {
+        if (this.track != track) {
+            this.clearKeywords();
+        }
         this.track = track;
+
     }
 
     /**
@@ -159,6 +175,42 @@ public class UserInterviewSetting extends BaseTimeEntity {
      */
     public void changeInterviewQuestionCount(int interviewQuestionCount) {
         this.interviewQuestionCount = interviewQuestionCount;
+    }
+
+    public void replaceKeywords(List<String> keywordValues) {
+        validateKeyword(keywordValues);
+        this.keywords.clear();
+
+        if (keywordValues == null || keywordValues.isEmpty()) {
+            return;
+        }
+
+        keywordValues.stream()
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .distinct()
+                .forEach(this::addKeyword);
+    }
+
+    private void validateKeyword(List<String> keyword) {
+        for (String s : keyword) {
+            if (s.length() > 50) {
+                throw new CustomApiException(
+                        ERR_000.getHttpStatus(),
+                        ERR_000,
+                        "키워드는 최대 50자까지 입력 가능합니다."
+                );
+            }
+        }
+    }
+
+    public void clearKeywords() {
+        this.keywords.clear();
+    }
+
+    private void addKeyword(String value) {
+        InterviewKeyword keyword = InterviewKeyword.create(this, value);
+        this.keywords.add(keyword);
     }
 
     @Override

@@ -12,11 +12,13 @@ public record InterviewGenerateContext(
         InterviewDifficulty difficulty,
         InterviewMode interviewMode,
         Integer answerTimeSeconds,
-        Integer count
+        Integer count,
+        List<String> interviewKeyword
 ) {
     public static InterviewGenerateContext generated() {
         return new InterviewGenerateContext(
                 true,
+                null,
                 null,
                 null,
                 null,
@@ -30,7 +32,8 @@ public record InterviewGenerateContext(
             InterviewDifficulty difficulty,
             InterviewMode interviewMode,
             Integer answerTimeSeconds,
-            Integer count
+            Integer count,
+            List<String> interviewKeyword
     ) {
         return new InterviewGenerateContext(
                 false,
@@ -38,7 +41,8 @@ public record InterviewGenerateContext(
                 difficulty,
                 interviewMode,
                 answerTimeSeconds,
-                count
+                count,
+                interviewKeyword
         );
     }
 }

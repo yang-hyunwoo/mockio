@@ -288,7 +288,7 @@ public class InterviewAnswerService {
                 savedContext.answer().getId(),
                 savedContext.answer().getAnswerText(),
                 savedContext.nextAttempt(),
-                interview.getTrack().name(),
+                interview.getTrack().getLabel(),
                 interview.getDifficulty().name(),
                 interview.getFeedbackStyle().name(),
                 question.getPrimaryTag()

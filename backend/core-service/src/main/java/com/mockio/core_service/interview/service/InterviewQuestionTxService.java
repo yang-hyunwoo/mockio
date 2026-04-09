@@ -6,6 +6,7 @@ import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.interview.Mapper.InterviewQuestionMapper;
 import com.mockio.core_service.interview.constant.QuestionType;
 import com.mockio.core_service.interview.domain.Interview;
+import com.mockio.core_service.interview.domain.InterviewKeyword;
 import com.mockio.core_service.interview.domain.InterviewQuestion;
 import com.mockio.core_service.interview.domain.UserInterviewSetting;
 import com.mockio.core_service.interview.dto.request.InterviewGenerateContext;
@@ -58,6 +59,10 @@ public class InterviewQuestionTxService {
             );
         }
 
+        List<String> interviewKeywordList = userInterviewSettingService.findByUserId(userId).getKeywords()
+                .stream()
+                .map(InterviewKeyword::getKeyword)
+                .toList();
         if (interview.isQuestionGenerated()) {
             return InterviewGenerateContext.generated();
         }
@@ -66,12 +71,16 @@ public class InterviewQuestionTxService {
             interview.markGenerating();
         }
 
+
+
         return InterviewGenerateContext.of(
                 interview.getTrack(),
                 interview.getDifficulty(),
                 interview.getInterviewMode(),
                 interview.getAnswerTimeSeconds(),
-                interview.getCount()
+                interview.getCount(),
+                interviewKeywordList
+
         );
     }
 

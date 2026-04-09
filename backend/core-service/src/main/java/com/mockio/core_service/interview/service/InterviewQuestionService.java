@@ -20,6 +20,7 @@ public class InterviewQuestionService {
     private final AIServiceClient aiServiceClient;
     private final InterviewCreateService interviewCreateService;
     private final InterviewQuestionTxService interviewQuestionTxService;
+    private static final int ADD_QUESTION_COUNT =5;
 
     public InterviewQuestionReadResponse startInterview(Long userId, StartInterviewRequest request) {
         Long interviewId = interviewCreateService.generateInterview(userId, request);
@@ -41,8 +42,7 @@ public class InterviewQuestionService {
                     context.difficulty(),
                     context.interviewMode(),
                     context.answerTimeSeconds(),
-                    context.count(),
-                    context.primaryTags()
+                    context.count() +ADD_QUESTION_COUNT
             );
 
             generatedQuestion = aiServiceClient.generateQuestions(cmd);

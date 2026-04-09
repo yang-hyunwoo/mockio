@@ -14,10 +14,8 @@ package com.mockio.core_service.ai.ollama.generator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.question.AiQuestion;
-import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.*;
+import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.ollama.client.OllamaClient;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
@@ -30,6 +28,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum.ILLEGAL_STATE;
 
 @Slf4j
 @Component
@@ -83,26 +83,27 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
 
         ObjectMapper mapper = new ObjectMapper();
 
-        List<AiQuestion> aiQuestions;
+        List<AiQuestion> aiQuestionList;
         try {
-            aiQuestions = mapper.readValue(answer, new TypeReference<List<AiQuestion>>() {
+            aiQuestionList = mapper.readValue(answer, new TypeReference<List<AiQuestion>>() {
             });
         } catch (Exception e) {
             log.error("AI 응답 파싱 실패: {}", answer, e);
-            throw new RuntimeException("AI 응답 파싱 실패");
+            throw new CustomApiException(ILLEGAL_STATE.getHttpStatus(),
+                    ILLEGAL_STATE,
+                    ILLEGAL_STATE.getMessage());
         }
         List<GeneratedQuestion.Item> result = new ArrayList<>();
-        for (int i = 0; i < aiQuestions.size(); i++) {
-            AiQuestion q = aiQuestions.get(i);
+        for (int i = 0; i < aiQuestionList.size(); i++) {
+            AiQuestion aiQuestion = aiQuestionList.get(i);
 
             result.add(new GeneratedQuestion.Item(
-                    ((i + 1) * 10),
-                    q.title(),
-                    q.body(),
-                    q.primaryTag(),
-                    sanitizer.sanitizeTags(q.tags()),
-                    "ollama",
-                    "ollama",
+                    aiQuestion.basicQuestion(),
+                    aiQuestion.hardQuestion(),
+                    aiQuestion.primaryTag(),
+                    sanitizer.sanitizeTags(aiQuestion.tags()),
+                    "Ollama",
+                    "Ollama",
                     "v1",
                     temperature
             ));

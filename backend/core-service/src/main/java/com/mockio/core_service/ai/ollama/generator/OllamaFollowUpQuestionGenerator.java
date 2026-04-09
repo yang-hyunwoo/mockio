@@ -19,7 +19,7 @@ import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionGenerator;
-import com.mockio.common_ai_contractor.generator.question.AiQuestion;
+import com.mockio.common_ai_contractor.generator.question.AiExpansionQuestion;
 import com.mockio.core_service.ai.ollama.client.OllamaClient;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
@@ -95,19 +95,19 @@ public class OllamaFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         String answer = client.chat(MODEL, prompt,commandText,temperature);
 
         ObjectMapper mapper = new ObjectMapper();
-        AiQuestion q;
+        AiExpansionQuestion q;
         try {
-            q = mapper.readValue(answer, AiQuestion.class);
+            q = mapper.readValue(answer, AiExpansionQuestion.class);
         } catch (Exception e) {
             // 1회 리페어
             String repairSystem = systemRepairPrompt;
             String repaired = client.chat(MODEL, "이전 응답을 위 스키마에 맞는 JSON으로만 변환하세요.", repairSystem, temperature);
 
             try {
-                q = mapper.readValue(repaired, AiQuestion.class);
+                q = mapper.readValue(repaired, AiExpansionQuestion.class);
             } catch (Exception e2) {
                 // 폴백
-                q = new AiQuestion(
+                q = new AiExpansionQuestion(
                         "추가 검증 질문",
                         "방금 답변에서 가장 중요한 가정(전제)은 무엇이고, 그 전제가 깨질 때 어떤 문제가 발생하나요?",
                         "Trade-off",

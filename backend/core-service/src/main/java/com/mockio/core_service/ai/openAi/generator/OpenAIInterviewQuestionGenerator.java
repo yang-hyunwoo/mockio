@@ -14,10 +14,9 @@ package com.mockio.core_service.ai.openAi.generator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.question.AiQuestion;
-import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.*;
+import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.core_service.ai.openAi.client.SpringAiOpenAIClient;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
@@ -30,6 +29,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum.*;
 
 @Slf4j
 @Component
@@ -50,7 +51,7 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     void init() {
         String absPath = "ai/prompt/question/";
         commandPrompt = promptLoader.load(absPath + "question-command-prompt-" + promptVersion + ".txt");
-        systemPrompt = promptLoader.load(absPath + "question-prompt-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "question-prompt-test-" + promptVersion + ".txt");
     }
 
     @Override
@@ -77,37 +78,38 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
         String prompt = systemPrompt.formatted(
                 command.questionCount(),
                 command.track(),
-                command.difficulty(),
-                command.primaryTag()
+                command.difficulty()
         );
         Double temperature = 0.7;
         String answer = client.chat(MODEL, prompt, commandText, temperature);
 
         ObjectMapper mapper = new ObjectMapper();
 
-        List<AiQuestion> aiQuestions;
+        List<AiQuestion> aiQuestionList;
         try {
-            aiQuestions = mapper.readValue(answer, new TypeReference<List<AiQuestion>>() {
+            aiQuestionList = mapper.readValue(answer, new TypeReference<List<AiQuestion>>() {
             });
         } catch (Exception e) {
             log.error("AI 응답 파싱 실패: {}", answer, e);
-            throw new RuntimeException("AI 응답 파싱 실패");
+            throw new CustomApiException(ILLEGAL_STATE.getHttpStatus(),
+                    ILLEGAL_STATE,
+                    ILLEGAL_STATE.getMessage());
         }
-        List<GeneratedQuestion.Item> result = new ArrayList<>();
-        for (int i = 0; i < aiQuestions.size(); i++) {
-            AiQuestion q = aiQuestions.get(i);
 
+        List<GeneratedQuestion.Item> result = new ArrayList<>();
+        for (int i = 0; i < aiQuestionList.size(); i++) {
+            AiQuestion aiQuestion = aiQuestionList.get(i);
             result.add(new GeneratedQuestion.Item(
-                    ((i + 1) * 10),
-                    q.title(),
-                    q.body(),
-                    q.primaryTag(),
-                    sanitizer.sanitizeTags(q.tags()),
+                    aiQuestion.basicQuestion(),
+                    aiQuestion.hardQuestion(),
+                    aiQuestion.primaryTag(),
+                    sanitizer.sanitizeTags(aiQuestion.tags()),
                     "OPENAI",
                     MODEL,
                     "v1",
                     temperature
             ));
+
         }
        return new GeneratedQuestion(result);
     }

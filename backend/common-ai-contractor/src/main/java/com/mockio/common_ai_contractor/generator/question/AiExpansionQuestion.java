@@ -6,18 +6,17 @@ package com.mockio.common_ai_contractor.generator.question;
 
 import java.util.Set;
 
-public record AiQuestion(
+public record AiExpansionQuestion(
 
-        //개본 개념 질문
-        Question basicQuestion,
+        //제목
+        String title,
 
-        //심화 질문
-        Question hardQuestion,
+        //응답 값
+        String body,
 
         //중요 key
         String primaryTag,
 
         //태그
         Set<String> tags
-
 ) {}

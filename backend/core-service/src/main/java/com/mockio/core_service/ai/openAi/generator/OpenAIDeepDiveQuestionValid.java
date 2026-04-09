@@ -46,10 +46,10 @@ public class OpenAIDeepDiveQuestionValid implements DeepDiveQuestionValid {
         String qText = (command == null || command.question() == null) ? "N/A" : command.question();
         String aText = (command == null || command.answer() == null) ? "" : command.answer();
 
-        String commandText = commandPrompt.formatted(command.interviewTrack());
+        String commandText = commandPrompt.formatted(command.interviewTrack().getLabel());
 
         String prompt = systemPrompt.formatted(command.interviewTrack(),
-                command.interviewTrack(),
+                command.interviewTrack().getLabel(),
                 command.interviewDifficulty(),
                 basicQText,
                 basicAText,

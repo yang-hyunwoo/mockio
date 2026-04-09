@@ -47,7 +47,7 @@ public class OpenAIFollowUpQuestionValid implements FollowUpQuestionValid {
         String commandText = commandPrompt.formatted(command.interviewTrack());
 
         String prompt = systemPrompt.formatted(
-                command.interviewTrack(),
+                command.interviewTrack().getLabel(),
                 command.interviewDifficulty(),
                 qText,
                 aText

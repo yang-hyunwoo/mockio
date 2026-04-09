@@ -25,6 +25,7 @@ public class InternalMapper {
         if (response == null) {
             return null;
         }
+
         return new UserInterviewSettingReadResponse(
                 response.id(),
                 response.track(),
@@ -32,7 +33,8 @@ public class InternalMapper {
                 response.feedbackStyle(),
                 response.interviewMode(),
                 response.answerTimeSeconds(),
-                response.questionCount()
+                response.questionCount(),
+                response.interviewKeyword()
         );
     }
 

@@ -86,7 +86,7 @@ public class OpenAIFollowUpQuestionGenerator implements FollowUpQuestionGenerato
         String commandText = commandPrompt.formatted(command.interviewTrack());
 
         String prompt = systemPrompt.formatted(
-                                command.interviewTrack(),
+                                command.interviewTrack().getLabel(),
                                 command.interviewDifficulty(),
                                 command.followUpReason(),
                                 qText,

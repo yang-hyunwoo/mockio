@@ -10,6 +10,8 @@ import com.mockio.common_ai_contractor.constant.InterviewTrack;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 import static com.mockio.common_core.annotation.otherValidator.ValidationGroups.*;
 
 public record GenerateQuestionCommand(
@@ -36,6 +38,9 @@ public record GenerateQuestionCommand(
 
         @NotBlank(message = "{default.notBlank}", groups = Step6.class)
         @Schema(description = "면접 질문 갯수", example = "1")
-        int questionCount
+        int questionCount,
+
+        @Schema(description = "면접_질문_키워드", example = "[]")
+        List<String> interviewKeyword
 
 ) {}

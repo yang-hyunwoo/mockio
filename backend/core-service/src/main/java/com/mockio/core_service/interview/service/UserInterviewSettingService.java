@@ -65,7 +65,8 @@ public class UserInterviewSettingService {
                 userRequest.feedbackStyle(),
                 userRequest.interviewMode(),
                 userRequest.answerTimeSeconds(),
-                userRequest.questionCount()
+                userRequest.questionCount(),
+                userRequest.interviewKeyword()
         );
     }
 

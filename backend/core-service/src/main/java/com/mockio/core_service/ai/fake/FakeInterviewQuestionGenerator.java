@@ -4,6 +4,7 @@ import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.Question;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -37,9 +38,14 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
         for (int i = 1; i <= n; i++) {
             String text = pool.get((i - 1) % pool.size());
             result.add(new GeneratedQuestion.Item(
-                    i,
-                    "FAKE-제목",
-                    text,
+                    new Question(
+                            "제목",
+                            text
+                    ),
+                    new Question(
+                            "제목",
+                            text
+                    ),
                     "스프링",
                     Set.of("스프링","JWT"),
                     "FAKE",

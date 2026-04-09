@@ -18,7 +18,7 @@ public class AIClientConfig {
     public WebClient aiWebClient(Builder builder,
                                  @Value("${services.core.base-url}") String baseUrl) {
         HttpClient httpClient = HttpClient.create()
-                .responseTimeout(Duration.ofSeconds(20));
+                .responseTimeout(Duration.ofSeconds(50));
 
         return builder
                 .baseUrl(baseUrl)

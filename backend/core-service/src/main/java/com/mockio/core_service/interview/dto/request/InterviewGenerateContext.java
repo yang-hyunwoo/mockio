@@ -12,8 +12,7 @@ public record InterviewGenerateContext(
         InterviewDifficulty difficulty,
         InterviewMode interviewMode,
         Integer answerTimeSeconds,
-        Integer count,
-        List<String> primaryTags
+        Integer count
 ) {
     public static InterviewGenerateContext generated() {
         return new InterviewGenerateContext(
@@ -22,8 +21,7 @@ public record InterviewGenerateContext(
                 null,
                 null,
                 null,
-                null,
-                List.of()
+                null
         );
     }
 
@@ -32,8 +30,7 @@ public record InterviewGenerateContext(
             InterviewDifficulty difficulty,
             InterviewMode interviewMode,
             Integer answerTimeSeconds,
-            Integer count,
-            List<String> primaryTags
+            Integer count
     ) {
         return new InterviewGenerateContext(
                 false,
@@ -41,8 +38,7 @@ public record InterviewGenerateContext(
                 difficulty,
                 interviewMode,
                 answerTimeSeconds,
-                count,
-                primaryTags
+                count
         );
     }
 }

@@ -17,14 +17,11 @@ public record GeneratedQuestion(
 ) {
     public record Item(
 
-            @Schema(description = "seq", example = "1")
-            int seq,
+            @Schema(description = "기본 개념 질문", example = "{title:string , body : string}")
+            Question basicQuestion,
 
-            @Schema(description = "제목", example = "제목")
-            String title,
-
-            @Schema(description = "응답값", example = "{d:a,b:c}")
-            String body,
+            @Schema(description = "심화 질문", example = "{title:string , body : string}")
+            Question hardQuestion,
 
             @Schema(description = "중요 태그", example = "중요")
             String primaryTag,

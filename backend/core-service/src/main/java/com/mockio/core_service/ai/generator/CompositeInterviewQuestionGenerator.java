@@ -103,9 +103,8 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
 
         for (int i = 0; i < Math.min(n, base.size()); i++) {
             fallback.add(new GeneratedQuestion.Item(
-                    ((i + 1) * 10),
-                    base.get(i).title(),
-                    base.get(i).body(),
+                    base.get(i).basicQuestion(),
+                    base.get(i).hardQuestion(),
                     base.get(i).primaryTag(),
                     base.get(i).tags(),
                     "FALLBACK",

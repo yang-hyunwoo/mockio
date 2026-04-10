@@ -3,9 +3,10 @@ package com.mockio.core_service.ai.openAi.generator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackEvaluationGenerator;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
+import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedbackEvaluation;
+import com.mockio.core_service.ai.ollama.client.OllamaClient;
 import com.mockio.core_service.ai.openAi.client.SpringAiOpenAIClient;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
@@ -18,19 +19,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OpenAIFeedbackGenerator implements FeedbackGenerator {
+public class OpenAIFeedbackEvaluationGenerator implements FeedbackEvaluationGenerator {
 
     private final SpringAiOpenAIClient client;
-    private final PromptLoader promptLoader;
-    private final AiResponseSanitizer sanitizer;
-    private final RubricProvider rubricProvider;
-    private final ObjectMapper objectMapper;
 
+    private final PromptLoader promptLoader;
     private final String MODEL = "gpt-4o-mini";
+    private final ObjectMapper objectMapper;
+    private final RubricProvider rubricProvider;
     private String commandPrompt;
     private String systemPrompt;
 
@@ -40,10 +39,8 @@ public class OpenAIFeedbackGenerator implements FeedbackGenerator {
     @PostConstruct
     void init() {
         String absPath = "ai/prompt/feedback/";
-        commandPrompt = promptLoader.load(absPath + "feedback-command-test-prompt-" + promptVersion + ".txt");
+        commandPrompt = promptLoader.load(absPath + "feedback-evaluation-prompt-" + promptVersion + ".txt");
         systemPrompt = promptLoader.load(absPath + "feedback-prompt-" + promptVersion + ".txt");
-
-
     }
 
     @Override
@@ -53,38 +50,45 @@ public class OpenAIFeedbackGenerator implements FeedbackGenerator {
 
     @Override
     @CircuitBreaker(name = "openaiFeedbackChat")
-    public GeneratedFeedback generate(GenerateFeedbackCommand command) {
+    public GeneratedFeedbackEvaluation generate(GenerateFeedbackCommand command) {
         Double temperature = 0.3;
 
         String commandText = null;
-            commandText = commandPrompt.formatted(
+        try {
+             commandText = commandPrompt.formatted(
                     command.track(),
                     command.difficulty(),
-                    command.generatedFeedbackEvaluationString(),
-                    command.primaryTag()
+                    command.primaryTag(),
+                    objectMapper.writeValueAsString(
+                            rubricProvider.getByTrack(command.track())
+                    )
             );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-        String prompt = null;
-
-        prompt = systemPrompt.formatted(
+        String prompt = systemPrompt.formatted(
                 command.track(),
                 command.difficulty(),
                 command.questionText(),
                 command.answerText()
         );
 
-
         String answer = client.chat(MODEL, prompt, commandText, temperature);
-
-        Integer score = sanitizer.extractScoreSafely(answer,"score");
-         return new GeneratedFeedback(
-                 answer,
-                score,
-                "OPENAI",
-                MODEL,
-                "v1",
-                temperature
-        );
+        try {
+           return objectMapper.readValue(answer, GeneratedFeedbackEvaluation.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+//        Integer score = sanitizer.extractScoreSafely(answer,"score");
+//         return new GeneratedFeedbackEvaluation(
+//                 answer,
+//                score,
+//                "OPENAI",
+//                MODEL,
+//                "v1",
+//                temperature
+//        );
     }
 
 }

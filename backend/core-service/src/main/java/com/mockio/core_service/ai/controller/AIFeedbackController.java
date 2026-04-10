@@ -29,6 +29,7 @@ public class AIFeedbackController {
 
     private final FeedbackGenerator feedbackGenerator;
     private final SummaryFeedbackGenerator summaryFeedbackGenerator;
+    private final FeedbackEvaluationGenerator feedbackEvaluationGenerator;
 
     /**
      * 단일 질문 피드백 생성 API
@@ -45,6 +46,11 @@ public class AIFeedbackController {
     @PostMapping("/question")
     public GeneratedFeedback singleFeedback(@RequestBody @Valid GenerateFeedbackCommand command) {
         return feedbackGenerator.generate(command);
+    }
+
+    @PostMapping("/question/evaluation")
+    public GeneratedFeedbackEvaluation singleFeedbackEvaluation(@RequestBody @Valid GenerateFeedbackCommand command) {
+        return feedbackEvaluationGenerator.generate(command);
     }
 
     /**

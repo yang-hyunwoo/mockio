@@ -32,7 +32,23 @@ public record GenerateFeedbackCommand(
         String feedbackStyle,
 
         @Schema(description = "질문 태그", example = "REST")
-        String primaryTag
+        String primaryTag,
 
-) {}
+        String generatedFeedbackEvaluationString
+
+) {
+        public GenerateFeedbackCommand addEvaluationString(String value) {
+                return new GenerateFeedbackCommand(
+                        questionText,
+                        answerText,
+                        track,
+                        difficulty,
+                        feedbackStyle,
+                        primaryTag,
+                        value
+                );
+        }
+}
+
+
 

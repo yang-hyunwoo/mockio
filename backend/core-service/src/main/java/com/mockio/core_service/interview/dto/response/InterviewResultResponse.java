@@ -5,6 +5,8 @@ package com.mockio.core_service.interview.dto.response;
  */
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackDimensions;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackJobMetric;
 import com.mockio.common_spring.util.response.EnumResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 

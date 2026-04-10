@@ -11,5 +11,6 @@ public record SummaryFeedback(
         List<String> strengths,
         List<String> improvements,
         EnumResponse status,
-        FeedbackDimensions feedbackDimensions
+        FeedbackDimensions feedbackDimensions,
+        FeedbackJobMetric feedbackJobMetrics
 ) {}

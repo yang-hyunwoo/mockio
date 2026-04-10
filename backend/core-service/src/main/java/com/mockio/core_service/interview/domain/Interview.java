@@ -77,6 +77,10 @@ public class Interview extends BaseTimeEntity {
     @Column(name = "feedback_status", nullable = false, length = 30)
     private InterviewFeedbackStatus feedbackStatus;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "root_interview_id")
+    private Interview rootInterview;
+
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
@@ -199,6 +203,20 @@ public class Interview extends BaseTimeEntity {
      */
     public boolean isQuestionGenerated() {
         return this.questionGenStatus == QuestionGenerationStatus.DONE;
+    }
+
+    public Interview getRootInterviewOrSelf() {
+        return rootInterview != null ? rootInterview : this;
+    }
+
+    public void connectRetryChain(Interview sourceInterview) {
+        this.sourceInterview = sourceInterview;
+        this.rootInterview = sourceInterview.getRootInterviewOrSelf();
+    }
+
+    public void markAsRootInterview() {
+        this.sourceInterview = null;
+        this.rootInterview = this;
     }
 
     /**

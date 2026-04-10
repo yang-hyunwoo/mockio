@@ -9,6 +9,7 @@ import java.util.List;
 
 public class UserInterviewSettingMapper {
 
+
     public static InterviewUserInterviewSettingReadResponse from(UserInterviewSetting userInterviewSetting) {
         List<String> list = userInterviewSetting.getKeywords()
                 .stream()

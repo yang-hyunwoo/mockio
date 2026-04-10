@@ -66,6 +66,9 @@ public record InterviewResultResponse(
         @Schema(description = "구조,명확,구체" , example = "")
         FeedbackDimensions feedbackDimensions,
 
+        @Schema(description = "실무 적합도" , example = "")
+        FeedbackJobMetric feedbackJobMetrics,
+
         @Schema(description = "종료사유" , example = "USER_EXIT")
         EnumResponse endReason
 
@@ -97,7 +100,7 @@ public record InterviewResultResponse(
                 List<String> strengths,
 
                 @Schema(description = "보안점" , example = "[]")
-                List<String> improvements,
+                List<FeedbackImprovement> improvements,
 
                 @Schema(description = "ai답변" , example = "ai답입니다.")
                 String modelAnswer,
@@ -109,7 +112,10 @@ public record InterviewResultResponse(
                 String headline,
 
                 @Schema(description = "약점" , example = "[]")
-                List<String> improvementTags
+                List<String> improvementTags,
+
+                @Schema(description = "실무 적합도" , example = "")
+                FeedbackJobMetric jobMetrics
 
         ) {}
 }

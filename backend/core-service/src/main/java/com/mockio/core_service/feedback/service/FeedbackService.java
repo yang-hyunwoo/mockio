@@ -59,6 +59,11 @@ public class FeedbackService {
         }
     }
 
+    /**
+     * 면접 질문 1개에 대한 피드백 조회
+     * @param interviewId
+     * @return
+     */
     public InternalFeedbackTotalDetailResponse getFeedbackDetail(Long interviewId) {
         List<InterviewFeedback> feedbacks =
                 interviewFeedbackRepository.findByInterviewIdOrderByIdAsc(interviewId);

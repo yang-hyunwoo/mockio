@@ -10,10 +10,11 @@ public record InternalFeedbackDetailResponse(
         Integer score,
         String summary,
         List<String> strengths,
-        List<String> improvements,
+        List<InternalFeedbackImprovement> improvements,
         String modelAnswer,
         EnumResponse status,
         InternalFeedbackDimensions dimensions,
         String headline,
-        List<String> improvementTags
+        List<String> improvementTags,
+        InternalFeedbackJobMetric jobMetrics
 ) {}

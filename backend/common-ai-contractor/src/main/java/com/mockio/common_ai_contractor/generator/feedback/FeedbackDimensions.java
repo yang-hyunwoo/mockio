@@ -1,4 +1,4 @@
-package com.mockio.core_service.interview.dto.response;
+package com.mockio.common_ai_contractor.generator.feedback;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

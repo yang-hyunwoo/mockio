@@ -1,9 +1,10 @@
 package com.mockio.core_service.feedback.kafka.consumer;
 
-import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mockio.common_ai_contractor.generator.feedback.*;
 import com.mockio.common_core.exception.NonRetryableEventException;
 import com.mockio.core_service.feedback.client.AiFeedbackClient;
 import com.mockio.core_service.feedback.domain.InterviewFeedback;
@@ -39,6 +40,7 @@ public class InterviewFeedbackConsumer {
     private final FeedbackTxService feedbackTxService;
     private final SummaryFeedbackTxService summaryFeedbackTxService;
     private final InterviewAnswerService interviewAnswerService;
+    private final ObjectMapper objectMapper;
     private static final String CONSUMER_NAME = "feedback-service.interview-lifecycle";
 
     @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
@@ -77,6 +79,7 @@ public class InterviewFeedbackConsumer {
         }
     }
 
+
     private void handleAnswerSubmitted(InterviewLifecycleEvent event) {
         InterviewAnswerSubmittedPayload payload = parser.payloadAs(event, InterviewAnswerSubmittedPayload.class);
 
@@ -86,19 +89,38 @@ public class InterviewFeedbackConsumer {
             return;
         }
 
-        // AI 호출
-        GeneratedFeedback result = aiFeedbackClient.generateQuestionFeedback(
-                new GenerateFeedbackCommand(
-                        payload.questionText(),
-                        payload.answerText(),
-                        payload.track(),
-                        payload.difficulty(),
-                        payload.feedbackStyle(),
-                        payload.primaryTag()
-                )
+        //1차 호출
+        GenerateFeedbackCommand generate = new GenerateFeedbackCommand(
+                payload.questionText(),
+                payload.answerText(),
+                payload.track(),
+                payload.difficulty(),
+                payload.feedbackStyle(),
+                payload.primaryTag(),
+                null
         );
-        feedbackTxService.markSucceeded(interviewFeedback.getAnswerId(), result);
+
+        GeneratedFeedback result = null;
+        //1차 점수 ai 호출
+        GeneratedFeedbackEvaluation generatedFeedbackEvaluation
+                = aiFeedbackClient.generateQuestionFeedbackEvaluation(generate);
+        String gfeString= "";
+        Integer score = 0;
+//        if (generatedFeedbackEvaluation.answerType().equals("QUESTION_REPEAT") || generatedFeedbackEvaluation.answerType().equals("EMPTY")) {
+//        } else {
+            // AI 평가 호출
+            try {
+                gfeString= objectMapper.writeValueAsString(generatedFeedbackEvaluation);
+                score = generatedFeedbackEvaluation.score();
+                generate = generate.addEvaluationString(gfeString);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            result = aiFeedbackClient.generateQuestionFeedback(generate);
+//        }
+        feedbackTxService.markSucceeded(interviewFeedback.getAnswerId(), result,gfeString,score);
     }
+
 
     private void handleInterviewNoAnswerSkipped(InterviewLifecycleEvent event) {
         InterviewAnswerSkippedPayload payload = parser.payloadAs(event, InterviewAnswerSkippedPayload.class);
@@ -136,5 +158,7 @@ public class InterviewFeedbackConsumer {
         // 저장: interview_id
         summaryFeedbackTxService.markSucceeded(interviewSummaryFeedback.getInterviewId(), generatedSummaryFeedback,payload);
     }
+
+
 
 }

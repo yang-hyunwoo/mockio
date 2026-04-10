@@ -1,6 +1,8 @@
 package com.mockio.core_service.feedback.dto.response;
 
 
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackJobMetric;
+
 import java.util.List;
 
 public record SummaryFeedbackText(
@@ -9,5 +11,5 @@ public record SummaryFeedbackText(
         List<String> strengths,
         List<String> improvements,
         InternalFeedbackDimensions dimensions,
-        InternalFeedbackJobMetric jobMetrics
+        FeedbackJobMetric jobMetrics
 ) {}

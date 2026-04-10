@@ -1,6 +1,7 @@
 package com.mockio.core_service.internalmapper;
 
 
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackDimensions;
 import com.mockio.core_service.feedback.dto.response.*;
 import com.mockio.core_service.feedback.kafka.dto.response.InterviewAnswerDetailResponse;
 import com.mockio.core_service.interview.dto.request.InternalEnsureInterviewSettingRequest;
@@ -70,24 +71,6 @@ public class InternalMapper {
     }
 
     /**
-     * 외부 feedbackService -> to InterviewService로 변환
-     * @param response
-     * @return
-     */
-    private static FeedbackJobMetric fromFeedbackJobMetric(
-            InternalFeedbackJobMetric response
-    ) {
-        if (response == null) {
-            return null;
-        }
-        return new FeedbackJobMetric(
-                response.practicality(),
-                response.decisionMaking(),
-                response.tradeoff()
-        );
-    }
-
-    /**
      * 외부 feedbackService -> to InterviewService로 변환 [보완할점 단건]
      * @param response
      * @return
@@ -132,7 +115,7 @@ public class InternalMapper {
                 fromFeedbackDimensions(response.dimensions()),
                 response.headline(),
                 response.improvementTags(),
-                fromFeedbackJobMetric(response.jobMetrics())
+                response.jobMetrics()
         );
     }
 
@@ -172,7 +155,7 @@ public class InternalMapper {
                 response.improvements(),
                 response.status(),
                 InternalMapper.fromFeedbackDimensions(response.feedbackDimensions()),
-                InternalMapper.fromFeedbackJobMetric(response.feedbackJobMetrics())
+                response.feedbackJobMetrics()
         );
     }
 

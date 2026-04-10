@@ -4,6 +4,8 @@ package com.mockio.core_service.interview.dto.response;
  * 피드백 상세 응답 DTO
  */
 
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackDimensions;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackJobMetric;
 import com.mockio.common_spring.util.response.EnumResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 

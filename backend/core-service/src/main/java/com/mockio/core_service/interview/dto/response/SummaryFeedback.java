@@ -1,5 +1,7 @@
 package com.mockio.core_service.interview.dto.response;
 
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackDimensions;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackJobMetric;
 import com.mockio.common_spring.util.response.EnumResponse;
 
 import java.util.List;

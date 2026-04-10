@@ -1,8 +1,8 @@
-package com.mockio.core_service.feedback.dto.response;
+package com.mockio.common_ai_contractor.generator.feedback;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record InternalFeedbackJobMetric(
+public record FeedbackJobMetric(
 
         @Schema(description = "실무 적합성", example = "0")
         Integer practicality,
@@ -14,9 +14,10 @@ public record InternalFeedbackJobMetric(
         Integer tradeoff
 
 ) {
-    public InternalFeedbackJobMetric {
+    public FeedbackJobMetric {
         if (practicality == null) practicality = 0;
         if (decisionMaking == null) decisionMaking = 0;
         if (tradeoff == null) tradeoff = 0;
     }
+
 }

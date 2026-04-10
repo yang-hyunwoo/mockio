@@ -20,7 +20,7 @@ public class InterviewQuestionService {
     private final AIServiceClient aiServiceClient;
     private final InterviewCreateService interviewCreateService;
     private final InterviewQuestionTxService interviewQuestionTxService;
-    private static final int ADD_QUESTION_COUNT =5;
+    private static final int ADD_QUESTION_COUNT =3;
 
     public InterviewQuestionReadResponse startInterview(Long userId, StartInterviewRequest request) {
         Long interviewId = interviewCreateService.generateInterview(userId, request);

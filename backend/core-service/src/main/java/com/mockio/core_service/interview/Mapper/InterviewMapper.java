@@ -1,5 +1,7 @@
 package com.mockio.core_service.interview.Mapper;
 
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackDimensions;
+import com.mockio.common_ai_contractor.generator.feedback.FeedbackJobMetric;
 import com.mockio.common_spring.util.response.EnumResponse;
 import com.mockio.core_service.interview.domain.Interview;
 import com.mockio.core_service.interview.domain.InterviewAnswer;

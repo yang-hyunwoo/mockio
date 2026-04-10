@@ -1,9 +1,6 @@
 package com.mockio.core_service.feedback.client;
 
-import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedback;
-import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedbackCommand;
+import com.mockio.common_ai_contractor.generator.feedback.*;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.core_service.util.APIErrorResponse;
@@ -50,6 +47,29 @@ public class AiFeedbackClient {
                         .maxBackoff(Duration.ofSeconds(2)))
                 .block();
     }
+
+    public GeneratedFeedbackEvaluation generateQuestionFeedbackEvaluation(GenerateFeedbackCommand req) {
+        return aiWebClient.post()
+                .uri("/api/ai/v1/feedback/question/evaluation")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
+                                ))
+                )
+                .bodyToMono(GeneratedFeedbackEvaluation.class)
+                .timeout(Duration.ofSeconds(25))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(2)))
+                .block();
+    }
+
 
     public GeneratedSummaryFeedback generateSummaryFeedback(GeneratedSummaryFeedbackCommand req) {
         return aiWebClient.post()

@@ -1,5 +1,8 @@
 package com.mockio.core_service.feedback.kafka.consumer;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.feedback.domain.InterviewFeedback;
@@ -17,6 +20,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 public class FeedbackTxService {
 
     private final FeedbackRepository interviewFeedbackRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public InterviewFeedback ensurePending(Long answerId , Long interviewId) {
@@ -34,7 +38,7 @@ public class FeedbackTxService {
     }
 
     @Transactional(propagation = REQUIRES_NEW)
-    public void markSucceeded(Long answerId, GeneratedFeedback result) {
+    public void markSucceeded(Long answerId, GeneratedFeedback result , String evaluationString ,Integer score) {
         InterviewFeedback fb = interviewFeedbackRepository.findByAnswerId(answerId)
                 .orElseThrow(() -> new CustomApiException(
                         ANSWER_NOT_FOUND.getHttpStatus(),
@@ -44,10 +48,9 @@ public class FeedbackTxService {
 
         // 이미 성공이면 스킵 (중복 처리 방지)
         if (fb.successChk()) return;
-
         fb.succeed(
-                result.feedbackText(),
-                result.score(),
+                mergeFeedbackJson(evaluationString, result.feedbackText()), // 1차 분석 + 2차 분석 더하기
+                score,
                 result.provider(),
                 result.model(),
                 result.promptVersion(),
@@ -64,6 +67,21 @@ public class FeedbackTxService {
                         ANSWER_NOT_FOUND.getMessage()
                 ));
         fb.skipped();
+    }
+
+    public String mergeFeedbackJson(String firstJson, String secondJson) {
+        try {
+            ObjectNode firstNode = (ObjectNode) objectMapper.readTree(firstJson);
+            JsonNode secondNode = objectMapper.readTree(secondJson);
+
+            secondNode.fields().forEachRemaining(entry -> {
+                firstNode.set(entry.getKey(), entry.getValue());
+            });
+
+            return objectMapper.writeValueAsString(firstNode);
+        } catch (Exception e) {
+            throw new RuntimeException("피드백 JSON 병합 실패", e);
+        }
     }
 
 }

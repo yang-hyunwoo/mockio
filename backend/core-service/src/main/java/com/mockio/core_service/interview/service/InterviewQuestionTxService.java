@@ -24,13 +24,8 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_ALREADY_ACTIVE;
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_FORBIDDEN;
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INTERVIEW_NOT_FOUND;
-import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.INVALID_INTERVIEW_STATUS;
-import static com.mockio.common_ai_contractor.constant.InterviewStatus.ACTIVE;
-import static com.mockio.common_ai_contractor.constant.InterviewStatus.GENERATING;
-import static com.mockio.common_ai_contractor.constant.InterviewStatus.PENDING;
+import static com.mockio.common_ai_contractor.constant.InterviewErrorCode.*;
+import static com.mockio.common_ai_contractor.constant.InterviewStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -169,6 +164,7 @@ public class InterviewQuestionTxService {
 
         Interview sourceInterview = getRetrySourceInterview(userId, request.interviewId());
         Interview savedRetryInterview = createRetryInterview(userId, request.idempotencyKey(), sourceInterview);
+        savedRetryInterview.connectRetryChain(sourceInterview);
         Interview lockedRetryInterview = getRetryInterviewForUpdate(userId, savedRetryInterview.getId());
 
         validateRetryInterviewStatus(lockedRetryInterview);

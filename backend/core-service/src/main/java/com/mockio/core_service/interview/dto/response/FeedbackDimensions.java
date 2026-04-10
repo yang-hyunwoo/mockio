@@ -12,6 +12,7 @@ public record FeedbackDimensions(
 
         @Schema(description = "구체성", example = "0")
         Integer specificity
+
 ) {
     public FeedbackDimensions {
         if (structure == null) structure = 0;

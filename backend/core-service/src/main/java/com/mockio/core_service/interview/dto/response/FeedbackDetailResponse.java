@@ -27,7 +27,7 @@ public record FeedbackDetailResponse(
         List<String> strengths,
 
         @Schema(description = "보안점", example = "[보안,보안2]")
-        List<String> improvements,
+        List<FeedbackImprovement> improvements,
 
         @Schema(description = "적절한 답변", example = "요건 어쩌고...")
         String modelAnswer,
@@ -42,7 +42,10 @@ public record FeedbackDetailResponse(
         String headline,
 
         @Schema(description = "보안점태그", example = "[]")
-        List<String> improvementTags
+        List<String> improvementTags,
+
+        @Schema(description = "실무적합성", example = "0")
+        FeedbackJobMetric jobMetrics
 
 ) {}
 

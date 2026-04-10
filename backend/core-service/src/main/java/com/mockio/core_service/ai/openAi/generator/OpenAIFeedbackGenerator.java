@@ -7,7 +7,6 @@ import com.mockio.common_ai_contractor.generator.feedback.FeedbackGenerator;
 import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackCommand;
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.core_service.ai.openAi.client.SpringAiOpenAIClient;
-import com.mockio.core_service.ai.openAi.dto.RubricItem;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
 import com.mockio.core_service.ai.util.RubricProvider;
@@ -17,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 
 @Slf4j

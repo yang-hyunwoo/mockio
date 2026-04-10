@@ -59,9 +59,9 @@ public class InterviewCreateService {
                     userInterviewSetting.getAnswerTimeSeconds(),
                     userInterviewSetting.getInterviewQuestionCount()
             );
-
-            return interviewRepository.save(interview).getId();
-
+            Interview saveInterview = interviewRepository.save(interview);
+            saveInterview.markAsRootInterview();
+            return saveInterview.getId();
         } catch (DataIntegrityViolationException e) {
             return interviewRepository.findByUserIdAndIdempotencyKey(userId, request.idempotencyKey())
                     .orElseThrow(() -> e)

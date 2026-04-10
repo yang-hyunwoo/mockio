@@ -26,7 +26,8 @@ public class SummaryFeedbackMapper {
                         summaryFeedback.getStatus().name(),
                         summaryFeedback.getStatus().getLabel()
                 ),
-                summaryFeedbackText.dimensions()
+                summaryFeedbackText.dimensions(),
+                summaryFeedbackText.jobMetrics()
         );
     }
 

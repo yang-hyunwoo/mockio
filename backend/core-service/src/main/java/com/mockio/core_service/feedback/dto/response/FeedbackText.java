@@ -9,8 +9,9 @@ public record FeedbackText(
         String headline,
         String summary,
         List<String> strengths,
-        List<String> improvements,
+        List<InternalFeedbackImprovement> improvements,
         List<String> improvementTags,
-        String modelAnswer
+        String modelAnswer,
+        InternalFeedbackJobMetric jobMetrics
 ) {}
 

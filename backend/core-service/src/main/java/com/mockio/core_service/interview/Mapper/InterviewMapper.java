@@ -112,7 +112,6 @@ public class InterviewMapper {
                     InterviewAnswer answer = answerMap.get(question.getId());
                     FeedbackDetailResponse feedback =
                             answer == null ? null : feedbackMap.get(answer.getId());
-
                     return new InterviewResultResponse.QuestionItem(
                             question.getId(),
                             question.getSeq(),
@@ -129,7 +128,8 @@ public class InterviewMapper {
                             feedback != null ? feedback.modelAnswer() : null,
                             feedback != null ? feedback.dimensions() : null,
                             feedback != null ? feedback.headline() : null,
-                            feedback != null ? feedback.improvementTags() : null
+                            feedback != null ? feedback.improvementTags() : null,
+                            feedback != null ? feedback.jobMetrics() : null
                     );
                 })
                 .toList();
@@ -139,6 +139,8 @@ public class InterviewMapper {
         Integer totalScore = summary != null ? summary.totalScore() : null;
         String summaryText = summary != null ? summary.summaryText() : null;
         FeedbackDimensions feedbackDimensions = summary != null ? summary.feedbackDimensions() : null;
+        FeedbackJobMetric feedbackJobMetric = summary != null ? summary.feedbackJobMetrics() : null;
+
         List<String> strengths = summary != null ? summary.strengths() : List.of();
         List<String> improvements = summary != null ? summary.improvements() : List.of();
         return new InterviewResultResponse(
@@ -171,6 +173,7 @@ public class InterviewMapper {
                 improvements,
                 questionItems,
                 feedbackDimensions,
+                feedbackJobMetric,
                 EnumResponse.of(
                         interview.getEndReason().name(),
                         interview.getEndReason().getLabel()

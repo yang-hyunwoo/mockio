@@ -51,6 +51,11 @@ public class InternalMapper {
         );
     }
 
+    /**
+     * 외부 feedbackService -> to InterviewService로 변환
+     * @param response
+     * @return
+     */
     private static FeedbackDimensions fromFeedbackDimensions(
             InternalFeedbackDimensions response
     ) {
@@ -64,6 +69,51 @@ public class InternalMapper {
         );
     }
 
+    /**
+     * 외부 feedbackService -> to InterviewService로 변환
+     * @param response
+     * @return
+     */
+    private static FeedbackJobMetric fromFeedbackJobMetric(
+            InternalFeedbackJobMetric response
+    ) {
+        if (response == null) {
+            return null;
+        }
+        return new FeedbackJobMetric(
+                response.practicality(),
+                response.decisionMaking(),
+                response.tradeoff()
+        );
+    }
+
+    /**
+     * 외부 feedbackService -> to InterviewService로 변환 [보완할점 단건]
+     * @param response
+     * @return
+     */
+    /**
+     * 외부 feedbackService -> to InterviewService로 변환 [보완할점 단건]
+     * @param response
+     * @return
+     */
+    private static List<FeedbackImprovement> fromFeedbackImprovement(
+            List<InternalFeedbackImprovement> response
+    ) {
+        if (response == null || response.isEmpty()) {
+            return List.of();
+        }
+
+        return response.stream()
+                .map(it -> new FeedbackImprovement(
+                        it.problem(),
+                        it.action(),
+                        it.example()
+                ))
+                .toList();
+    }
+
+
     public static FeedbackDetailResponse fromInternalFeedbackDetail(
             InternalFeedbackDetailResponse response
     ) {
@@ -76,12 +126,13 @@ public class InternalMapper {
                 response.score(),
                 response.summary(),
                 response.strengths(),
-                response.improvements(),
+                fromFeedbackImprovement(response.improvements()),
                 response.modelAnswer(),
                 response.status(),
-                InternalMapper.fromFeedbackDimensions(response.dimensions()),
+                fromFeedbackDimensions(response.dimensions()),
                 response.headline(),
-                response.improvementTags()
+                response.improvementTags(),
+                fromFeedbackJobMetric(response.jobMetrics())
         );
     }
 
@@ -92,6 +143,8 @@ public class InternalMapper {
                 .map(InternalMapper::fromInternalFeedbackDetail)
                 .toList();
     }
+
+
 
     public static FeedbackTotalDetailResponse fromInternalFeedbackTotalDetail(
             InternalFeedbackTotalDetailResponse response
@@ -118,8 +171,8 @@ public class InternalMapper {
                 response.strengths(),
                 response.improvements(),
                 response.status(),
-                InternalMapper.fromFeedbackDimensions(response.feedbackDimensions())
-
+                InternalMapper.fromFeedbackDimensions(response.feedbackDimensions()),
+                InternalMapper.fromFeedbackJobMetric(response.feedbackJobMetrics())
         );
     }
 

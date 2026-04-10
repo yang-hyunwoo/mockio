@@ -24,7 +24,8 @@ public class FeedbackMapper {
                 ),
                 feedbackText != null ? feedbackText.dimensions() : null,
                 feedbackText != null ? feedbackText.headline() : null,
-                feedbackText != null ? feedbackText.improvementTags() : null
+                feedbackText != null ? feedbackText.improvementTags() : null,
+                feedbackText != null ? feedbackText.jobMetrics() : null
         );
     }
 
@@ -35,7 +36,7 @@ public class FeedbackMapper {
                 null,
                 null,
                 List.of(),
-                List.of(),
+                null,
                 null,
                 EnumResponse.of(
                         interviewFeedback.getStatus().name(),
@@ -43,7 +44,8 @@ public class FeedbackMapper {
                 ),
                 null,
                 null,
-                List.of()
+                List.of(),
+                null
         );
     }
 

@@ -68,6 +68,7 @@ public class InterviewFacadeService {
             List<InterviewAnswer> answers =
                     interviewAnswerRepository.findAllByQuestionIdInOrderByIdAsc(questionIds);
 
+            //면접 총 요약 조회
             FeedbackTotalDetailResponse interviewHistoryDetail = InternalMapper.fromInternalFeedbackTotalDetail(feedbackService.getFeedbackDetail(interviewId));
 
             return InterviewMapper.fromResult(interview,

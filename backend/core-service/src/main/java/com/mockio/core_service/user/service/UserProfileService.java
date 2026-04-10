@@ -7,6 +7,7 @@ package com.mockio.core_service.user.service;
  */
 
 import com.mockio.common_core.exception.CustomApiException;
+import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.interview.service.UserInterviewSettingService;
 import com.mockio.core_service.user.client.FileServiceClient;
 import com.mockio.core_service.user.constant.UserStatus;
@@ -16,7 +17,6 @@ import com.mockio.core_service.user.dto.response.FileUploadResponse;
 import com.mockio.core_service.user.dto.response.UserInterviewSettingReadResponse;
 import com.mockio.core_service.user.dto.response.UserProfileDetailResponse;
 import com.mockio.core_service.user.dto.response.UserProfileImageResponse;
-import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.user.mapper.UserProfileMapper;
 import com.mockio.core_service.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

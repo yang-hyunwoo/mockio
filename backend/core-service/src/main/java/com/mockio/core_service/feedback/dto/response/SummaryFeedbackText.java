@@ -8,5 +8,6 @@ public record SummaryFeedbackText(
         String summaryText,
         List<String> strengths,
         List<String> improvements,
-        InternalFeedbackDimensions dimensions
+        InternalFeedbackDimensions dimensions,
+        InternalFeedbackJobMetric jobMetrics
 ) {}

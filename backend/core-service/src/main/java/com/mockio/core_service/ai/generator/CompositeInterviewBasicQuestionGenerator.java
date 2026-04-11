@@ -12,9 +12,9 @@ package com.mockio.core_service.ai.generator;
  */
 
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GenerateBasicQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.InterviewBasicQuestionGenerator;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.core_service.ai.fallback.FallbackQuestion;
@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
 
@@ -36,9 +34,9 @@ import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
 @Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeInterviewQuestionGenerator implements InterviewQuestionGenerator {
+public class CompositeInterviewBasicQuestionGenerator implements InterviewBasicQuestionGenerator {
 
-    private final List<InterviewQuestionGenerator> generators;
+    private final List<InterviewBasicQuestionGenerator> generators;
 
     @Value("${ai.generator}")
     private String mode;
@@ -49,11 +47,11 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
     }
 
     @Override
-    public GeneratedQuestion generate(GenerateQuestionCommand command) {
-        List<InterviewQuestionGenerator> chain = buildChain(mode);
+    public GeneratedQuestion generate(GenerateBasicQuestionCommand command) {
+        List<InterviewBasicQuestionGenerator> chain = buildChain(mode);
 
         RuntimeException last = null;
-        for (InterviewQuestionGenerator g : chain) {
+        for (InterviewBasicQuestionGenerator g : chain) {
             try {
                 return g.generate(command);
             } catch (RuntimeException ex) {
@@ -66,12 +64,12 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
         return fallbackGenerate(command, last);
     }
 
-    private List<InterviewQuestionGenerator> buildChain(String mode) {
+    private List<InterviewBasicQuestionGenerator> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        InterviewQuestionGenerator openai = find(AiEngine.OPENAI);
-        InterviewQuestionGenerator ollama = find(AiEngine.OLLAMA);
-        InterviewQuestionGenerator fake = find(AiEngine.FAKE);
+        InterviewBasicQuestionGenerator openai = find(AiEngine.OPENAI);
+        InterviewBasicQuestionGenerator ollama = find(AiEngine.OLLAMA);
+        InterviewBasicQuestionGenerator fake = find(AiEngine.FAKE);
 
         return switch (primary) {
             case OLLAMA -> List.of(ollama, openai, fake);
@@ -94,7 +92,7 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
         return true;
     }
 
-    private GeneratedQuestion fallbackGenerate(GenerateQuestionCommand command, Throwable ex) {
+    private GeneratedQuestion fallbackGenerate(GenerateBasicQuestionCommand command, Throwable ex) {
         log.warn("ai generate fallback triggered. track={}, count={}, difficulty={}. cause={}",
                 command.track(), command.questionCount(), command.difficulty(), ex.toString());
         List<GeneratedQuestion.Item> fallback = new ArrayList<>();
@@ -103,8 +101,7 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
 
         for (int i = 0; i < Math.min(n, base.size()); i++) {
             fallback.add(new GeneratedQuestion.Item(
-                    base.get(i).basicQuestion(),
-                    base.get(i).hardQuestion(),
+                    base.get(i).question(),
                     base.get(i).primaryTag(),
                     base.get(i).tags(),
                     "FALLBACK",
@@ -115,7 +112,7 @@ public class CompositeInterviewQuestionGenerator implements InterviewQuestionGen
         return new GeneratedQuestion(fallback);
     }
 
-    private InterviewQuestionGenerator find(AiEngine engine) {
+    private InterviewBasicQuestionGenerator find(AiEngine engine) {
         return generators.stream()
                 .filter(g -> g != this)
                 .filter(g -> g.engine() == engine)

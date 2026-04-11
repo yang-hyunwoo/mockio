@@ -25,4 +25,5 @@ public record GeneratedFeedback(
 
         @Schema(description = "연관도", example = "0.2")
         Double temperature
+
 ) {}

@@ -1,7 +1,7 @@
-package com.mockio.core_service.ai.openAi.generator;
+package com.mockio.core_service.ai.ollama.generator;
 
 /**
- * OpenAI 기반 인터뷰 질문 생성기 구현체.
+ * Ollama 기반 인터뷰 질문 생성기 구현체.
  *
  * <p>GenerateQuestionCommand를 기반으로 면접 질문 생성을 위한 프롬프트를 구성하고,
  * OpenAI Chat Completion API를 호출하여 질문 목록을 생성한다.</p>
@@ -16,8 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.*;
 import com.mockio.common_core.exception.CustomApiException;
-import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
-import com.mockio.core_service.ai.openAi.client.SpringAiOpenAIClient;
+import com.mockio.core_service.ai.ollama.client.OllamaClient;
 import com.mockio.core_service.ai.util.AiResponseSanitizer;
 import com.mockio.core_service.ai.util.PromptLoader;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -30,17 +29,17 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum.*;
+import static com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum.ILLEGAL_STATE;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenerator {
+public class OllamaInterviewBasicQuestionGenerator implements InterviewBasicQuestionGenerator {
 
-    private final SpringAiOpenAIClient client;
-    private final AiResponseSanitizer sanitizer;
+    private final OllamaClient client;
     private final PromptLoader promptLoader;
-    private final String MODEL = "gpt-4o-mini";
+    private final AiResponseSanitizer sanitizer;
+    private static final String model = "llama3.1:8b";
     private String commandPrompt;
     private String systemPrompt;
 
@@ -51,18 +50,18 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
     void init() {
         String absPath = "ai/prompt/question/";
         commandPrompt = promptLoader.load(absPath + "question-command-prompt-" + promptVersion + ".txt");
-        systemPrompt = promptLoader.load(absPath + "question-prompt-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "question-basic-prompt-" + promptVersion + ".txt");
     }
 
     @Override
     public AiEngine engine() {
-        return AiEngine.OPENAI;
+        return AiEngine.OLLAMA;
     }
 
     /**
      * 인터뷰 질문 생성 요청을 처리한다.
      *
-     * <p>OpenAI 응답을 줄 단위로 분리한 뒤,
+     * <p>Ollama 응답을 줄 단위로 분리한 뒤,
      * 질문 번호 및 불필요한 접두어를 제거하고
      * 요청된 개수만큼 질문을 선별하여 반환한다.</p>
      *
@@ -70,23 +69,17 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
      * @return 생성된 인터뷰 질문 목록
      */
     @Override
-    @CircuitBreaker(name = "openaiChat")
-    public GeneratedQuestion generate(GenerateQuestionCommand command) {
-
+    @CircuitBreaker(name = "ollamaChat")
+    public GeneratedQuestion generate(GenerateBasicQuestionCommand command) {
         String commandText = commandPrompt.formatted(command.track());
-
-        String keywordText = command.interviewKeyword() == null || command.interviewKeyword().isEmpty()
-                ? "없음"
-                : String.join(", ", command.interviewKeyword());
 
         String prompt = systemPrompt.formatted(
                 command.questionCount(),
-                command.track().getLabel(),
-                command.difficulty(),
-                keywordText
+                command.track(),
+                command.difficulty()
         );
         Double temperature = 0.7;
-        String answer = client.chat(MODEL, prompt, commandText, temperature);
+        String answer = client.chat(model, prompt, commandText, temperature);
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -100,21 +93,19 @@ public class OpenAIInterviewQuestionGenerator implements InterviewQuestionGenera
                     ILLEGAL_STATE,
                     ILLEGAL_STATE.getMessage());
         }
-
         List<GeneratedQuestion.Item> result = new ArrayList<>();
         for (int i = 0; i < aiQuestionList.size(); i++) {
             AiQuestion aiQuestion = aiQuestionList.get(i);
+
             result.add(new GeneratedQuestion.Item(
-                    aiQuestion.basicQuestion(),
-                    aiQuestion.hardQuestion(),
+                    aiQuestion.question(),
                     aiQuestion.primaryTag(),
                     sanitizer.sanitizeTags(aiQuestion.tags()),
-                    "OPENAI",
-                    MODEL,
+                    "Ollama",
+                    "Ollama",
                     "v1",
                     temperature
             ));
-
         }
        return new GeneratedQuestion(result);
     }

@@ -18,10 +18,7 @@ public record GeneratedQuestion(
     public record Item(
 
             @Schema(description = "기본 개념 질문", example = "{title:string , body : string}")
-            Question basicQuestion,
-
-            @Schema(description = "심화 질문", example = "{title:string , body : string}")
-            Question hardQuestion,
+            Question question,
 
             @Schema(description = "중요 태그", example = "중요")
             String primaryTag,

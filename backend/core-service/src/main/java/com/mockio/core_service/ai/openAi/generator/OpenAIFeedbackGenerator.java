@@ -40,7 +40,7 @@ public class OpenAIFeedbackGenerator implements FeedbackGenerator {
     @PostConstruct
     void init() {
         String absPath = "ai/prompt/feedback/";
-        commandPrompt = promptLoader.load(absPath + "feedback-command-test-prompt-" + promptVersion + ".txt");
+        commandPrompt = promptLoader.load(absPath + "feedback-command-prompt-" + promptVersion + ".txt");
         systemPrompt = promptLoader.load(absPath + "feedback-prompt-" + promptVersion + ".txt");
 
 

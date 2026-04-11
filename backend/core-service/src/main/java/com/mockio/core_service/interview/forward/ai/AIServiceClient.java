@@ -7,12 +7,12 @@ import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundl
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestionCommand;
 import com.mockio.common_ai_contractor.generator.followup.FollowupValid;
-import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GenerateBasicQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GenerateHardQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.core_service.interview.dto.response.SttResponse;
-import com.mockio.core_service.user.dto.response.FileUploadResponse;
 import com.mockio.core_service.util.APIErrorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,9 +35,9 @@ public class AIServiceClient {
 
     private final WebClient aiWebClient;
 
-    public GeneratedQuestion generateQuestions(GenerateQuestionCommand req) {
+    public GeneratedQuestion generateBasicQuestions(GenerateBasicQuestionCommand req) {
        return aiWebClient.post()
-                .uri("/api/ai/v1/questions/generate")
+                .uri("/api/ai/v1/questions/generate/basic")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(req)
                 .retrieve()
@@ -49,6 +49,28 @@ public class AIServiceClient {
                                        error.message() != null ? error.message() : error.errCodeMsg()
                                ))
                )
+                .bodyToMono(GeneratedQuestion.class)
+                .timeout(Duration.ofSeconds(25))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(2)))
+                .block();
+    }
+
+    public GeneratedQuestion generateHardQuestions(GenerateHardQuestionCommand req) {
+        return aiWebClient.post()
+                .uri("/api/ai/v1/questions/generate/hard")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(req)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
+                                ))
+                )
                 .bodyToMono(GeneratedQuestion.class)
                 .timeout(Duration.ofSeconds(25))
                 .retryWhen(Retry.backoff(1, Duration.ofMillis(300))

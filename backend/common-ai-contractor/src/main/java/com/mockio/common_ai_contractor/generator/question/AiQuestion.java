@@ -8,11 +8,8 @@ import java.util.Set;
 
 public record AiQuestion(
 
-        //개본 개념 질문
-        Question basicQuestion,
-
-        //심화 질문
-        Question hardQuestion,
+        //질문
+        Question question,
 
         //중요 key
         String primaryTag,

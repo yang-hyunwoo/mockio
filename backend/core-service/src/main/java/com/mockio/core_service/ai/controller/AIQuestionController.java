@@ -16,9 +16,7 @@ package com.mockio.core_service.ai.controller;
  */
 
 import com.mockio.common_ai_contractor.generator.followup.*;
-import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
-import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,9 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AIQuestionController {
 
-    private final InterviewQuestionGenerator questionGenerator;
+    private final InterviewBasicQuestionGenerator interviewBasicQuestionGenerator;
     private final FollowUpQuestionGenerator followUpQuestionGenerator;
     private final FollowUpQuestionValid followUpQuestionValid;
+    private final InterviewHardQuestionGenerator interviewHardQuestionGenerator;
 
     /**
      * 인터뷰 질문 생성 API
@@ -48,10 +47,16 @@ public class AIQuestionController {
      * @param command 질문 생성 요청 데이터 (직무, 난이도, 키워드 등)
      * @return 생성된 인터뷰 질문
      */
-    @Operation(summary = "질문 생성")
-    @PostMapping("/generate")
-    public GeneratedQuestion generate(@RequestBody @Valid GenerateQuestionCommand command) {
-        return questionGenerator.generate(command);
+    @Operation(summary = "기본 질문 생성")
+    @PostMapping("/generate/basic")
+    public GeneratedQuestion generate(@RequestBody @Valid GenerateBasicQuestionCommand command) {
+        return interviewBasicQuestionGenerator.generate(command);
+    }
+
+    @Operation(summary = "심화 질문 생성")
+    @PostMapping("/generate/hard")
+    public GeneratedQuestion generate(@RequestBody @Valid GenerateHardQuestionCommand command) {
+        return interviewHardQuestionGenerator.generate(command);
     }
 
     @Operation(summary = "꼬리질문 생성 체크")

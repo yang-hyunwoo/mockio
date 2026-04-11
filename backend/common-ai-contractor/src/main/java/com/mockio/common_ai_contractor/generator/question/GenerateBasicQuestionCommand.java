@@ -14,7 +14,7 @@ import java.util.List;
 
 import static com.mockio.common_core.annotation.otherValidator.ValidationGroups.*;
 
-public record GenerateQuestionCommand(
+public record GenerateBasicQuestionCommand(
 
         @NotBlank(message = "{default.notBlank}", groups = Step1.class)
         @Schema(description = "사용자 ID", example = "1")

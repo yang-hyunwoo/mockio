@@ -1,9 +1,9 @@
 package com.mockio.core_service.ai.fake;
 
 import com.mockio.common_ai_contractor.constant.AiEngine;
-import com.mockio.common_ai_contractor.generator.question.GenerateQuestionCommand;
+import com.mockio.common_ai_contractor.generator.question.GenerateBasicQuestionCommand;
 import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
-import com.mockio.common_ai_contractor.generator.question.InterviewQuestionGenerator;
+import com.mockio.common_ai_contractor.generator.question.InterviewBasicQuestionGenerator;
 import com.mockio.common_ai_contractor.generator.question.Question;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerator {
+public class FakeInterviewBasicQuestionGenerator implements InterviewBasicQuestionGenerator {
 
     @Override
     public AiEngine engine() {
@@ -20,7 +20,7 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
     }
 
     @Override
-    public GeneratedQuestion generate(GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(GenerateBasicQuestionCommand command) {
         int n = Math.max(1, command.questionCount());
 
         List<String> pool = List.of(
@@ -40,11 +40,9 @@ public class FakeInterviewQuestionGenerator implements InterviewQuestionGenerato
             result.add(new GeneratedQuestion.Item(
                     new Question(
                             "제목",
-                            text
-                    ),
-                    new Question(
-                            "제목",
-                            text
+                            text,
+                            "BASIC",
+                            null
                     ),
                     "스프링",
                     Set.of("스프링","JWT"),

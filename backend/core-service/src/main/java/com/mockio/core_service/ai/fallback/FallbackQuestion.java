@@ -5,8 +5,7 @@ import com.mockio.common_ai_contractor.generator.question.Question;
 import java.util.Set;
 
 public record FallbackQuestion(
-        Question basicQuestion,
-        Question hardQuestion,
+        Question question,
         String primaryTag,
         Set<String> tags
 ) {}

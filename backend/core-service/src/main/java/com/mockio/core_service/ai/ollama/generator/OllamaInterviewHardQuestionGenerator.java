@@ -34,7 +34,7 @@ import static com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum.ILLE
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenerator {
+public class OllamaInterviewHardQuestionGenerator implements InterviewHardQuestionGenerator {
 
     private final OllamaClient client;
     private final PromptLoader promptLoader;
@@ -50,7 +50,7 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
     void init() {
         String absPath = "ai/prompt/question/";
         commandPrompt = promptLoader.load(absPath + "question-command-prompt-" + promptVersion + ".txt");
-        systemPrompt = promptLoader.load(absPath + "question-prompt-" + promptVersion + ".txt");
+        systemPrompt = promptLoader.load(absPath + "question-hard-prompt-" + promptVersion + ".txt");
     }
 
     @Override
@@ -70,13 +70,22 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
      */
     @Override
     @CircuitBreaker(name = "ollamaChat")
-    public GeneratedQuestion generate(GenerateQuestionCommand command) {
+    public GeneratedQuestion generate(GenerateHardQuestionCommand command) {
         String commandText = commandPrompt.formatted(command.track());
 
+        String keywordText = command.interviewKeyword() == null || command.interviewKeyword().isEmpty()
+                ? "없음"
+                : String.join(", ", command.interviewKeyword());
+
         String prompt = systemPrompt.formatted(
-                command.questionCount(),
-                command.track(),
-                command.difficulty()
+                command.track().getLabel(),
+                command.track().getLabel(),
+                command.difficulty(),
+                keywordText,
+                command.baseQuestions(),
+                command.linkHardCount(),
+                command.questionCount() - command.linkHardCount(),
+                command.questionCount()
         );
         Double temperature = 0.7;
         String answer = client.chat(model, prompt, commandText, temperature);
@@ -98,8 +107,7 @@ public class OllamaInterviewQuestionGenerator implements InterviewQuestionGenera
             AiQuestion aiQuestion = aiQuestionList.get(i);
 
             result.add(new GeneratedQuestion.Item(
-                    aiQuestion.basicQuestion(),
-                    aiQuestion.hardQuestion(),
+                    aiQuestion.question(),
                     aiQuestion.primaryTag(),
                     sanitizer.sanitizeTags(aiQuestion.tags()),
                     "Ollama",

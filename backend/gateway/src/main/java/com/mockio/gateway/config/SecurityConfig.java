@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 "/api/ai/v1/public/**",
                                 "/api/auth/v1/public/**",
                                 "/api/feedback/v1/public/**",
-                                "/api/noti/v1/public/**",
+                                "/api/notice/v1/public/**",
                                 "/api/inquiry/v1/public/**",
                                 "/api/file/v1/public/**",
                                 "/api/faq/v1/public/**",

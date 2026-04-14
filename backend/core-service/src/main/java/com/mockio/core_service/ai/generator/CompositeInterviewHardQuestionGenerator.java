@@ -15,8 +15,11 @@ import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.question.*;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.ai.fake.FakeInterviewHardQuestionGenerator;
 import com.mockio.core_service.ai.fallback.FallbackQuestion;
 import com.mockio.core_service.ai.fallback.FallbackQuestionRegistry;
+import com.mockio.core_service.ai.ollama.generator.OllamaInterviewHardQuestionGenerator;
+import com.mockio.core_service.ai.openAi.generator.OpenAIInterviewHardQuestionGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,25 +29,19 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
-
 @Component
 @Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeInterviewHardQuestionGenerator implements InterviewHardQuestionGenerator {
+public class CompositeInterviewHardQuestionGenerator {
 
-    private final List<InterviewHardQuestionGenerator> generators;
+    private final OpenAIInterviewHardQuestionGenerator openAIInterviewHardQuestionGenerator;
+    private final OllamaInterviewHardQuestionGenerator ollamaInterviewHardQuestionGenerator;
+    private final FakeInterviewHardQuestionGenerator fakeInterviewHardQuestionGenerator;
 
     @Value("${ai.generator}")
     private String mode;
 
-    @Override
-    public AiEngine engine() {
-        return null;
-    }
-
-    @Override
     public GeneratedQuestion generate(GenerateHardQuestionCommand command) {
         List<InterviewHardQuestionGenerator> chain = buildChain(mode);
 
@@ -54,6 +51,10 @@ public class CompositeInterviewHardQuestionGenerator implements InterviewHardQue
                 return g.generate(command);
             } catch (RuntimeException ex) {
                 last = ex;
+
+                log.warn("hard question generation failed. engine={}, fallbackable={}, cause={}",
+                        g.engine(), isFallbackable(ex), ex.toString());
+
                 if (!isFallbackable(ex)) {
                     throw ex;
                 }
@@ -65,20 +66,28 @@ public class CompositeInterviewHardQuestionGenerator implements InterviewHardQue
     private List<InterviewHardQuestionGenerator> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        InterviewHardQuestionGenerator openai = find(AiEngine.OPENAI);
-        InterviewHardQuestionGenerator ollama = find(AiEngine.OLLAMA);
-        InterviewHardQuestionGenerator fake = find(AiEngine.FAKE);
-
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> List.of(
+                    ollamaInterviewHardQuestionGenerator,
+                    openAIInterviewHardQuestionGenerator,
+                    fakeInterviewHardQuestionGenerator
+            );
+            case FAKE -> List.of(fakeInterviewHardQuestionGenerator);
+            case OPENAI -> List.of(
+                    openAIInterviewHardQuestionGenerator,
+                    ollamaInterviewHardQuestionGenerator,
+                    fakeInterviewHardQuestionGenerator
+            );
         };
     }
 
     private AiEngine parse(String mode) {
-        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
-        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        if ("ollama".equalsIgnoreCase(mode)) {
+            return AiEngine.OLLAMA;
+        }
+        if ("fake".equalsIgnoreCase(mode)) {
+            return AiEngine.FAKE;
+        }
         return AiEngine.OPENAI;
     }
 
@@ -108,18 +117,6 @@ public class CompositeInterviewHardQuestionGenerator implements InterviewHardQue
                     0.0));
         }
         return new GeneratedQuestion(fallback);
-    }
-
-    private InterviewHardQuestionGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g != this)
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(
-                        () -> new CustomApiException(
-                                ERR_500.getHttpStatus(),
-                                ERR_500,
-                                "AI를 찾을 수 없습니다."));
     }
 
 }

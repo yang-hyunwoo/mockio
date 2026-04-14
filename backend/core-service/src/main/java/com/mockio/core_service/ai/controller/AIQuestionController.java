@@ -17,6 +17,10 @@ package com.mockio.core_service.ai.controller;
 
 import com.mockio.common_ai_contractor.generator.followup.*;
 import com.mockio.common_ai_contractor.generator.question.*;
+import com.mockio.core_service.ai.generator.CompositeFollowUpQuestionGenerator;
+import com.mockio.core_service.ai.generator.CompositeFollowUpQuestionValid;
+import com.mockio.core_service.ai.generator.CompositeInterviewBasicQuestionGenerator;
+import com.mockio.core_service.ai.generator.CompositeInterviewHardQuestionGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,10 +36,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AIQuestionController {
 
-    private final InterviewBasicQuestionGenerator interviewBasicQuestionGenerator;
-    private final FollowUpQuestionGenerator followUpQuestionGenerator;
-    private final FollowUpQuestionValid followUpQuestionValid;
-    private final InterviewHardQuestionGenerator interviewHardQuestionGenerator;
+    private final CompositeInterviewBasicQuestionGenerator compositeInterviewBasicQuestionGenerator;
+    private final CompositeFollowUpQuestionGenerator compositeFollowUpQuestionGenerator;
+    private final CompositeFollowUpQuestionValid compositeFollowUpQuestionValid;
+    private final CompositeInterviewHardQuestionGenerator compositeInterviewHardQuestionGenerator;
 
     /**
      * 인터뷰 질문 생성 API
@@ -50,19 +54,19 @@ public class AIQuestionController {
     @Operation(summary = "기본 질문 생성")
     @PostMapping("/generate/basic")
     public GeneratedQuestion generate(@RequestBody @Valid GenerateBasicQuestionCommand command) {
-        return interviewBasicQuestionGenerator.generate(command);
+        return compositeInterviewBasicQuestionGenerator.generate(command);
     }
 
     @Operation(summary = "심화 질문 생성")
     @PostMapping("/generate/hard")
     public GeneratedQuestion generate(@RequestBody @Valid GenerateHardQuestionCommand command) {
-        return interviewHardQuestionGenerator.generate(command);
+        return compositeInterviewHardQuestionGenerator.generate(command);
     }
 
     @Operation(summary = "꼬리질문 생성 체크")
     @PostMapping("/followup-valid")
     public FollowupValid followupValid(@RequestBody @Valid FollowUpQuestionCommand command) {
-        return followUpQuestionValid.generateValid(command);
+        return compositeFollowUpQuestionValid.generateValid(command);
     }
 
     /**
@@ -78,7 +82,7 @@ public class AIQuestionController {
     @Operation(summary = "꼬리질문 생성")
     @PostMapping("/followup")
     public FollowUpQuestion followup(@RequestBody @Valid FollowUpQuestionCommand command) {
-        return followUpQuestionGenerator.generate(command);
+        return compositeFollowUpQuestionGenerator.generate(command);
     }
 
 }

@@ -17,47 +17,44 @@ import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveGenerator;
 import com.mockio.common_ai_contractor.generator.deepdive.GenerateDeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
 import com.mockio.common_ai_contractor.generator.followup.FollowUpQuestion;
-import com.mockio.common_core.constant.CommonErrorEnum;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.ai.fake.FakeDeepDiveGenerator;
+import com.mockio.core_service.ai.ollama.generator.OllamaAIDeepDiveGenerator;
+import com.mockio.core_service.ai.openAi.generator.OpenAIDeepDiveGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
 
-import static com.mockio.common_core.constant.CommonErrorEnum.*;
-
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
+public class CompositeDeepDiveGenerator {
 
-    private final List<DeepDiveGenerator> generators;
+    private final OpenAIDeepDiveGenerator openAIDeepDiveGenerator;
+    private final OllamaAIDeepDiveGenerator ollamaAIDeepDiveGenerator;
+    private final FakeDeepDiveGenerator fakeDeepDiveGenerator;
 
     @Value("${ai.generator}")
     private String mode;
 
-    @Override
-    public AiEngine engine() {
-        return null;
-    }
-
-    @Override
     public GeneratedDeepDiveBundle generate(GenerateDeepDiveCommand command) {
-
         List<DeepDiveGenerator> chain = buildChain(mode);
 
         RuntimeException last = null;
+
         for (DeepDiveGenerator g : chain) {
             try {
                 return g.generate(command);
             } catch (RuntimeException ex) {
                 last = ex;
+                log.warn("deep dive generation failed. engine={}, fallbackable={}, cause={}",
+                        g.engine(), isFallbackable(ex), ex.toString());
+
                 if (!isFallbackable(ex)) {
                     throw ex;
                 }
@@ -67,35 +64,30 @@ public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
     }
 
     private List<DeepDiveGenerator> buildChain(String mode) {
-        //  openai -> ollama -> fake
-        //     ollama -> openai -> fake
         AiEngine primary = parse(mode);
 
-        DeepDiveGenerator openai = find(AiEngine.OPENAI);
-        DeepDiveGenerator ollama = find(AiEngine.OLLAMA);
-        DeepDiveGenerator fake = find(AiEngine.FAKE);
-
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> List.of(
+                    ollamaAIDeepDiveGenerator,
+                    openAIDeepDiveGenerator,
+                    fakeDeepDiveGenerator
+            );
+            case FAKE -> List.of(fakeDeepDiveGenerator);
+            case OPENAI -> List.of(
+                    openAIDeepDiveGenerator,
+                    ollamaAIDeepDiveGenerator,
+                    fakeDeepDiveGenerator
+            );
         };
     }
 
-    private DeepDiveGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(
-                        () -> new CustomApiException(
-                                ERR_500.getHttpStatus(),
-                                ERR_500,
-                                "AI를 찾을 수 없습니다."));
-    }
-
     private AiEngine parse(String mode) {
-        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
-        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        if ("ollama".equalsIgnoreCase(mode)) {
+            return AiEngine.OLLAMA;
+        }
+        if ("fake".equalsIgnoreCase(mode)) {
+            return AiEngine.FAKE;
+        }
         return AiEngine.OPENAI;
     }
 
@@ -106,6 +98,7 @@ public class CompositeDeepDiveGenerator implements DeepDiveGenerator {
         }
         return true;
     }
+
 
     private GeneratedDeepDiveBundle fallbackGenerate(GenerateDeepDiveCommand command, Throwable ex) {
         log.warn("ai feedback fallback triggered. track={}, difficulty={}, cause={}",

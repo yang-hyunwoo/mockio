@@ -6,35 +6,28 @@ import com.mockio.common_ai_contractor.constant.AiEngine;
 import com.mockio.common_ai_contractor.generator.followup.*;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.ai.fake.FakeFollowUpQuestionValid;
+import com.mockio.core_service.ai.ollama.generator.OllamaFollowUpQuestionValid;
+import com.mockio.core_service.ai.openAi.generator.OpenAIFollowUpQuestionValid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
 
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
+public class CompositeFollowUpQuestionValid  {
 
-    private final List<FollowUpQuestionValid> generators;
+    private final OpenAIFollowUpQuestionValid openAIFollowUpQuestionValid;
+    private final OllamaFollowUpQuestionValid ollamaFollowUpQuestionValid;
+    private final FakeFollowUpQuestionValid fakeFollowUpQuestionValid;
 
     @Value("${ai.generator}")
     private String mode;
 
-    @Override
-    public AiEngine engine() {
-        return null;
-    }
-
-    @Override
     public FollowupValid generateValid(FollowUpQuestionCommand command) {
         List<FollowUpQuestionValid> chain = buildChain(mode);
 
@@ -44,6 +37,10 @@ public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
                 return g.generateValid(command);
             } catch (RuntimeException ex) {
                 last = ex;
+
+                log.warn("followup question valid generation failed. engine={}, fallbackable={}, cause={}",
+                        g.engine(), isFallbackable(ex), ex.toString());
+
                 if (!isFallbackable(ex)) {
                     throw ex;
                 }
@@ -55,20 +52,28 @@ public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
     private List<FollowUpQuestionValid> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        FollowUpQuestionValid openai = find(AiEngine.OPENAI);
-        FollowUpQuestionValid ollama = find(AiEngine.OLLAMA);
-        FollowUpQuestionValid fake = find(AiEngine.FAKE);
-
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> List.of(
+                    ollamaFollowUpQuestionValid,
+                    openAIFollowUpQuestionValid,
+                    fakeFollowUpQuestionValid
+            );
+            case FAKE -> List.of(fakeFollowUpQuestionValid);
+            case OPENAI -> List.of(
+                    openAIFollowUpQuestionValid,
+                    ollamaFollowUpQuestionValid,
+                    fakeFollowUpQuestionValid
+            );
         };
     }
 
     private AiEngine parse(String mode) {
-        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
-        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        if ("ollama".equalsIgnoreCase(mode)) {
+            return AiEngine.OLLAMA;
+        }
+        if ("fake".equalsIgnoreCase(mode)) {
+            return AiEngine.FAKE;
+        }
         return AiEngine.OPENAI;
     }
 
@@ -90,20 +95,4 @@ public class CompositeFollowUpQuestionValid implements FollowUpQuestionValid {
         );
     }
 
-    private FollowUpQuestionValid find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g != this)
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(
-                        () -> new CustomApiException(
-                                ERR_500.getHttpStatus(),
-                                ERR_500,
-                                "AI를 찾을 수 없습니다."));
-    }
-
 }
-
-
-
-

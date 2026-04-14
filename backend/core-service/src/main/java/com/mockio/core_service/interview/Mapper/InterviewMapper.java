@@ -179,7 +179,8 @@ public class InterviewMapper {
                 EnumResponse.of(
                         interview.getEndReason().name(),
                         interview.getEndReason().getLabel()
-                )
+                ),
+                interview.getSourceInterview() == null ? null : interview.getSourceInterview().getId()
         );
     }
 
@@ -188,14 +189,9 @@ public class InterviewMapper {
             Interview interview,
             Map<Long, InterviewScoreListItem> scoreMap
     ) {
-        System.out.println("interviewId = " + interview.getId());
-        System.out.println("scoreMap keys = " + scoreMap.keySet());
 
         InterviewScoreListItem item = scoreMap.get(interview.getId());
-        System.out.println("found item = " + item);
-
         int score = (item != null) ? item.score() : 0;
-
         return new InterviewScoreHistoryResponse.Item(
                 interview.getId(),
                 interview.getTrack().getLabel() + " (" + interview.getDifficulty().getLabel() + ")",

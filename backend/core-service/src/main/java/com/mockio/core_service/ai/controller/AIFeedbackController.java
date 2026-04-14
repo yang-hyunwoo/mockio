@@ -12,6 +12,9 @@ package com.mockio.core_service.ai.controller;
  */
 
 import com.mockio.common_ai_contractor.generator.feedback.*;
+import com.mockio.core_service.ai.generator.CompositeFeedbackEvaluationGenerator;
+import com.mockio.core_service.ai.generator.CompositeFeedbackGenerator;
+import com.mockio.core_service.ai.generator.CompositeSummaryFeedbackGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,9 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AIFeedbackController {
 
-    private final FeedbackGenerator feedbackGenerator;
-    private final SummaryFeedbackGenerator summaryFeedbackGenerator;
-    private final FeedbackEvaluationGenerator feedbackEvaluationGenerator;
+    private final CompositeFeedbackGenerator compositeFeedbackGenerator;
+    private final CompositeSummaryFeedbackGenerator compositeSummaryFeedbackGenerator;
+    private final CompositeFeedbackEvaluationGenerator compositeFeedbackEvaluationGenerator;
 
     /**
      * 단일 질문 피드백 생성 API
@@ -45,12 +48,12 @@ public class AIFeedbackController {
     @Operation(summary = "단일 피드백 생성")
     @PostMapping("/question")
     public GeneratedFeedback singleFeedback(@RequestBody @Valid GenerateFeedbackCommand command) {
-        return feedbackGenerator.generate(command);
+        return compositeFeedbackGenerator.generate(command);
     }
 
     @PostMapping("/question/evaluation")
     public GeneratedFeedbackEvaluation singleFeedbackEvaluation(@RequestBody @Valid GenerateFeedbackCommand command) {
-        return feedbackEvaluationGenerator.generate(command);
+        return compositeFeedbackEvaluationGenerator.generate(command);
     }
 
     /**
@@ -67,7 +70,7 @@ public class AIFeedbackController {
     @Operation(summary = "전체 요약 피드백 생성")
     @PostMapping("/summary")
     public GeneratedSummaryFeedback summaryFeedback(@RequestBody @Valid GeneratedSummaryFeedbackCommand command) {
-        return summaryFeedbackGenerator.generate(command);
+        return compositeSummaryFeedbackGenerator.generate(command);
     }
 
 }

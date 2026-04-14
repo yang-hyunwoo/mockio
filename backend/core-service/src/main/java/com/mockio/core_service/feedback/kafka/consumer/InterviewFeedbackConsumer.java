@@ -1,9 +1,7 @@
 package com.mockio.core_service.feedback.kafka.consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mockio.common_ai_contractor.generator.feedback.*;
 import com.mockio.common_core.exception.NonRetryableEventException;
 import com.mockio.core_service.feedback.client.AiFeedbackClient;
@@ -13,9 +11,9 @@ import com.mockio.core_service.feedback.kafka.dto.GeneratedSummaryFeedbackMapper
 import com.mockio.core_service.feedback.kafka.dto.request.InterviewAnswerSkippedPayload;
 import com.mockio.core_service.feedback.kafka.dto.request.InterviewAnswerSubmittedPayload;
 import com.mockio.core_service.feedback.kafka.dto.request.InterviewCompletedPayload;
-import com.mockio.core_service.feedback.kafka.dto.request.InterviewLifecycleEvent;
+import com.mockio.core_service.feedback.kafka.dto.request.FeedbackLifecycleEvent;
 import com.mockio.core_service.feedback.kafka.dto.response.InterviewAnswerDetailResponse;
-import com.mockio.core_service.feedback.kafka.support.InterviewEventParser;
+import com.mockio.core_service.feedback.kafka.support.FeedbackEventParser;
 import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.interview.service.InterviewAnswerService;
 import com.mockio.core_service.kafka.ProcessedEvent;
@@ -35,7 +33,7 @@ import java.util.List;
 public class InterviewFeedbackConsumer {
 
     private final ProcessedEventRepository processedEventRepository;
-    private final InterviewEventParser parser;
+    private final FeedbackEventParser parser;
     private final AiFeedbackClient aiFeedbackClient;
     private final FeedbackTxService feedbackTxService;
     private final SummaryFeedbackTxService summaryFeedbackTxService;
@@ -46,21 +44,13 @@ public class InterviewFeedbackConsumer {
     @KafkaListener(topics = "interview.lifecycle", groupId = "feedback-service")
     public void onMessage(String messageJson, Acknowledgment ack) {
         log.info("kafka message received: {}", messageJson);
-        InterviewLifecycleEvent event;
+        FeedbackLifecycleEvent event;
 
         try {
             event = parser.parse(messageJson);
         } catch (Exception e) {
             //파싱 불가 → 재시도 의미 없음
             throw new NonRetryableEventException("Invalid message", e);
-        }
-
-        try {
-            processedEventRepository.save(ProcessedEvent.of(event.eventId(), CONSUMER_NAME));
-        } catch (DataIntegrityViolationException e) {
-            // 이미 처리됨 → 정상 종료(ACK)
-            ack.acknowledge();
-            return;
         }
 
         try {
@@ -72,6 +62,7 @@ public class InterviewFeedbackConsumer {
                         "Unknown eventType=" + event.eventType()
                 );
             }
+            processedEventRepository.save(ProcessedEvent.of(event.eventId(), CONSUMER_NAME));
             ack.acknowledge();
         } catch (Exception e) {
             // 재시도 가능 → ACK 안 함 → Retry → DLQ
@@ -80,7 +71,7 @@ public class InterviewFeedbackConsumer {
     }
 
 
-    private void handleAnswerSubmitted(InterviewLifecycleEvent event) {
+    private void handleAnswerSubmitted(FeedbackLifecycleEvent event) {
         InterviewAnswerSubmittedPayload payload = parser.payloadAs(event, InterviewAnswerSubmittedPayload.class);
 
         //피드백 생성
@@ -122,7 +113,7 @@ public class InterviewFeedbackConsumer {
     }
 
 
-    private void handleInterviewNoAnswerSkipped(InterviewLifecycleEvent event) {
+    private void handleInterviewNoAnswerSkipped(FeedbackLifecycleEvent event) {
         InterviewAnswerSkippedPayload payload = parser.payloadAs(event, InterviewAnswerSkippedPayload.class);
 
         //피드백 값 SKIPEED 변경
@@ -131,7 +122,7 @@ public class InterviewFeedbackConsumer {
 
     }
 
-    private void handleInterviewCompleted(InterviewLifecycleEvent event) {
+    private void handleInterviewCompleted(FeedbackLifecycleEvent event) {
         InterviewCompletedPayload payload = parser.payloadAs(event, InterviewCompletedPayload.class);
 
         //피드백 생성

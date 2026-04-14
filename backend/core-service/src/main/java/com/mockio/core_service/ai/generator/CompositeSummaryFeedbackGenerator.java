@@ -6,32 +6,30 @@ import com.mockio.common_ai_contractor.generator.feedback.GeneratedSummaryFeedba
 import com.mockio.common_ai_contractor.generator.feedback.SummaryFeedbackGenerator;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.ai.fake.FakeSummaryFeedbackGenerator;
+import com.mockio.core_service.ai.ollama.generator.OllamaSummaryFeedbackGenerator;
+import com.mockio.core_service.ai.openAi.generator.OpenAISummaryFeedbackGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeSummaryFeedbackGenerator implements SummaryFeedbackGenerator {
+public class CompositeSummaryFeedbackGenerator {
 
-    private final List<SummaryFeedbackGenerator> generators;
+    private final OpenAISummaryFeedbackGenerator openAISummaryFeedbackGenerator;
+    private final OllamaSummaryFeedbackGenerator ollamaSummaryFeedbackGenerator;
+    private final FakeSummaryFeedbackGenerator fakeSummaryFeedbackGenerator;
+
     private static final String PROMPT_VERSION = "v1";
 
     @Value("${ai.generator}")
     private String mode;
 
-    @Override
-    public AiEngine engine() {
-        return null;
-    }
-
-    @Override
     public GeneratedSummaryFeedback generate(GeneratedSummaryFeedbackCommand command) {
         List<SummaryFeedbackGenerator> chain = buildChain(mode);
 
@@ -41,6 +39,10 @@ public class CompositeSummaryFeedbackGenerator implements SummaryFeedbackGenerat
                 return g.generate(command);
             } catch (RuntimeException ex) {
                 last = ex;
+
+                log.warn("summary feedback generation failed. engine={}, fallbackable={}, cause={}",
+                        g.engine(), isFallbackable(ex), ex.toString());
+
                 if (!isFallbackable(ex)) {
                     throw ex;
                 }
@@ -50,31 +52,30 @@ public class CompositeSummaryFeedbackGenerator implements SummaryFeedbackGenerat
     }
 
     private List<SummaryFeedbackGenerator> buildChain(String mode) {
-        //  openai -> ollama -> fake
-        //     ollama -> openai -> fake
         AiEngine primary = parse(mode);
 
-        SummaryFeedbackGenerator openai = find(AiEngine.OPENAI);
-        SummaryFeedbackGenerator ollama = find(AiEngine.OLLAMA);
-        SummaryFeedbackGenerator fake = find(AiEngine.FAKE);
-
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> List.of(
+                    ollamaSummaryFeedbackGenerator,
+                    openAISummaryFeedbackGenerator,
+                    fakeSummaryFeedbackGenerator
+            );
+            case FAKE -> List.of(fakeSummaryFeedbackGenerator);
+            case OPENAI -> List.of(
+                    openAISummaryFeedbackGenerator,
+                    ollamaSummaryFeedbackGenerator,
+                    fakeSummaryFeedbackGenerator
+            );
         };
     }
 
-    private SummaryFeedbackGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Missing generator: " + engine));
-    }
-
     private AiEngine parse(String mode) {
-        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
-        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        if ("ollama".equalsIgnoreCase(mode)) {
+            return AiEngine.OLLAMA;
+        }
+        if ("fake".equalsIgnoreCase(mode)) {
+            return AiEngine.FAKE;
+        }
         return AiEngine.OPENAI;
     }
 

@@ -80,15 +80,6 @@ public class OllamaFeedbackEvaluationGenerator implements FeedbackEvaluationGene
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-//        Integer score = sanitizer.extractScoreSafely(answer,"score");
-//         return new GeneratedFeedbackEvaluation(
-//                 answer,
-//                score,
-//                "OPENAI",
-//                MODEL,
-//                "v1",
-//                temperature
-//        );
     }
 
 }

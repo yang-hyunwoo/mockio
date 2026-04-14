@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public record InterviewLifecycleEvent(
+public record FeedbackLifecycleEvent(
         UUID eventId,
         String aggregateType,
         Long aggregateId,

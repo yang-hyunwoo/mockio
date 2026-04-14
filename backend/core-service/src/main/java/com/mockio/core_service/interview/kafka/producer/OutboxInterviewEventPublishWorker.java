@@ -27,7 +27,7 @@ public class OutboxInterviewEventPublishWorker {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    private static final String TOPIC = "interview.lifecycle";
+    private static String TOPIC = "interview.lifecycle";
     private static final int MAX_ATTEMPTS = 10;
     private static final long MAX_BACKOFF_SECONDS = 300; // 5분
 
@@ -66,6 +66,10 @@ public class OutboxInterviewEventPublishWorker {
                     e.getPayload(), // jsonb String → JsonNode
                     OffsetDateTime.now()
             );
+
+            if(e.getAggregateType().equals("COMPAREQUESTION")) {
+                TOPIC = "compare_question.lifecycle";
+            }
 
             String json = objectMapper.writeValueAsString(envelope);
 

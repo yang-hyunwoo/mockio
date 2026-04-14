@@ -154,6 +154,8 @@ public class InterviewAnswerService {
                 .orElse(null);
     }
 
+
+
     @Transactional
     public SttResponse aiStt(MultipartFile file, Long interviewId, Long userId) {
         Interview interview = findInterview(userId, interviewId);

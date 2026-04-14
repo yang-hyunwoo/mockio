@@ -30,6 +30,8 @@ public enum InterviewErrorCode implements ErrorCode {
     AI_SERVICE_FAILED(409, "AI_SERVICE_FAILED", "AI 서비스 중 오류가 발생 했습니다."),
 
     IDEMPOTENCY_KEY_NOT_FOUND(400, "IDEMPOTENCY_KEY_NOT_FOUND", "키가 존재하지 않습니다"),
+    COMPARE_QUESTION_NOT_FOUND(404, "COMPARE_QUESTION_NOT_FOUND", "질문 비교가 존재하지 않습니다."),
+
     ;
 
     private final int httpStatus;

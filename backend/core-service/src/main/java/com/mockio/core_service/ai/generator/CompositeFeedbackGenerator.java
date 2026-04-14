@@ -17,33 +17,30 @@ import com.mockio.common_ai_contractor.generator.feedback.GenerateFeedbackComman
 import com.mockio.common_ai_contractor.generator.feedback.GeneratedFeedback;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.ai.fake.FakeFeedBackGenerator;
+import com.mockio.core_service.ai.ollama.generator.OllamaFeedbackGenerator;
+import com.mockio.core_service.ai.openAi.generator.OpenAIFeedbackGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
-
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeFeedbackGenerator implements FeedbackGenerator {
+public class CompositeFeedbackGenerator  {
 
-    private final List<FeedbackGenerator> generators;
+    private final OpenAIFeedbackGenerator openAIFeedbackGenerator;
+    private final OllamaFeedbackGenerator ollamaFeedbackGenerator;
+    private final FakeFeedBackGenerator fakeFeedBackGenerator;
+
 
     @Value("${ai.generator}")
     private String mode;
 
-    @Override
-    public AiEngine engine() {
-        return null;
-    }
 
-    @Override
     public GeneratedFeedback generate(GenerateFeedbackCommand command) {
 
         List<FeedbackGenerator> chain = buildChain(mode);
@@ -69,31 +66,28 @@ public class CompositeFeedbackGenerator implements FeedbackGenerator {
         //  ollama -> openai -> fake
         AiEngine primary = parse(mode);
 
-        FeedbackGenerator openai = find(AiEngine.OPENAI);
-        FeedbackGenerator ollama = find(AiEngine.OLLAMA);
-        FeedbackGenerator fake = find(AiEngine.FAKE);
-
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> List.of(
+                    ollamaFeedbackGenerator,
+                    openAIFeedbackGenerator,
+                    fakeFeedBackGenerator
+            );
+            case FAKE -> List.of(fakeFeedBackGenerator);
+            case OPENAI -> List.of(
+                    openAIFeedbackGenerator,
+                    ollamaFeedbackGenerator,
+                    fakeFeedBackGenerator
+            );
         };
     }
 
-    private FeedbackGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(
-                        () -> new CustomApiException(
-                                ERR_500.getHttpStatus(),
-                                ERR_500,
-                                "AI를 찾을 수 없습니다."));
-    }
-
     private AiEngine parse(String mode) {
-        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
-        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        if ("ollama".equalsIgnoreCase(mode)) {
+            return AiEngine.OLLAMA;
+        }
+        if ("fake".equalsIgnoreCase(mode)) {
+            return AiEngine.FAKE;
+        }
         return AiEngine.OPENAI;
     }
 

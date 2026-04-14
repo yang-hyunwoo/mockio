@@ -1,7 +1,7 @@
-package com.mockio.core_service.feedback.kafka.support;
+package com.mockio.core_service.interview.kafka.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mockio.core_service.feedback.kafka.dto.request.InterviewLifecycleEvent;
+import com.mockio.core_service.interview.kafka.dto.InterviewLifecycleEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

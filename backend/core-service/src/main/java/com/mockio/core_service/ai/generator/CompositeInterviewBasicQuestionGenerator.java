@@ -17,36 +17,31 @@ import com.mockio.common_ai_contractor.generator.question.GeneratedQuestion;
 import com.mockio.common_ai_contractor.generator.question.InterviewBasicQuestionGenerator;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
+import com.mockio.core_service.ai.fake.FakeInterviewBasicQuestionGenerator;
 import com.mockio.core_service.ai.fallback.FallbackQuestion;
 import com.mockio.core_service.ai.fallback.FallbackQuestionRegistry;
+import com.mockio.core_service.ai.ollama.generator.OllamaInterviewBasicQuestionGenerator;
+import com.mockio.core_service.ai.openAi.generator.OpenAIInterviewBasicQuestionGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mockio.common_core.constant.CommonErrorEnum.ERR_500;
-
 @Component
-@Primary
 @RequiredArgsConstructor
 @Slf4j
-public class CompositeInterviewBasicQuestionGenerator implements InterviewBasicQuestionGenerator {
+public class CompositeInterviewBasicQuestionGenerator  {
 
-    private final List<InterviewBasicQuestionGenerator> generators;
+    private final OpenAIInterviewBasicQuestionGenerator openAIInterviewBasicQuestionGenerator;
+    private final OllamaInterviewBasicQuestionGenerator ollamaInterviewBasicQuestionGenerator;
+    private final FakeInterviewBasicQuestionGenerator fakeInterviewBasicQuestionGenerator;
 
     @Value("${ai.generator}")
     private String mode;
 
-    @Override
-    public AiEngine engine() {
-        return null;
-    }
-
-    @Override
     public GeneratedQuestion generate(GenerateBasicQuestionCommand command) {
         List<InterviewBasicQuestionGenerator> chain = buildChain(mode);
 
@@ -56,6 +51,10 @@ public class CompositeInterviewBasicQuestionGenerator implements InterviewBasicQ
                 return g.generate(command);
             } catch (RuntimeException ex) {
                 last = ex;
+
+                log.warn("basic question generation failed. engine={}, fallbackable={}, cause={}",
+                        g.engine(), isFallbackable(ex), ex.toString());
+
                 if (!isFallbackable(ex)) {
                     throw ex;
                 }
@@ -67,20 +66,28 @@ public class CompositeInterviewBasicQuestionGenerator implements InterviewBasicQ
     private List<InterviewBasicQuestionGenerator> buildChain(String mode) {
         AiEngine primary = parse(mode);
 
-        InterviewBasicQuestionGenerator openai = find(AiEngine.OPENAI);
-        InterviewBasicQuestionGenerator ollama = find(AiEngine.OLLAMA);
-        InterviewBasicQuestionGenerator fake = find(AiEngine.FAKE);
-
         return switch (primary) {
-            case OLLAMA -> List.of(ollama, openai, fake);
-            case FAKE -> List.of(fake);
-            default -> List.of(openai, ollama, fake);
+            case OLLAMA -> List.of(
+                    ollamaInterviewBasicQuestionGenerator,
+                    openAIInterviewBasicQuestionGenerator,
+                    fakeInterviewBasicQuestionGenerator
+            );
+            case FAKE -> List.of(fakeInterviewBasicQuestionGenerator);
+            case OPENAI -> List.of(
+                    openAIInterviewBasicQuestionGenerator,
+                    ollamaInterviewBasicQuestionGenerator,
+                    fakeInterviewBasicQuestionGenerator
+            );
         };
     }
 
     private AiEngine parse(String mode) {
-        if ("ollama".equalsIgnoreCase(mode)) return AiEngine.OLLAMA;
-        if ("fake".equalsIgnoreCase(mode)) return AiEngine.FAKE;
+        if ("ollama".equalsIgnoreCase(mode)) {
+            return AiEngine.OLLAMA;
+        }
+        if ("fake".equalsIgnoreCase(mode)) {
+            return AiEngine.FAKE;
+        }
         return AiEngine.OPENAI;
     }
 
@@ -110,18 +117,6 @@ public class CompositeInterviewBasicQuestionGenerator implements InterviewBasicQ
                     0.0));
         }
         return new GeneratedQuestion(fallback);
-    }
-
-    private InterviewBasicQuestionGenerator find(AiEngine engine) {
-        return generators.stream()
-                .filter(g -> g != this)
-                .filter(g -> g.engine() == engine)
-                .findFirst()
-                .orElseThrow(
-                        () -> new CustomApiException(
-                                ERR_500.getHttpStatus(),
-                                ERR_500,
-                                "AI를 찾을 수 없습니다."));
     }
 
 }

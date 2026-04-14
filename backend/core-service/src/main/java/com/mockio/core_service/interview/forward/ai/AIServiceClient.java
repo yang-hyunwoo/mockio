@@ -1,6 +1,10 @@
 package com.mockio.core_service.interview.forward.ai;
 
 import com.mockio.common_ai_contractor.constant.InterviewErrorCode;
+import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareQuestion;
+import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareQuestionCommand;
+import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareSummary;
+import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareSummaryCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveCommand;
 import com.mockio.common_ai_contractor.generator.deepdive.DeepDiveValid;
 import com.mockio.common_ai_contractor.generator.deepdive.GeneratedDeepDiveBundle;
@@ -27,6 +31,7 @@ import reactor.util.retry.Retry;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 @Component
@@ -35,142 +40,82 @@ public class AIServiceClient {
 
     private final WebClient aiWebClient;
 
+    /**
+     * 기본 질문 생성
+     * @param req
+     * @return
+     */
     public GeneratedQuestion generateBasicQuestions(GenerateBasicQuestionCommand req) {
-       return aiWebClient.post()
-                .uri("/api/ai/v1/questions/generate/basic")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(req)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, r ->
-                       r.bodyToMono(APIErrorResponse.class)
-                               .map(error -> new CustomApiException(
-                                       error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
-                                       mapErrorCode(error.errCode()),
-                                       error.message() != null ? error.message() : error.errCodeMsg()
-                               ))
-               )
-                .bodyToMono(GeneratedQuestion.class)
-                .timeout(Duration.ofSeconds(25))
-                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
-                        .filter(this::isRetryable)
-                        .maxBackoff(Duration.ofSeconds(2)))
-                .block();
+        return post("/api/ai/v1/questions/generate/basic", req, GeneratedQuestion.class);
     }
 
+    /**
+     * 심화 질문 생성
+     * @param req
+     * @return
+     */
     public GeneratedQuestion generateHardQuestions(GenerateHardQuestionCommand req) {
-        return aiWebClient.post()
-                .uri("/api/ai/v1/questions/generate/hard")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(req)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(APIErrorResponse.class)
-                                .map(error -> new CustomApiException(
-                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
-                                        mapErrorCode(error.errCode()),
-                                        error.message() != null ? error.message() : error.errCodeMsg()
-                                ))
-                )
-                .bodyToMono(GeneratedQuestion.class)
-                .timeout(Duration.ofSeconds(25))
-                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
-                        .filter(this::isRetryable)
-                        .maxBackoff(Duration.ofSeconds(2)))
-                .block();
+        return post("/api/ai/v1/questions/generate/hard", req, GeneratedQuestion.class);
     }
 
-    private boolean isRetryable(Throwable t) {
-        return t instanceof TimeoutException || t.getCause() instanceof IOException;
-    }
-
+    /**
+     * 꼬리 질문 생성
+     * @param req
+     * @return
+     */
     public FollowUpQuestion generateFollowQuestions(FollowUpQuestionCommand req) {
-        return aiWebClient.post()
-                .uri("/api/ai/v1/questions/followup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(req)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(APIErrorResponse.class)
-                                .map(error -> new CustomApiException(
-                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
-                                        mapErrorCode(error.errCode()),
-                                        error.message() != null ? error.message() : error.errCodeMsg()
-                                ))
-                )
-                .bodyToMono(FollowUpQuestion.class)
-                .timeout(Duration.ofSeconds(25))
-                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
-                        .filter(this::isRetryable)
-                        .maxBackoff(Duration.ofSeconds(2)))
-                .block();
+        return post("/api/ai/v1/questions/followup", req, FollowUpQuestion.class);
     }
 
+    /**
+     * 꼬리 질문 생성 가능 여부 체크
+     * @param req
+     * @return
+     */
     public FollowupValid generateFollowQuestionsValid(FollowUpQuestionCommand req) {
-        return aiWebClient.post()
-                .uri("/api/ai/v1/questions/followup-valid")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(req)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(APIErrorResponse.class)
-                                .map(error -> new CustomApiException(
-                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
-                                        mapErrorCode(error.errCode()),
-                                        error.message() != null ? error.message() : error.errCodeMsg()
-                                ))
-                )
-                .bodyToMono(FollowupValid.class)
-                .timeout(Duration.ofSeconds(25))
-                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
-                        .filter(this::isRetryable)
-                        .maxBackoff(Duration.ofSeconds(2)))
-                .block();
+        return post("/api/ai/v1/questions/followup-valid", req, FollowupValid.class);
     }
 
+    /**
+     * 심화 질문 생성 가능 여부 체크
+     * @param req
+     * @return
+     */
     public GeneratedDeepDiveBundle generateDeepDiveResult(DeepDiveCommand req) {
-        return aiWebClient.post()
-                .uri("/api/ai/v1/questions/deepdive/validate-and-generate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(req)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(APIErrorResponse.class)
-                                .map(error -> new CustomApiException(
-                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
-                                        mapErrorCode(error.errCode()),
-                                        error.message() != null ? error.message() : error.errCodeMsg()
-                                ))
-                )
-                .bodyToMono(GeneratedDeepDiveBundle.class)
-                .timeout(Duration.ofSeconds(25))
-                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
-                        .filter(this::isRetryable)
-                        .maxBackoff(Duration.ofSeconds(2)))
-                .block();
+        return post("/api/ai/v1/questions/deepdive/validate-and-generate", req, GeneratedDeepDiveBundle.class);
     }
 
+    /**
+     * 심화 질문 생성
+     * @param req
+     * @return
+     */
     public DeepDiveValid generateDeepDiveValid(DeepDiveCommand req) {
-        return aiWebClient.post()
-                .uri("/api/ai/v1/questions/deepdive/deep-dive-valid")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(req)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, r ->
-                        r.bodyToMono(APIErrorResponse.class)
-                                .map(error -> new CustomApiException(
-                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
-                                        mapErrorCode(error.errCode()),
-                                        error.message() != null ? error.message() : error.errCodeMsg()
-                                ))
-                )
-                .bodyToMono(DeepDiveValid.class)
-                .timeout(Duration.ofSeconds(25))
-                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
-                        .filter(this::isRetryable)
-                        .maxBackoff(Duration.ofSeconds(2)))
-                .block();
+       return post("/api/ai/v1/questions/deepdive/deep-dive-valid", req, DeepDiveValid.class);
     }
 
+    /**
+     * 면접 비교 생성
+     * @param req
+     */
+    public GeneratedCompareSummary generateCompareInterview(GeneratedCompareSummaryCommand req) {
+        return post("/api/ai/v1/compare/summary/generate", req, GeneratedCompareSummary.class);
+    }
+
+    /**
+     * 이전 면접 질문 비교 생성
+     * @param req
+     * @return
+     */
+    public GeneratedCompareQuestion generateCompareQuestion(GeneratedCompareQuestionCommand req) {
+        return post("/api/ai/v1/compare/question/generate", req, GeneratedCompareQuestion.class);
+    }
+
+    /**
+     * stt 변환
+     * @param multipartFile
+     * @return
+     */
     public SttResponse generateStt(MultipartFile multipartFile) {
         try {
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
@@ -208,6 +153,36 @@ public class AIServiceClient {
         }
     }
 
+    /**
+     * WebClient Post 전송
+     * @param uri
+     * @param body
+     * @param responseType
+     * @return
+     * @param <T>
+     */
+    public <T> T post(String uri, Object body, Class<T> responseType) {
+        return aiWebClient.post()
+                .uri(uri)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(APIErrorResponse.class)
+                                .map(error -> new CustomApiException(
+                                        error.httpCode() != null ? error.httpCode() : r.statusCode().value(),
+                                        mapErrorCode(error.errCode()),
+                                        error.message() != null ? error.message() : error.errCodeMsg()
+                                ))
+                )
+                .bodyToMono(responseType)
+                .timeout(Duration.ofSeconds(25))
+                .retryWhen(Retry.backoff(1, Duration.ofMillis(300))
+                        .filter(this::isRetryable)
+                        .maxBackoff(Duration.ofSeconds(2)))
+                .block();
+    }
+
     private AIErrorCodeEnum mapErrorCode(String errCode) {
         if (errCode == null || errCode.isBlank()) {
             return AIErrorCodeEnum.ILLEGAL_STATE;
@@ -217,6 +192,10 @@ public class AIServiceClient {
         } catch (IllegalArgumentException e) {
             return AIErrorCodeEnum.ILLEGAL_STATE;
         }
+    }
+
+    private boolean isRetryable(Throwable t) {
+        return t instanceof TimeoutException || t.getCause() instanceof IOException;
     }
 
 }

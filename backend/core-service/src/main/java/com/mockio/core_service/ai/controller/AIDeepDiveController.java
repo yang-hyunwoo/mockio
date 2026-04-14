@@ -11,6 +11,8 @@ package com.mockio.core_service.ai.controller;
  */
 
 import com.mockio.common_ai_contractor.generator.deepdive.*;
+import com.mockio.core_service.ai.generator.CompositeDeepDiveGenerator;
+import com.mockio.core_service.ai.generator.CompositeDeepDiveQuestionValid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,8 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AIDeepDiveController {
 
-    private final DeepDiveGenerator deepDiveGenerator;
-    private final DeepDiveQuestionValid deepDiveQuestionValid;
+    private final CompositeDeepDiveGenerator compositeDeepDiveGenerator;
+    private final CompositeDeepDiveQuestionValid compositeDeepDiveQuestionValid;
 
     /**
      * DeepDive 질문 생성 API
@@ -45,13 +47,13 @@ public class AIDeepDiveController {
     @Operation(summary = "딥다이브 질문 생성")
     @PostMapping("/deepdive/validate-and-generate")
     public GeneratedDeepDiveBundle generate(@RequestBody @Valid GenerateDeepDiveCommand command) {
-        return deepDiveGenerator.generate(command);
+        return compositeDeepDiveGenerator.generate(command);
     }
 
     @Operation(summary = "딥다이브 질문 생성 체크")
     @PostMapping("/deepdive/deep-dive-valid")
     public DeepDiveValid followupValid(@RequestBody @Valid GenerateDeepDiveCommand command) {
-        return deepDiveQuestionValid.generateValid(command);
+        return compositeDeepDiveQuestionValid.generateValid(command);
     }
 
 }

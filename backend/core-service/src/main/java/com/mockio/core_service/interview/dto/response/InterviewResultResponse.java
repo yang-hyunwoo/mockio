@@ -72,7 +72,11 @@ public record InterviewResultResponse(
         FeedbackJobMetric feedbackJobMetrics,
 
         @Schema(description = "종료사유" , example = "USER_EXIT")
-        EnumResponse endReason
+        EnumResponse endReason,
+
+        @Schema(description = "이전_면접_ID" , example = "1")
+        Long sourceInterviewId
+
 
 ) {
         public record QuestionItem(

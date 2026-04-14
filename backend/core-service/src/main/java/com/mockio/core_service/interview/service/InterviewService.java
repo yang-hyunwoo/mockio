@@ -179,19 +179,6 @@ public class InterviewService {
         //이전 피드백 조회
         InterviewResultResponse prevInterviewResult = interviewFacadeService.getInterviewHistoryDetail(prevInterview.getId(), userId);
 
-
-        //이전 면접 기본 질문 만 조회
-//        List<InterviewResultResponse.QuestionItem> preList = prevInterviewResult.questions()
-//                .stream()
-//                .filter(q -> q.questionOrder() % 10 == 0)
-//                .toList();
-//
-//        //현재 면접 기본 질문 만 조회
-//        List<InterviewResultResponse.QuestionItem> currentList = currentInterviewResult.questions()
-//                .stream()
-//                .filter(q -> q.questionOrder() % 10 == 0)
-//                .toList();
-
         //현재 / 이전 질문-답변 조회
         List<CompareInterviewResponse.QuestionCompareItem> questionItems = getQuestionCompareItems(prevInterviewResult.questions(), currentInterviewResult.questions());
 
@@ -207,8 +194,8 @@ public class InterviewService {
                         prevInterview.getId(),
                         prevInterviewResult.overallScore(),
                         prevInterviewResult.feedbackDimensions(),
-                        currentInterviewResult.feedbackJobMetrics(),
-                        currentInterviewResult.endedAt()
+                        prevInterviewResult.feedbackJobMetrics(),
+                        prevInterviewResult.endedAt()
                 ),
                 questionItems
         );

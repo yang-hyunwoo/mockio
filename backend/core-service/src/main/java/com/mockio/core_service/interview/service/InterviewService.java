@@ -17,12 +17,15 @@ import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareSummary
 import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareSummaryCommand;
 import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.common_jpa.dto.PageDto;
+import com.mockio.core_service.feedback.dto.response.InternalFeedbackDetailResponse;
 import com.mockio.core_service.feedback.dto.response.InternalInterviewScoreListResponse;
+import com.mockio.core_service.feedback.dto.response.InternalQuestionBoardDetailResponse;
 import com.mockio.core_service.feedback.service.FeedbackService;
 import com.mockio.core_service.internalmapper.InternalMapper;
 import com.mockio.core_service.interview.Mapper.InterviewCompareMapper;
 import com.mockio.core_service.interview.Mapper.InterviewMapper;
 import com.mockio.core_service.interview.domain.*;
+import com.mockio.core_service.interview.dto.request.InternalQuestionBoardCreateRequest;
 import com.mockio.core_service.interview.dto.request.QuestionCompareRequest;
 import com.mockio.core_service.interview.dto.response.*;
 import com.mockio.core_service.interview.forward.ai.AIServiceClient;
@@ -74,8 +77,8 @@ public class InterviewService {
      * @param userId
      * @return
      */
-    public InterviewMainListResponse getInterviewMainList(Long userId) {
-        return InterviewMapper.fromMainList(interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE));
+    public InterviewListResponse getInterviewMainList(Long userId) {
+        return InterviewMapper.fromInterviewList(interviewRepository.findByUserIdAndStatusAndEndedAtIsNullOrderByCreatedAt(userId, InterviewStatus.ACTIVE));
     }
 
     /**
@@ -336,6 +339,109 @@ public class InterviewService {
 
 
     /**
+     * 내부 호출 면접 목록 리스트 조회
+     * @param userId
+     */
+    @Transactional(readOnly = true)
+    public InterviewListResponse internalGetInterviewList(Long userId) {
+        return InterviewMapper.fromInterviewList(interviewRepository.findByUserIdAndStatusAndEndReason(userId,InterviewStatus.ENDED, COMPLETED));
+
+    }
+
+    /**
+     * 면접 정보 조회
+     * @param userId
+     * @param interviewId
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public InternalQuestionAnswerResponse internalGetInterviewQuestionAnswer(Long userId, Long interviewId) {
+        Interview interview = interviewRepository.findByIdAndUserId(interviewId, userId)
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                INTERVIEW_FORBIDDEN.getHttpStatus(),
+                                INTERVIEW_FORBIDDEN,
+                                INTERVIEW_FORBIDDEN.getMessage()
+                        )
+                );
+
+        List<InterviewQuestion> questions = interviewQuestionRepository.findAllByInterviewIdOrderBySeqAsc(interview.getId());
+        List<Long> questionIds = questions.stream()
+                .map(InterviewQuestion::getId)
+                .toList();
+        //면접 총 요약 조회
+        FeedbackTotalDetailResponse interviewHistoryDetail = InternalMapper.fromInternalFeedbackTotalDetail(feedbackService.getFeedbackDetail(interviewId));
+
+        List<InterviewAnswer> answers = interviewAnswerRepository.findAllByQuestionIdInOrderByIdAsc(questionIds);
+        InterviewResultResponse interviewResultResponse = InterviewMapper.fromResult(interview,
+                questions,
+                answers,
+                interviewHistoryDetail);
+        return InterviewMapper.fromInternalQuestionAnswer(interviewResultResponse);
+    }
+
+    /**
+     * 면접 정보 저장 시 정보 조회
+     * @param req
+     */
+    public InternalQuestionBoardDetailResponse internalGetInterviewQuestionAnswerDetail(InternalQuestionBoardCreateRequest req) {
+       if(req.interview().isEmpty()) {
+           throw new CustomApiException(
+                   INTERVIEW_FORBIDDEN.getHttpStatus(),
+                   INTERVIEW_FORBIDDEN,
+                   INTERVIEW_FORBIDDEN.getMessage()
+           );
+       }
+        InternalQuestionBoardCreateRequest.Item interviewItem = req.interview().getFirst();
+
+       //인터뷰 조회
+        Interview interview = interviewRepository.findByIdAndUserId(interviewItem.interviewId(), req.userId())
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                INTERVIEW_FORBIDDEN.getHttpStatus(),
+                                INTERVIEW_FORBIDDEN,
+                                INTERVIEW_FORBIDDEN.getMessage()
+                        )
+                );
+
+        //인터뷰 질문 조회
+        InterviewQuestion interviewQuestion = interviewQuestionRepository.findByIdAndInterviewId(interviewItem.questionId(), interviewItem.interviewId())
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                INTERVIEW_FORBIDDEN.getHttpStatus(),
+                                INTERVIEW_FORBIDDEN,
+                                INTERVIEW_FORBIDDEN.getMessage()
+                        )
+                );
+
+        //인터뷰 답변 조회
+        InterviewAnswer interviewAnswer = interviewAnswerRepository.findByQuestionId(interviewItem.questionId())
+                .orElseThrow(
+                        () -> new CustomApiException(
+                                INTERVIEW_FORBIDDEN.getHttpStatus(),
+                                INTERVIEW_FORBIDDEN,
+                                INTERVIEW_FORBIDDEN.getMessage()
+                        )
+                );
+
+        //ai 요약
+        InternalFeedbackDetailResponse internalFeedbackDetailResponse = feedbackService.interviewFeedbackRead(interviewAnswer.getId());
+
+        return new InternalQuestionBoardDetailResponse(
+                interview.getTrack().name(),
+                interview.getId(),
+                interviewQuestion.getId(),
+                interviewQuestion.getSeq(),
+                interviewQuestion.getQuestionText(),
+                interviewAnswer.getId(),
+                interviewAnswer.getAnswerText(),
+                internalFeedbackDetailResponse.score(),
+                internalFeedbackDetailResponse.summary()
+        );
+    }
+
+
+    /**
      * 이전 면접 ai 호출
      * @param userId
      * @param interview
@@ -482,7 +588,6 @@ public class InterviewService {
         return currentQuestionList.stream()
                 .map(current -> {
                     InterviewResultResponse.QuestionItem prev = prevMap.get(current.questionOrder());
-
 
                     return new CompareInterviewResponse.QuestionCompareItem(
                             current != null ? current.id() : null,

@@ -13,6 +13,7 @@ package com.mockio.auth_service.dto;
  * OAuth2 로그인 시에는 외부 제공자의 사용자 정보(attributes)를 함께 보관한다.
  */
 
+import com.mockio.common_jpa.AuditorPrincipal;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 
 @Getter
-public class LoginUser implements UserDetails , OAuth2User {
+public class LoginUser implements UserDetails , OAuth2User, AuditorPrincipal {
 
     private final Long userId;
     private final String email;
@@ -133,5 +134,12 @@ public class LoginUser implements UserDetails , OAuth2User {
     public boolean isEnabled() {
         return this.status != "ACTIVE";
     }
+
+    @Override
+    public Long getUserId() {
+        return userId;
+    }
+
+
 
 }

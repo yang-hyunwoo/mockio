@@ -98,6 +98,8 @@ public class Response<T> {
     public static <T> ResponseEntity<Response<T>> create(String message, T data) {
         return ResponseEntity.status(HttpStatus.CREATED).body(successCreate(message, data));
     }
+
+
     public static <T> ResponseEntity<Response<T>> create(String headerValues , String message, T data) {
         return ResponseEntity.status(HttpStatus.CREATED).header(SET_COOKIE,headerValues).body(successCreate(message, data));
     }
@@ -112,6 +114,9 @@ public class Response<T> {
 
     public static <T> ResponseEntity<Response<T>> delete(String message, T data) {
         return ResponseEntity.status(HttpStatus.OK).body(successDelete(message, data));
+    }
+    public static <T> ResponseEntity<Response<T>> delete(String message) {
+        return ResponseEntity.status(HttpStatus.OK).body(successDelete(message));
     }
 
     public static ResponseEntity<Void> deleteNoContent() {
@@ -139,6 +144,10 @@ public class Response<T> {
 
     protected static <T> Response<T> successDelete(String message, T data) {
         return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, data,OffsetDateTime.now());
+    }
+
+    protected static <T> Response<T> successDelete(String message) {
+        return new Response<>(SUCCESS_CODE, HttpStatus.OK.value(), message,null,null, null,OffsetDateTime.now());
     }
 
     @Override

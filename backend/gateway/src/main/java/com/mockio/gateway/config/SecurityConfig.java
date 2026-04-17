@@ -47,6 +47,8 @@ public class SecurityConfig {
                                 "/api/inquiry/v1/public/**",
                                 "/api/file/v1/public/**",
                                 "/api/faq/v1/public/**",
+                                "/api/comment/v1/public/**",
+                                "/api/questionboard/v1/public/**",
                                 "/api/auth/v1/oauth2/authorization/**",
                                 "/api/auth/v1/login/oauth2/code/**",
                                 "/docs/auth/**",

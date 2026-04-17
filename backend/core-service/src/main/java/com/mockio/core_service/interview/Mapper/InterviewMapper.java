@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 public class InterviewMapper {
 
-    public static InterviewMainListResponse.Item fromMainItem(Interview interview) {
+    public static InterviewListResponse.Item fromMainItem(Interview interview) {
         int total = interview.getTotalCount();
         int answered = interview.getAnsweredQuestions();
 
@@ -27,7 +27,7 @@ public class InterviewMapper {
                 ? 0
                 : (int) Math.floor((answered * 100.0) / total);
 
-        return new InterviewMainListResponse.Item(
+        return new InterviewListResponse.Item(
                 interview.getId(),
                 interview.getTrack().getLabel() + " (" + interview.getDifficulty().getLabel() + ")",
                 interview.getCreatedAt(),
@@ -36,8 +36,8 @@ public class InterviewMapper {
     }
 
     /** 엔티티 리스트 → Response */
-    public static InterviewMainListResponse fromMainList(List<Interview> interviews) {
-        return new InterviewMainListResponse(
+    public static InterviewListResponse fromInterviewList(List<Interview> interviews) {
+        return new InterviewListResponse(
                 interviews.stream()
                         .map(InterviewMapper::fromMainItem)
                         .toList()
@@ -359,6 +359,26 @@ public class InterviewMapper {
                 interviewPage.getNumber(),
                 interviewPage.getTotalPages(),
                 interviewPage.getTotalElements()
+        );
+    }
+
+    /**
+     * 내부 호출 면접 질문 ,답변,ai 피드백 조회
+     * @param interviewResultResponse
+     * @return
+     */
+    public static InternalQuestionAnswerResponse fromInternalQuestionAnswer(InterviewResultResponse interviewResultResponse) {
+        return new InternalQuestionAnswerResponse(
+                interviewResultResponse.questions().stream()
+                        .map(question -> new InternalQuestionAnswerResponse.QuestionItem(
+                                question.id(),
+                                question.questionOrder(),
+                                question.question(),
+                                question.answer(),
+                                question.feedback(),
+                                question.score()
+                        ))
+                        .toList()
         );
     }
 

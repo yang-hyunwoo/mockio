@@ -24,7 +24,9 @@ public class InternalTokenFilter extends OncePerRequestFilter {
             "/api/file/v1/internal/",
             "/api/notice/v1/internal/",
             "/api/notification/v1/internal/",
-            "/api/faq/v1/internal/"
+            "/api/faq/v1/internal/",
+            "/api/questionboard/v1/internal/",
+            "/api/questionboard/v1/internal/"
     );
 
     @Override

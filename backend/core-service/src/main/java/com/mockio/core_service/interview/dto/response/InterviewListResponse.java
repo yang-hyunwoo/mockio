@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-public record InterviewMainListResponse (
+public record InterviewListResponse(
 
         @Schema(description = "면접 목록 리스트" , example = "[]")
         List<Item> interviews

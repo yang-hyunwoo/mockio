@@ -1,4 +1,4 @@
-package com.mockio.auth_service.util;
+package com.mockio.common_spring.util;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

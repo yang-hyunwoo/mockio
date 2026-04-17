@@ -1,15 +1,16 @@
 package com.mockio.core_service.interview.controller;
 
-import com.mockio.common_ai_contractor.generator.compare.GeneratedCompareSummary;
 import com.mockio.common_jpa.dto.PageDto;
 import com.mockio.common_security.annotation.CurrentSubject;
 import com.mockio.common_spring.util.MessageUtil;
 import com.mockio.common_spring.util.response.Response;
-import com.mockio.core_service.interview.domain.InterviewCompareSummary;
+import com.mockio.core_service.feedback.dto.response.InternalQuestionBoardDetailResponse;
+import com.mockio.core_service.interview.dto.request.InternalQuestionBoardCreateRequest;
 import com.mockio.core_service.interview.dto.request.QuestionCompareRequest;
 import com.mockio.core_service.interview.dto.response.*;
 import com.mockio.core_service.interview.service.InterviewFacadeService;
 import com.mockio.core_service.interview.service.InterviewService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -34,7 +35,7 @@ public class InterviewReadController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "면접 메인 목록 조회")
     @GetMapping("/main/list")
-    public ResponseEntity<Response<InterviewMainListResponse>> getInterviewMainList(
+    public ResponseEntity<Response<InterviewListResponse>> getInterviewMainList(
             @CurrentSubject @Parameter(description = "사용자_ID", example = "1") Long userId
     ) {
         return Response.ok(messageUtil.getMessage("response.read"), interviewService.getInterviewMainList(userId));
@@ -100,5 +101,37 @@ public class InterviewReadController {
         return Response.ok(messageUtil.getMessage("response.read"), interviewService.getQuestionCompare(userId, compareQuestionId));
     }
 
+
+    @SecurityRequirement(name="bearerAuth")
+    @Operation(summary = "면접 리스트 조회")
+    @Hidden
+    @GetMapping("/internal/{userId}/list")
+    public InterviewListResponse internalGetInterviewList(
+            @PathVariable @Parameter(description = "사용자_ID", example = "1") Long userId
+    ) {
+        return interviewService.internalGetInterviewList(userId);
+    }
+
+
+    @SecurityRequirement(name="bearerAuth")
+    @Operation(summary = "면접 질문,답변,피드백 조회")
+    @Hidden
+    @GetMapping("/internal/{userId}/{interviewId}/list")
+    public InternalQuestionAnswerResponse internalGetInterviewQuestionAnswerList(
+            @PathVariable @Parameter(description = "사용자_ID", example = "1") Long userId,
+            @PathVariable @Parameter(description = "면접_ID", example = "1") Long interviewId
+    ) {
+       return interviewService.internalGetInterviewQuestionAnswer(userId, interviewId);
+    }
+
+    @SecurityRequirement(name="bearerAuth")
+    @Operation(summary = "면접 질문,답변,피드백 상세 조회")
+    @Hidden
+    @PostMapping("/internal/detail")
+    public InternalQuestionBoardDetailResponse internalGetInterviewQuestionAnswerDetail(
+            @RequestBody InternalQuestionBoardCreateRequest req
+    ) {
+        return interviewService.internalGetInterviewQuestionAnswerDetail(req);
+    }
 
 }

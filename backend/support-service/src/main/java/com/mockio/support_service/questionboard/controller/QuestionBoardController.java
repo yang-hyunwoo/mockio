@@ -9,10 +9,7 @@ import com.mockio.support_service.questionboard.dto.request.QuestionBoardCreateR
 import com.mockio.support_service.questionboard.dto.request.QuestionBoardDeleteRequest;
 import com.mockio.support_service.questionboard.dto.request.QuestionBoardListRequest;
 import com.mockio.support_service.questionboard.dto.request.QuestionBoardUpdateRequest;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardDetailResponse;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardDslListResponse;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardListResponse;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardUpdateDetailResponse;
+import com.mockio.support_service.questionboard.dto.response.*;
 import com.mockio.support_service.questionboard.service.QuestionBoardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -64,11 +61,11 @@ public class QuestionBoardController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "면접 공유 게시판 등록")
     @PostMapping("/create")
-    public void createQuestionBoard(
+    public ResponseEntity<Response<QuestionBoardCreateResponse>> createQuestionBoard(
             @CurrentSubject @Parameter(description = "사용자ID", example = "1") Long userId,
             @RequestBody @Valid QuestionBoardCreateRequest req
     ) {
-        questionBoardService.createQuestionBoard(userId,req);
+        return Response.create(messageUtil.getMessage("response.create"), questionBoardService.createQuestionBoard(userId, req));
 
     }
 

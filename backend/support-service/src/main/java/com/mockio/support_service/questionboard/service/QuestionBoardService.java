@@ -11,10 +11,7 @@ import com.mockio.support_service.questionboard.dto.internal.response.QuestionAn
 import com.mockio.support_service.questionboard.dto.internal.response.InternalQuestionBoardDetailResponse;
 import com.mockio.support_service.questionboard.dto.internal.response.UserInfoResponse;
 import com.mockio.support_service.questionboard.dto.request.*;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardDetailResponse;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardDslListResponse;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardListResponse;
-import com.mockio.support_service.questionboard.dto.response.QuestionBoardUpdateDetailResponse;
+import com.mockio.support_service.questionboard.dto.response.*;
 import com.mockio.support_service.questionboard.repository.QuestionBoardQueryDslRepository;
 import com.mockio.support_service.questionboard.repository.QuestionBoardRepository;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +83,7 @@ public class QuestionBoardService {
      * @param userId
      * @param req
      */
-    public void createQuestionBoard(Long userId, QuestionBoardCreateRequest req) {
+    public QuestionBoardCreateResponse createQuestionBoard(Long userId, QuestionBoardCreateRequest req) {
         //사용자 닉네임 조회
         UserInfoResponse userInfoResponse = coreClient.userDetail(userId);
 
@@ -133,7 +130,10 @@ public class QuestionBoardService {
                 .stream()
                 .collect(Collectors.toSet()));
 
-        questionBoardRepository.save(questionBoard);
+        QuestionBoard save = questionBoardRepository.save(questionBoard);
+        return new QuestionBoardCreateResponse(
+                save.getId()
+        );
 
     }
 

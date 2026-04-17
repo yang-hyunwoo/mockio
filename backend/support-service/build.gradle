@@ -89,6 +89,9 @@ dependencies {
 	//cloudflare
 	implementation platform("software.amazon.awssdk:bom:2.25.48")
 	implementation 'software.amazon.awssdk:s3'
+
+	implementation "org.apache.httpcomponents.client5:httpclient5"
+	
 }
 
 tasks.named('test') {

@@ -33,8 +33,8 @@ public class FeedbackMapper {
         return new InternalFeedbackDetailResponse(
                 interviewFeedback.getId(),
                 interviewFeedback.getAnswerId(),
-                null,
-                null,
+                0,
+                "질문이 없어 요약이 없습니다.",
                 List.of(),
                 null,
                 null,

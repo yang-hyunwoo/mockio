@@ -4,8 +4,10 @@ server:
 services:
   core:
     base-url: http://core-service:8080
-    connect-timeout-ms: 2000
-    read-timeout-ms: 3000
+
+http:
+  connect-timeout: 2000
+  read-timeout: 3000
 
 internal:
   support:

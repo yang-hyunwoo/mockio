@@ -16,15 +16,15 @@ import com.mockio.auth_service.dto.response.UserInfoResponse;
 import com.mockio.auth_service.dto.request.LoginFailureRequest;
 import com.mockio.auth_service.dto.request.OauthUserRequest;
 import com.mockio.auth_service.dto.response.UserAuthInfoResponse;
-import com.mockio.auth_service.util.APIErrorResponse;
+import com.mockio.common_spring.util.APIErrorResponse;
 import com.mockio.common_core.exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse;
 
 import java.io.IOException;
-import java.time.Duration;
 
 import static com.mockio.common_core.constant.CommonErrorEnum.*;
 
@@ -112,7 +112,7 @@ public class UserClient {
      * 3. 내부 에러 코드(UserErrorEnum) 매핑
      * 4. CustomApiException으로 변환
      */
-    private void clientError(RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response) throws IOException {
+    private void clientError(ConvertibleClientHttpResponse response) throws IOException {
         if (response.getStatusCode().isError()) {
             APIErrorResponse error = response.bodyTo(APIErrorResponse.class);
             throw new CustomApiException(

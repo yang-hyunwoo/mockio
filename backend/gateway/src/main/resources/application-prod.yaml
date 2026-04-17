@@ -15,7 +15,7 @@ spring:
         - id: support-service
           uri: http://support-service:8080
           predicates:
-            - Path=/api/notice/v1/**,/api/faq/v1/**,/api/notification/v1/**,/api/file/v1/**
+            - Path=/api/notice/v1/**,/api/faq/v1/**,/api/notification/v1/**,/api/file/v1/**,/api/questionboard/v1/**,/api/comment/v1/**
 
         - id: auth-service-docs
           uri: http://auth-service:8080

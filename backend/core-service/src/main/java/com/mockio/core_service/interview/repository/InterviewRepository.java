@@ -3,7 +3,6 @@ package com.mockio.core_service.interview.repository;
 import com.mockio.common_ai_contractor.constant.InterviewEndReason;
 import com.mockio.common_ai_contractor.constant.InterviewStatus;
 import com.mockio.common_ai_contractor.constant.InterviewTrack;
-import com.mockio.common_spring.constant.Status;
 import com.mockio.core_service.interview.domain.Interview;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -22,7 +21,7 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     Optional<Interview> findActiveByUserIdAndStatus(Long userId, InterviewStatus status);
 
-    Optional<Interview>  findByUserIdAndIdempotencyKey(Long userId, String idempotencyKey);
+    Optional<Interview> findByUserIdAndIdempotencyKey(Long userId, String idempotencyKey);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Interview i where i.id = :id and i.userId = :userId")
@@ -93,4 +92,10 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
                                                                                                             OffsetDateTime createdAt,
                                                                                                             InterviewEndReason interviewEndReason,
                                                                                                             InterviewStatus interviewStatus);
+
+    List<Interview> findByUserIdAndStatusAndEndReason(
+            Long userId,
+            InterviewStatus status,
+            InterviewEndReason endReason
+    );
 }

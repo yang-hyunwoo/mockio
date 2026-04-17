@@ -29,6 +29,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/notice/v1/internal/**").permitAll()
                         .requestMatchers("/api/notice/v1/public/**").permitAll()
                         .requestMatchers("/api/faq/v1/internal/**").permitAll()
+                        .requestMatchers("/api/questionboard/v1/public/**").permitAll()
+                        .requestMatchers("/api/questionboard/v1/internal/**").permitAll()
+                        .requestMatchers("/api/comment/v1/public/**").permitAll()
+                        .requestMatchers("/api/comment/v1/internal/**").permitAll()
                         .requestMatchers("/api/faq/v1/public/**").permitAll()
                         .requestMatchers("/faq/v1/public/**").permitAll() //테스트용
                         .requestMatchers("/api/file/v1/internal/**").permitAll()

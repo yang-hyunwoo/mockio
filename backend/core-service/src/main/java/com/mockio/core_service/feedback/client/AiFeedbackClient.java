@@ -5,8 +5,6 @@ import com.mockio.common_core.exception.CustomApiException;
 import com.mockio.core_service.ai.constant.errorCode.AIErrorCodeEnum;
 import com.mockio.core_service.util.APIErrorResponse;
 import lombok.RequiredArgsConstructor;
-import org.flywaydb.core.api.ErrorCode;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
